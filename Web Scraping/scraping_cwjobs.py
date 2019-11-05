@@ -17,7 +17,7 @@ ads = pd.DataFrame(columns=['company', 'title', 'salary', 'location', 'date', 'f
 
 # loop for scraping
 
-for i in range(0, 123):
+for i in range(0, 5):
     company = []
     job_title = []
     description = []
@@ -27,6 +27,7 @@ for i in range(0, 123):
     full_description = []
     text_list = []
     type_list = []
+    print(i)
 
     time.sleep(1)  # ensuring at least 1 second between page grabs
     url = 'https://www.cwjobs.co.uk/jobs/' + searchTerm + '?s=header&page=' + str(i)
@@ -44,9 +45,9 @@ for i in range(0, 123):
         res_sub = requests.get(j)
         soup_sub = bs4.BeautifulSoup(res_sub.content, features='html.parser')
         desc = sf.cw_full_desc(soup_sub)
-        jobtype = sf.cw_jobtype(soup_sub)
+        job_type = sf.cw_jobtype(soup_sub)
         text_list.append(desc)
-        type_list.append(jobtype)
+        type_list.append(job_type)
 
     df['full_description'] = text_list
     df['jobtype'] = type_list
@@ -55,4 +56,4 @@ for i in range(0, 123):
     ads = ads.append(df, ignore_index=True)
 
 today = datetime.now().strftime('%Y_%m_%d_%H_%M')
-ads.to_csv(parent_folder + '/data/cwjobs_' + today + '.csv', index=True, sep='\t')
+ads.to_csv(parent_folder + '/DataScienceJobs/data/cwjobs_' + today + '.csv', index=True, sep='\t')

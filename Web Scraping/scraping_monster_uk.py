@@ -2,6 +2,7 @@ import requests, bs4, time
 import pandas as pd
 import os.path
 from datetime import datetime
+from datetime import date
 import scraping_func as sf
 
 path = os.getcwd()
@@ -17,9 +18,6 @@ all_links = sf.monster_links(soup)
 links = [s for s in all_links if "job-openings" in s]
 
 today = datetime.now().strftime('%Y_%m_%d_%H_%M')
-with open(parent_folder+'/DataScienceJobs/data/monster_links_'+today+'.txt', 'w') as f:
-    for item in links:
-        f.write("%s\n" % item)
 
 job_title_company = []
 description = []
@@ -32,7 +30,7 @@ career = []
 duration = []
 ref_code = []
 
-for i in range(0, len(links)):
+for i in range(0, len(links)): #
     url = links[i]
     res = requests.get(url)
     time.sleep(1)  # ensuring at least 1 second between page grabs
@@ -55,4 +53,15 @@ d = {'title': job_title_company, 'description': description, 'salary': salary, '
      'url': links}
 
 df = pd.DataFrame(d)
-df.to_csv(parent_folder + '/DataScienceJobs/data/monster_' + today + '.csv', index=True, sep='\t')
+
+# Data cleaning
+df['extraction_date'] = date.today()
+df['job_title'] = df['title'].str.split('-', n=1, expand=True)[0]
+df['company'] = df['title'].str.split('-', n=1, expand=True)[1]
+df.drop(['title'], axis=1, inplace=True)
+
+df['salary_low'] = df['salary'].str.split('-', n=1, expand=True)[0]
+df['salary_high'] = df['salary'].str.split('-', n=1, expand=True)[1]
+
+df.to_csv(parent_folder + '/DataScienceJobs/data/monster_all.csv', sep='\t', header=None, mode='a', index=False)
+#df.to_csv(parent_folder + '/data/monster_all.csv', sep='\t', header=None, mode='a')

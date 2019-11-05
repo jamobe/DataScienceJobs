@@ -2,6 +2,7 @@ import requests, bs4, time
 import pandas as pd
 import os.path
 from datetime import datetime
+from datetime import date
 import scraping_func as sf
 
 path = os.getcwd()
@@ -13,18 +14,11 @@ parent_folder, current_folder = os.path.split(path)
 searchTerm = "data"
 
 # create empty data frame with column headers
-ads = pd.DataFrame(columns=['company', 'title', 'salary', 'location', 'description', 'date', 'full_description', 'url'])
+ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'date', 'description', 'url'])
 
 # loop for scraping
 
-for i in range(0, 250):  # range(0:1000)
-    company = []
-    job_title = []
-    description = []
-    salary = []
-    location = []
-    date = []
-    full_description = []
+for i in range(0, 200):  # range(0:1000)
     text_list = []
 
     time.sleep(1)  # ensuring at least 1 second between page grabs
@@ -32,12 +26,11 @@ for i in range(0, 250):  # range(0:1000)
     res = requests.get(url)
     soup = bs4.BeautifulSoup(res.content, features='html.parser')
     df = pd.DataFrame(
-        columns=['company', 'title', 'salary', 'location', 'description', 'date', 'full_description', 'url'])
+        columns=['company', 'job_title', 'salary', 'location', 'date', 'description', 'url'])
     df['company'] = sf.indeed_company(soup)
-    df['title'] = sf.indeed_job_title(soup)
+    df['job_title'] = sf.indeed_job_title(soup)
     df['salary'] = sf.indeed_salary(soup)
     df['location'] = sf.indeed_location(soup)
-    df['description'] = sf.indeed_description(soup)
     df['date'] = sf.indeed_date(soup)
 
     sub_urls = sf.indeed_links(soup)
@@ -49,10 +42,23 @@ for i in range(0, 250):  # range(0:1000)
         desc = sf.indeed_full_desc(soup_sub)
         text_list.append(desc)
 
-    df['full_description'] = text_list
+    df['description'] = text_list
     df['url'] = sub_urls
 
     ads = ads.append(df, ignore_index=True)
 
+# Data cleaning
+ads['extraction_date'] = date.today()
+ads.company = ads.company.str.strip()
+ads.description = ads.description.str.strip()
+ads.salary = ads.salary.str.strip()
+ads['salary_low'] = ads['salary'].str.split('-', n=1, expand=True)[0]
+ads['salary_high'] = ads['salary'].str.split('-', n=1, expand=True)[1]
+ads['job_type'] = 'Not available'
+ads['industry'] = 'Not available'
+ads['education'] = 'Not available'
+ads['career'] = 'Not available'
+
+
 today = datetime.now().strftime('%Y_%m_%d_%H_%M')
-ads.to_csv(parent_folder + '/data/indeed_de_' + today + '.csv', index=True, sep='\t')
+ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all.csv', sep='\t', header=None, mode='a', index=False)
