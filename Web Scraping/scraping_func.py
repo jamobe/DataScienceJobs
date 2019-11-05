@@ -106,9 +106,9 @@ def cw_job_title(soup):
             jobs.append(a)
     return (jobs)
 
-############################################
-#      indeed.de website functions         #
-############################################
+##########################################################
+#      indeed.de and Indeed.us website functions         #
+##########################################################
 
 def indeed_job_title(soup):
     jobs = []
@@ -178,7 +178,14 @@ def indeed_links(soup):
         links.append('https://de.indeed.com' + str(div['href']))
     return links
 
+def indeed_us_links(soup):
+    links = []
+    for div in soup.find_all(name='a', attrs={'class': 'jobtitle turnstileLink'}):
+        links.append('https://www.indeed.com' + str(div['href']))
+    return links
+
 
 def indeed_full_desc(soup):
     text = [x.text for x in soup.find_all(name="div", attrs={"id": "jobDescriptionText"})]
     return text
+
