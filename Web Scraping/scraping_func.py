@@ -4,39 +4,39 @@
 
 def monster_links(soup):
     links =[]
-    for div in soup.find_all(name='a', attrs={'data-bypass':'true'}):
+    for div in soup.find_all(name='a', attrs={'data-bypass': 'true'}):
         links.append(div['href'])
     return links
 
 # Function for extracting the job title from the website:
 def monster_jobtitle(soup):
     title = 'no_title'
-    for div in soup.find_all(name='h1', attrs={'class':'title'}):
+    for div in soup.find_all(name='h1', attrs={'class': 'title'}):
         title = div.text
     return title
 
 # Function for extracting the job description from the website:
 def monster_descr(soup):
     jobdesc = []
-    for div in soup.find_all(name='span', attrs={'id':'TrackingJobBody'}):
+    for div in soup.find_all(name='span', attrs={'id': 'TrackingJobBody'}):
         jobdesc = div.text
     return jobdesc
 
 # Function for extracting salary from the website:
 def monster_salary(soup):
     salary = []
-    for div in soup.find_all('div',{'class':'col-xs-12 cell'}):
+    for div in soup.find_all('div',{'class': 'col-xs-12 cell'}):
         salary = div.text
         salary = salary.replace('Salary','').strip()
     return salary
 
 # Function for extracting meta-data from the website:
 def monster_summary(soup):
-    output = ['nan','nan','nan','nan','nan','nan','nan']
-    separation =['Location', 'Job type', 'Posted', 'Industries', 'Education level', 'Career level','Reference code']
-    for div in soup.find_all('dl',{'class':'header'}):
+    output = ['nan','nan', 'nan', 'nan', 'nan', 'nan', 'nan']
+    separation =['Location', 'Job type', 'Posted', 'Industries', 'Education level', 'Career level', 'Reference code']
+    for div in soup.find_all('dl', {'class': 'header'}):
         summary = div.text
-        summary = summary.replace('\n','')
+        summary = summary.replace('\n', '')
         for idx, item in enumerate(separation):
             if item in summary:
                 output[idx] = summary.replace(item,'')
@@ -115,7 +115,7 @@ def indeed_job_title(soup):
     for div in soup.find_all(name="div", attrs={"class": "row"}):
         for a in div.find_all(name="a", attrs={"data-tn-element": "jobTitle"}):
             jobs.append(a["title"])
-    return (jobs)
+    return jobs
 
 
 def indeed_salary(soup):
@@ -125,7 +125,7 @@ def indeed_salary(soup):
             salaries.append(div.find(name="span", attrs={"class": "salaryText"}).text)
         except:
             salaries.append("Nothing_found")
-    return (salaries)
+    return salaries
 
 
 def indeed_location(soup):
@@ -136,7 +136,7 @@ def indeed_location(soup):
         except:
             locations.append("Nothing_found")
 
-    return (locations)
+    return locations
 
 
 def indeed_description(soup):
@@ -147,7 +147,7 @@ def indeed_description(soup):
         except:
             description.append("Nothing_found")
 
-    return (description)
+    return description
 
 
 def indeed_date(soup):
@@ -169,7 +169,7 @@ def indeed_company(soup):
         except:
             company.append("Nothing_found")
 
-    return (company)
+    return company
 
 
 def indeed_links(soup):
