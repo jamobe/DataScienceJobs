@@ -19,7 +19,8 @@ def monster_links(soup):
 
 
 def monster_jobtitle(soup):
-    """Extracting titles from job descriptions from Monster.uk
+    """
+    Extracting titles from job descriptions from Monster.uk
     :param soup:
     :return: title
     """
@@ -54,7 +55,6 @@ def monster_salary(soup):
     return salary
 
 
-# Function for extracting meta-data from the website:
 def monster_summary(soup):
     """
     Extracting meta-data from Monster.uk
@@ -73,9 +73,9 @@ def monster_summary(soup):
 
 
 if __name__ == "__main__":
+
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
-
     url = 'https://www.monster.co.uk/jobs/search/?q=data&saltyp=1&cy=uk&stpage=1&page=10'
 
     #  GET request
@@ -85,7 +85,6 @@ if __name__ == "__main__":
     all_links = monster_links(soup)
     links = [s for s in all_links if "job-openings" in s]
 
-    # today = datetime.now().strftime('%Y_%m_%d_%H_%M')
     data = defaultdict(list)
 
     for i in range(0, len(links)):
@@ -109,7 +108,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(data)
 
-    # Data cleaning
+    # basic data cleaning
     df['extraction_date'] = date.today()
     df['job_title'] = df['title'].str.split('-', n=1, expand=True)[0]
     df['company'] = df['title'].str.split('-', n=1, expand=True)[1]
@@ -119,4 +118,4 @@ if __name__ == "__main__":
     df['salary_high'] = df['salary'].str.split('-', n=1, expand=True)[1]
 
     df.to_csv(parent_folder + '/DataScienceJobs/data/monster_all.csv', sep='\t', header=None, mode='a', index=False)
-    # df.to_csv(parent_folder + '/data/monster_all.csv', sep='\t', header=None, mode='a')
+
