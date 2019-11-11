@@ -2,45 +2,7 @@
 #     Monster.uk scraping Functions        #
 ############################################
 
-def monster_links(soup):
-    links =[]
-    for div in soup.find_all(name='a', attrs={'data-bypass': 'true'}):
-        links.append(div['href'])
-    return links
 
-# Function for extracting the job title from the website:
-def monster_jobtitle(soup):
-    title = 'no_title'
-    for div in soup.find_all(name='h1', attrs={'class': 'title'}):
-        title = div.text
-    return title
-
-# Function for extracting the job description from the website:
-def monster_descr(soup):
-    jobdesc = []
-    for div in soup.find_all(name='span', attrs={'id': 'TrackingJobBody'}):
-        jobdesc = div.text
-    return jobdesc
-
-# Function for extracting salary from the website:
-def monster_salary(soup):
-    salary = []
-    for div in soup.find_all('div',{'class': 'col-xs-12 cell'}):
-        salary = div.text
-        salary = salary.replace('Salary','').strip()
-    return salary
-
-# Function for extracting meta-data from the website:
-def monster_summary(soup):
-    output = ['nan','nan', 'nan', 'nan', 'nan', 'nan', 'nan']
-    separation =['Location', 'Job type', 'Posted', 'Industries', 'Education level', 'Career level', 'Reference code']
-    for div in soup.find_all('dl', {'class': 'header'}):
-        summary = div.text
-        summary = summary.replace('\n', '')
-        for idx, item in enumerate(separation):
-            if item in summary:
-                output[idx] = summary.replace(item,'')
-    return output
 
 #########################################
 #         cwjobs website functions      #
