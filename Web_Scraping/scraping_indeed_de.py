@@ -18,9 +18,9 @@ ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'date'
 
 # loop for scraping
 
-for i in range(0, 200):  # range(0:1000)
+for i in range(0, 60):  # range(0:1000)
     text_list = []
-
+    print(i)
     time.sleep(1)  # ensuring at least 1 second between page grabs
     url = "https://de.indeed.com/Jobs?q=" + searchTerm + "&filter=0&start=" + str(i)
     res = requests.get(url)
