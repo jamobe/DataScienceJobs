@@ -79,7 +79,10 @@ if __name__ == "__main__":
     parent_folder, current_folder = os.path.split(path)
     print(parent_folder)
     print(current_folder)
+
     csv_path = '/data/indeed_us_all.csv'
+    #csv_path = '/data/monster_all.csv'
+
     print(csv_path)
     df = pd.read_csv(path + csv_path, sep='\t')
     print('Uploaded: ' + csv_path + '\n')
@@ -144,6 +147,7 @@ if __name__ == "__main__":
     print('Identified region and country for each location ...\n')
 
     output = '/data/cleaned_Indeed_us.csv'
+    #output = '/data/cleaned_Monster.csv'
     df2.to_csv(path + output, index=False)
     print('Save results in ' + output)
 
