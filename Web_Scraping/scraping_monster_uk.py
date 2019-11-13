@@ -72,11 +72,22 @@ def monster_summary(soup):
     return output
 
 
+def check_locations(string):
+    loc = pd.read_csv(parent_folder+'/data/locations_UK.csv')
+    UK_cities = loc.set_index('location').T.to_dict('list')
+    location = [key for key,val in UK_cities.items() if key in string]
+    return location
+
 if __name__ == "__main__":
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
-    url = 'https://www.monster.co.uk/jobs/search/?q=data&saltyp=1&cy=uk&stpage=1&page=10'
+    searchTerm = 'data'
+    #searchTerm = 'machine-learning'
+
+    url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
+    #url = 'https://www.monster.co.uk/jobs/search/?q=maschine-learning&cy=uk'
+    #url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&cy=uk'
 
     #  GET request
     res = requests.get(url)
