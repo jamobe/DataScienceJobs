@@ -156,7 +156,7 @@ if __name__ == "__main__":
         # basic data cleaning
         ads['extraction_date'] = date.today()
         ads.company = ads.company.str.strip()
-        ads.description = ads.description.str.strip()
+        #ads.description = ads.description.str.strip()
         ads.salary = ads.salary.str.strip()
         ads['salary_low'] = np.NaN
         ads['salary_high'] = np.NaN
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         ads['education'] = 'Nothing_found'
         ads['career'] = 'Nothing_found'
         ads['ref_code'] = 'Nothing_found'
-        ads = ads.replace('Nothing_found',np.NaN)
+        ads = ads.replace('Nothing_found', np.NaN)
 
         #today = datetime.now().strftime('%Y_%m_%d_%H_%M')
         cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
@@ -173,4 +173,4 @@ if __name__ == "__main__":
                 'ref_code']
 
         ads = ads[cols]
-        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all_copy.csv', sep='\t', header=None, mode='a', index=False)
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all.csv', sep='\t', header=None, mode='a', index=False) #

@@ -18,8 +18,8 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = "data"
-    #searchTerm = "machine+learning"
+    #searchTerm = "data"
+    searchTerm = "machine+learning"
 
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         # Data cleaning
         ads['extraction_date'] = date.today()
         ads.company = ads.company.str.strip()
-        ads.description = ads.description.str.strip()
+        #ads.description = ads.description.str.strip()
         ads.salary = ads.salary.str.strip()
         ads['salary_low'] = np.NaN
         ads['salary_high'] = np.NaN
@@ -68,4 +68,4 @@ if __name__ == "__main__":
 
         ads = ads[cols]
 
-        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all-Copy1.csv', sep='\t', header=None, mode='a', index=False)
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all.csv', sep='\t', header=None, mode='a', index=False)
