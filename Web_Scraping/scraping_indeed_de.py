@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
 
-    for i in range(0, 1000):  # range(0:1000)
+    for i in range(0, 100):  # range(0:1000)
         text_list = []
         print(i)
         time.sleep(1)  # ensuring at least 1 second between page grabs
@@ -53,6 +53,8 @@ if __name__ == "__main__":
         ads.company = ads.company.str.strip()
         ads.description = ads.description.str.strip()
         ads.salary = ads.salary.str.strip()
+        ads['salary_low'] = np.NaN
+        ads['salary_high'] = np.NaN
         ads['jobtype'] = 'Nothing_found'
         ads['industry'] = 'Nothing_found'
         ads['education'] = 'Nothing_found'
@@ -60,4 +62,10 @@ if __name__ == "__main__":
         ads['ref_code'] = 'Nothing_found'
         ads = ads.replace('Nothing_found', np.NaN)
 
-        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all.csv', sep='\t', header=None, mode='a', index=False)
+        cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
+                'extraction_date', 'salary_low', 'salary_high', 'jobtype', 'industry', 'education', 'career',
+                'ref_code']
+
+        ads = ads[cols]
+
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all-Copy1.csv', sep='\t', header=None, mode='a', index=False)
