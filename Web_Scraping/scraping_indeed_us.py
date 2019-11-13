@@ -119,13 +119,13 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = "machine+learning"
-    #searchTerm = "data"
+    #searchTerm = "machine+learning"
+    searchTerm = "data"
 
     # create empty data frame with column headers
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
 
-    for i in range(0, 1000):  # range(0:1000)
+    for i in range(0, 100):  # range(0:1000)
         text_list = []
         print(i)
         time.sleep(1)  # ensuring at least 1 second between page grabs
@@ -168,4 +168,9 @@ if __name__ == "__main__":
         ads = ads.replace('Nothing_found',np.NaN)
 
         #today = datetime.now().strftime('%Y_%m_%d_%H_%M')
-        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all.csv', sep='\t', header=None, mode='a', index=False)
+        cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
+                'extraction_date', 'salary_low', 'salary_high', 'jobtype', 'industry', 'education', 'career',
+                'ref_code']
+
+        ads = ads[cols]
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all_copy.csv', sep='\t', header=None, mode='a', index=False)
