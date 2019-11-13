@@ -77,10 +77,9 @@ def check_locations(string):
 if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
-    print(parent_folder)
-    print(current_folder)
 
-    csv_path = '/data/indeed_us_all.csv'
+    csv_path = '/data/indeed_de_all.csv'
+    #csv_path = '/data/indeed_us_all.csv'
     #csv_path = '/data/monster_all.csv'
 
     print(csv_path)
@@ -146,7 +145,8 @@ if __name__ == "__main__":
     df2.loc[df2.location.str.contains('England'), 'location'] = ''
     print('Identified region and country for each location ...\n')
 
-    output = '/data/cleaned_Indeed_us.csv'
+    output = '/data/cleaned_Indeed_de.csv'
+    #output = '/data/cleaned_Indeed_us.csv'
     #output = '/data/cleaned_Monster.csv'
     df2.to_csv(path + output, index=False)
     print('Save results in ' + output)
