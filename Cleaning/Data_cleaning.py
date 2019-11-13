@@ -11,6 +11,7 @@ def find_salary(string):
     :param string:
     :return: salary
     """
+    string = str(string)
     currencies = ['£', '€', 'EUR', '$']
     found = [i for i in string if i in currencies]
     if found:
@@ -71,9 +72,9 @@ def check_locations(string):
 
 
 if __name__ == "__main__":
-    #website = 'indeed_de' #231
+    website = 'indeed_de' #231
     #website = 'monster' #609
-    website = 'indeed_us' #93
+    #website = 'indeed_us' #93
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
@@ -159,7 +160,7 @@ if __name__ == "__main__":
     loc = pd.read_csv(path + '/data/locations_UK.csv')
     loc2 = pd.read_csv(path + '/data/locations.csv')
     location = loc.append(loc2, ignore_index=True)
-    df2 = pd.merge(df, location, on='location', how='left')
+    df2 = pd.merge(df, location, on='location', how='left')#.drop('Unnamed: 0', axis=1)
     df2 = df2.reset_index(drop=True)
 
     df2.loc[df2.location.str.contains('Uk Wide'), 'location'] = 'NaN'
@@ -169,6 +170,12 @@ if __name__ == "__main__":
 
     output = '/data/cleaned_'+ website + '.csv'
 
-    df2.to_csv(path + output, index=False)
-    print('Save results in ' + output)
+    cols = ['description', 'salary', 'location', 'jobtype', 'industry', 'education',
+            'career', 'ref_code', 'url', 'job_title', 'company', 'salary_low',
+            'salary_high', 'posted_date', 'currency', 'per', 'region', 'country']
+    df3 = df2[cols]
+    print(df3.columns)
+    print('Save results in ' + output + '...')
+    df3.to_csv(path + output, index=False)
+    print('Done!')
 
