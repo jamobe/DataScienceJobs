@@ -1,6 +1,7 @@
 #define functions for parsing HTML
 
 def extract_job_title_from_result(soup): 
+    import pandas as pd
     jobs = []
     for div in soup.find_all(name="div", attrs={"class":"row"}):
         try:
@@ -8,7 +9,7 @@ def extract_job_title_from_result(soup):
                 jobs.append(a["title"])
         except:
                 jobs.append("Nothing_found")
-    return(jobs)
+    return pd.DataFrame(jobs)
 
 def extract_salary_from_result(soup): 
     salaries = []
@@ -17,9 +18,9 @@ def extract_salary_from_result(soup):
             salaries.append(div.find(name="span",attrs={"class":"salaryText"}).text)
         except:
             salaries.append("Nothing_found")
-    return(salaries)
+    return salaries
 
-def extract_location_from_result(soup): 
+def extract_location_from_result(soup):
     locations = []
     for div in soup.find_all(name="div", attrs={"class":"row"}):
         try:
@@ -27,9 +28,9 @@ def extract_location_from_result(soup):
         except:
             locations.append("Nothing_found")
    
-    return(locations)
+    return locations
 
-def extract_description_from_result(soup): 
+def extract_description_from_result(soup):
     description = []
     for div in soup.find_all(name="div", attrs={"class":"row"}):
         try:
@@ -37,17 +38,17 @@ def extract_description_from_result(soup):
         except:
             description.append("Nothing_found")
    
-    return(description)
+    return description
 
 def extract_date_from_result(soup): 
+    import pandas as pd
     date = []
     for div in soup.find_all(name="div", attrs={"class":"row"}):
         try:
             date.append(div.find("span", attrs={"class": "date"}).text)
         except:
             date.append("Nothing_found")
-   
-    return(date)
+    return date
 
 def extract_company_from_result(soup): 
     company = []
@@ -57,7 +58,7 @@ def extract_company_from_result(soup):
         except:
             company.append("Nothing_found")
    
-    return(company)
+    return company
 
 def extract_links(soup):
     links =[]
@@ -71,6 +72,7 @@ def extract_full_desc(soup):
 
 
 def extract_headlines_from_result(soup): 
+    import pandas as pd
     headlines =[]
     try:
         vals=[x.text for x in soup.find_all(name="span",attrs={"class":"jobsearch-JobMetadataHeader-iconLabel"})]
