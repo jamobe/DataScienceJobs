@@ -1,5 +1,6 @@
 import requests, bs4, time
 import pandas as pd
+import numpy as np
 import os.path
 from datetime import datetime
 from datetime import date
@@ -18,22 +19,23 @@ if __name__ == "__main__":
     parent_folder, current_folder = os.path.split(path)
 
     searchTerm = "data"
+    #searchTerm = "machine+learning"
 
-    ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'date', 'description', 'url'])
+    ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
 
-    for i in range(0, 60):  # range(0:1000)
+    for i in range(0, 100):  # range(0:1000)
         text_list = []
         print(i)
         time.sleep(1)  # ensuring at least 1 second between page grabs
         url = "https://de.indeed.com/Jobs?q=" + searchTerm + "&filter=0&start=" + str(i)
         res = requests.get(url)
         soup = bs4.BeautifulSoup(res.content, features='html.parser')
-        df = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'date', 'description', 'url'])
+        df = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
         df['company'] = indeed_company(soup)
         df['job_title'] = indeed_job_title(soup)
         df['salary'] = indeed_salary(soup)
         df['location'] = indeed_location(soup)
-        df['date'] = indeed_date(soup)
+        df['duration'] = indeed_date(soup)
 
         sub_urls = indeed_links(soup)
         text = []
@@ -46,16 +48,24 @@ if __name__ == "__main__":
         df['url'] = sub_urls
         ads = ads.append(df, ignore_index=True)
 
-    # Data cleaning
-    ads['extraction_date'] = date.today()
-    ads.company = ads.company.str.strip()
-    ads.description = ads.description.str.strip()
-    ads.salary = ads.salary.str.strip()
-    ads['salary_low'] = ads['salary'].str.split('-', n=1, expand=True)[0]
-    ads['salary_high'] = ads['salary'].str.split('-', n=1, expand=True)[1]
-    ads['job_type'] = 'Not available'
-    ads['industry'] = 'Not available'
-    ads['education'] = 'Not available'
-    ads['career'] = 'Not available'
+        # Data cleaning
+        ads['extraction_date'] = date.today()
+        ads.company = ads.company.str.strip()
+        ads.description = ads.description.str.strip()
+        ads.salary = ads.salary.str.strip()
+        ads['salary_low'] = np.NaN
+        ads['salary_high'] = np.NaN
+        ads['jobtype'] = 'Nothing_found'
+        ads['industry'] = 'Nothing_found'
+        ads['education'] = 'Nothing_found'
+        ads['career'] = 'Nothing_found'
+        ads['ref_code'] = 'Nothing_found'
+        ads = ads.replace('Nothing_found', np.NaN)
 
-    ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all.csv', sep='\t', header=None, mode='a', index=False)
+        cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
+                'extraction_date', 'salary_low', 'salary_high', 'jobtype', 'industry', 'education', 'career',
+                'ref_code']
+
+        ads = ads[cols]
+
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all-Copy1.csv', sep='\t', header=None, mode='a', index=False)

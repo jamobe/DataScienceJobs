@@ -141,5 +141,5 @@ if __name__ == "__main__":
         df['url'] = sub_urls
         ads = ads.append(df, ignore_index=True)
 
-    today = datetime.now().strftime('%Y_%m_%d_%H_%M')
-    ads.to_csv(parent_folder + '/DataScienceJobs/data/cwjobs_' + today + '.csv', index=True, sep='\t')
+        today = datetime.now().strftime('%Y_%m_%d_%H_%M')
+        ads.to_csv(parent_folder + '/DataScienceJobs/data/cwjobs_' + today + '.csv', index=True, sep='\t')
