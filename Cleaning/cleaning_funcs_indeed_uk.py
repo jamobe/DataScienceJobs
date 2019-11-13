@@ -113,7 +113,7 @@ def clean_other_deets(pandas_df_col):
         if pandas_df_col.str.split('_',n = 2, expand = True)[0][i] is None:
             location_2 = 'None'
             type_2[i] = 'None'
-            salary_2[i] = 'None
+            salary_2[i] = 'None'
         elif pandas_df_col.str.split('_',n = 2, expand = True)[2][i] is not None:
             type_2[i] = pandas_df_col.str.split('_',n = 2, expand = True)[1][i]
             salary_2[i] = pandas_df_col.str.split('_',n = 2, expand = True)[2][i]
