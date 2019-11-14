@@ -179,3 +179,23 @@ def salary_average(low, high):
         else:
             a[i] = 'None'           
     return a
+
+def check_locations(string):
+    path = os.getcwd()
+    parent_folder, current_folder = os.path.split(path)
+    parent_folder
+    loc = pd.read_csv(parent_folder+'/data/uk_location_lookup.csv')
+    loc2 = pd.read_csv(parent_folder + '/data/locations.csv')
+    UK = loc.set_index('location').T.to_dict('list')
+    Other = loc2.set_index('location').T.to_dict('list')
+
+    location = [key for key,val in UK.items() if key in string]
+    if not location:
+        location = [key for key,val in UK.items() if string in key]    
+    if not location:
+        location = [key for key, val in Other.items() if key in string]
+    if not location:
+        location = [key for key, val in Other.items() if string in key]
+    if not location:
+        location = ["not_found"]
+    return ','.join(location)
