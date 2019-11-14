@@ -119,9 +119,9 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = "business+intelligence"
-    #  business+intelligence','data+engineer','data+manager','econometrics','statistics','data+analyst','data+scientist',
-    # 'machine+learning', 'data'
+    searchTerm = 'data+engineer'
+    #  'data+engineer','data+manager','econometrics','statistics','data+analyst','data+scientist',
+    # 'machine+learning', 'data', "business+intelligence"
 
     # create empty data frame with column headers
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
