@@ -77,10 +77,34 @@ def create_split_salary_range(pandas_df_col):
     return a,b
 
 def clean_salary(pandas_df_col,currency_symbol):
-    import pandas as pd
-    try:
-    a = [pandas_df_col[x].split(currency_symbol,1)[1] for x in range(len(pandas_df_col))]
-    
+    import pandas as pd     
+    a = [pandas_df_col[x].split(currency_symbol,1)[1] for x in range(len(pandas_df_col))]        
     a = [a[x].split("per",1)[0] for x in range(len(a))]
     a = pd.to_numeric(a)
-    return a    
+    return a
+
+def clean_jobref(pandas_df_col):
+    a = [ str(pandas_df_col[x]).replace("[","") for x in range(len(pandas_df_col))]
+    a = [a[x].replace("]","") for x in range(len(pandas_df_col))]
+    a = [a[x].replace("'","") for x in range(len(pandas_df_col))]
+    return a
+
+def check_locations(string):
+    path = os.getcwd()
+    parent_folder, current_folder = os.path.split(path)
+    parent_folder
+    loc = pd.read_csv(parent_folder+'/data/uk_location_lookup.csv')
+    loc2 = pd.read_csv(parent_folder + '/data/locations.csv')
+    UK = loc.set_index('location').T.to_dict('list')
+    Other = loc2.set_index('location').T.to_dict('list')
+
+    location = [key for key,val in UK.items() if key in string]
+    if not location:
+        location = [key for key,val in UK.items() if string in key]    
+    if not location:
+        location = [key for key, val in Other.items() if key in string]
+    if not location:
+        location = [key for key, val in Other.items() if string in key]
+    if not location:
+        location = ["not_found"]
+    return ','.join(location)
