@@ -8,6 +8,8 @@ import re
 import scraping_funcs_harnham as sf
 import pickle
 
+PATH = "C:/Users/lundr/DataScienceJobs/data/harnham_raw_pickles/"
+
 #urls for UK data science jobs
 links=[]
 for i in range(1,10):
