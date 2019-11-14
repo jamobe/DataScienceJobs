@@ -18,8 +18,9 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    #searchTerm = "data"
-    searchTerm = "machine+learning"
+    searchTerm = 'business+intelligence'
+    #  'business+intelligence','data+engineer','data+manager','econometrics','statistics','data+analyst','data+scientist',
+    # 'machine+learning', 'data'
 
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
 
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         # Data cleaning
         ads['extraction_date'] = date.today()
         ads.company = ads.company.str.strip()
-        #ads.description = ads.description.str.strip()
+        # ads.description = ads.description.str.strip()
         ads.salary = ads.salary.str.strip()
         ads['salary_low'] = np.NaN
         ads['salary_high'] = np.NaN

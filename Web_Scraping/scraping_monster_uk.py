@@ -82,12 +82,14 @@ if __name__ == "__main__":
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
-    searchTerm = 'data'
-    #searchTerm = 'machine-learning'
+
+    searchTerm = 'business-intelligence'
+    #  'business-intelligence','data-engineer','data-manager','econometrics','statistics','data-analyst','data-scientist',
+    # 'machine-learning', 'data'
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
-    #url = 'https://www.monster.co.uk/jobs/search/?q=maschine-learning&cy=uk'
-    #url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&cy=uk'
+    # url = 'https://www.monster.co.uk/jobs/search/?q=maschine-learning&cy=uk'
+    # url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&cy=uk'
 
     #  GET request
     res = requests.get(url)
