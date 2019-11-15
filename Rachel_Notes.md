@@ -26,3 +26,49 @@ Thoughts on the analysis:
  - make sure missing values are coerced to np.nan
  - standardize day, year, month etc. -> yearly, monthly daily
  
+
+
+Dictionary of words to be deleted
+
+
+               "|": " ",
+               "''": " ",
+               "'": " ",
+               ",": " ",
+               "+": " ",
+               "/": " ",
+               "€": " ",
+               "£": " ",
+               "$": " ",
+               "benefits":" ",
+               "THE COMPANY": " ",
+               "THE ROLE": " ",
+               "THE BENEFITS": " ",
+               "HOW TO APPLY": " ",
+               "KEYWORDS": " ",
+               "YOUR SKILLS AND EXPERIENCE": " ",
+               "YOUR SKILLS AND EXPERTISE": " ",
+               "Please register your interest by sending your CV via the Apply link on this page":" ",
+               "BENEFITS":" ",
+               "CONTACT":" ",
+               "OVERVIEW":" ",
+               "SALARY":" ",
+               "For further details":" ",
+               "to enquire about other roles please contact":" ",
+               "Nick Mandella":" ",
+               "Harnham":" ",
+               "On a daily basis":" ",
+               "you will be:":" ",
+               "you will join:":" ",
+               "!" :" ",
+               "." : " ",
+               "0" :" ",
+              "1" : " ",
+              "2" : " ",
+              "3" :" ",
+              "4" : " ",
+              "5" : " ",
+              "6" : " ",
+              "7" :" ",
+              "8" : " ",
+              "9" : " "
