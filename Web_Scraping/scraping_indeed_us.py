@@ -119,8 +119,9 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    #searchTerm = "machine+learning"
-    searchTerm = "data"
+    searchTerm = 'data+engineer'
+    #  'data+engineer','data+manager','econometrics','statistics','data+analyst','data+scientist',
+    # 'machine+learning', 'data', "business+intelligence"
 
     # create empty data frame with column headers
     ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
@@ -130,7 +131,7 @@ if __name__ == "__main__":
         print(i)
         time.sleep(1)  # ensuring at least 1 second between page grabs
         url = 'https://www.indeed.com/jobs?q=' + searchTerm + '&l=United+States&start=' + str(i)
-        #url = 'https://www.indeed.com/jobs?q=' + searchTerm+ '&l='
+        # url = 'https://www.indeed.com/jobs?q=' + searchTerm+ '&l='
         res = requests.get(url)
         soup = bs4.BeautifulSoup(res.content, features='html.parser')
         df = pd.DataFrame(
@@ -156,7 +157,7 @@ if __name__ == "__main__":
         # basic data cleaning
         ads['extraction_date'] = date.today()
         ads.company = ads.company.str.strip()
-        #ads.description = ads.description.str.strip()
+        # ads.description = ads.description.str.strip()
         ads.salary = ads.salary.str.strip()
         ads['salary_low'] = np.NaN
         ads['salary_high'] = np.NaN
@@ -167,7 +168,7 @@ if __name__ == "__main__":
         ads['ref_code'] = 'Nothing_found'
         ads = ads.replace('Nothing_found', np.NaN)
 
-        #today = datetime.now().strftime('%Y_%m_%d_%H_%M')
+        # today = datetime.now().strftime('%Y_%m_%d_%H_%M')
         cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
                 'extraction_date', 'salary_low', 'salary_high', 'jobtype', 'industry', 'education', 'career',
                 'ref_code']
