@@ -83,9 +83,9 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = 'data-manager'
-    # 'data-manager','econometrics','statistics','data-analyst','data-scientist',
-    # 'machine-learning', 'data', 'business-intelligence', 'data-engineer'
+    searchTerm = 'data-scientist'
+    # ,'data-scientist',
+    # 'machine-learning', 'data', 'business-intelligence', 'data-engineer', 'data-manager', 'econometrics','statistics', 'data-analyst'
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
     # url = 'https://www.monster.co.uk/jobs/search/?q=maschine-learning&cy=uk'
