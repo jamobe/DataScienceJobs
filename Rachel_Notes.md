@@ -8,6 +8,7 @@ Questions:
  - Do we drop entries with no salaries before putting them in the database? No
  - Do we have a train and test table in the SQL database? No -> check with Adam
  - should we add columns for currency conversions in the main table? yes
+ - 
  
 
 Thoughts on Summary stats:
