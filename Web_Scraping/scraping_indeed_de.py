@@ -18,14 +18,14 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = 'data+scientist'
-    # 'machine+learning', 'data', 'business+intelligence', 'data+engineer', 'data+manager','econometrics','statistics', 'data+analyst'
+    # 'data+scientist',
+    searchTerm = 'econometrics'
+    # 'data', 'business+intelligence', 'data+engineer', 'data+manager','statistics', 'data+analyst', 'machine+learning'
 
-    ads = pd.DataFrame(columns=['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url'])
-
+    total_jobs = 0
     for i in range(0, 100):  # range(0:1000)
         text_list = []
-        print(i)
+        print('scraping page ' + str(i) + ' of 100')
         time.sleep(1)  # ensuring at least 1 second between page grabs
         url = "https://de.indeed.com/Jobs?q=" + searchTerm + "&filter=0&start=" + str(i)
         res = requests.get(url)
@@ -46,26 +46,28 @@ if __name__ == "__main__":
             text_list.append(desc)
         df['description'] = text_list
         df['url'] = sub_urls
-        ads = ads.append(df, ignore_index=True)
 
         # Data cleaning
-        ads['extraction_date'] = date.today()
-        ads.company = ads.company.str.strip()
-        # ads.description = ads.description.str.strip()
-        ads.salary = ads.salary.str.strip()
-        ads['salary_low'] = np.NaN
-        ads['salary_high'] = np.NaN
-        ads['jobtype'] = 'Nothing_found'
-        ads['industry'] = 'Nothing_found'
-        ads['education'] = 'Nothing_found'
-        ads['career'] = 'Nothing_found'
-        ads['ref_code'] = 'Nothing_found'
-        ads = ads.replace('Nothing_found', np.NaN)
+        df['extraction_date'] = date.today()
+        df.company = df.company.str.strip()
+        df.salary = df.salary.str.strip()
+        df['salary_low'] = np.NaN
+        df['salary_high'] = np.NaN
+        df['jobtype'] = np.NaN
+        df['industry'] = np.NaN
+        df['education'] = np.NaN
+        df['career'] = np.NaN
+        df['ref_code'] = np.NaN
 
         cols = ['company', 'job_title', 'salary', 'location', 'duration', 'description', 'url',
                 'extraction_date', 'salary_low', 'salary_high', 'jobtype', 'industry', 'education', 'career',
                 'ref_code']
 
-        ads = ads[cols]
+        df_final = df[cols]
+        total_jobs = total_jobs + df_final.shape[0]
 
-        ads.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all.csv', sep='\t', header=None, mode='a', index=False)
+        #if i == 0:
+        #    df_final.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all_2.csv', sep='\t', index=False)
+        #else:
+        df_final.to_csv(parent_folder + '/DataScienceJobs/data/indeed_de_all_2.csv', sep='\t', header=None, mode='a', index=False)
+    print('scraped ' + str(total_jobs) + ' job postings.')

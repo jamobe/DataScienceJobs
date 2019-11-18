@@ -1,13 +1,19 @@
 import pandas as pd
 import re
 import numpy as np
+import string
 import os.path
 from collections import defaultdict
 
 
 def extract_salary(string):
+    """
+
+    :param string:
+    :return:
+    """
     try:
-        result = re.findall(r'(?:[\£\$\€].{1}[,\d]+.?\d*)',string)
+        result = re.findall(r'(?:[\£\$\€].{1}[,\d]+.?\d*)', string)
         result = ' - '.join(result)
     except:
         result = 'NaN'
@@ -15,8 +21,13 @@ def extract_salary(string):
 
 
 def extract_salary_after(string):
+    """
+
+    :param string:
+    :return:
+    """
     try:
-        result = re.findall(r'([.|,\d]+,?\d*.[\£\$\€])',string)
+        result = re.findall(r'([.|,\d]+,?\d*.[\£\$\€])', string)
         result = ' - '.join(result)
     except:
         result = 'NaN'
@@ -66,7 +77,7 @@ def clean_salary(df, column_names):
     for column in column_names:
         if df[column] is not None:
             df[column] = df[column].str.strip()
-            #df[column] = df[column].str.split(' ', n=1, expand=True)[0]
+            # df[column] = df[column].str.split(' ', n=1, expand=True)[0]
             df[column] = df[column].str.split('.', n=1, expand=True)[0]
             df[column].replace(regex=True, inplace=True, to_replace=r'\D', value=r'')
             df[column] = pd.to_numeric(df[column])
@@ -80,11 +91,11 @@ def check_locations(string):
     :return: location
     """
     path = os.getcwd()
-    loc = pd.read_csv(path +'/data/locations_UK.csv')
+    loc = pd.read_csv(path + '/data/locations_UK.csv')
     loc2 = pd.read_csv(path + '/data/locations.csv')
     UK_cities = loc.set_index('location').T.to_dict('list')
     Cities = loc2.set_index('location').T.to_dict('list')
-    location = [key for key,val in UK_cities.items() if key in string]
+    location = [key for key, val in UK_cities.items() if key in string]
     if not location:
         location = [key for key, val in Cities.items() if key in string]
     return ','.join(location)
@@ -92,10 +103,10 @@ def check_locations(string):
 
 def convert_euro(value, currency):
     """
-
-    :param value:
-    :param currency:
-    :return:
+    Convert salary in $ or £ to €
+    :param value: salary
+    :param currency: only $, €, £ accepted
+    :return: converted value in €
     """
     if currency == '$':
         euro = value * 0.9
@@ -108,45 +119,71 @@ def convert_euro(value, currency):
     return euro
 
 
-def check_jobtype(string):
+def clean_jobtype(string):
     """
     Extract jobtype from description
     :param string:
     :return: currency
     """
-    job_type = ['permanent', 'unbefristet']
-    found = [i for i in string.lower() if i in job_type]
-    if found:
-        found = 'permanent'
+    permanent = ['Permanent', 'unbefristet']
+    temporary = ['Temporary', 'Placement', 'Seasonal']
+    position = [string.find(substring) for substring in permanent]
+    if max(position)> -1:
+        label = 'permanent'
     else:
-        found = np.NaN
-    return found
+        temp_position = [string.find(substring) for substring in temporary]
+        if max(temp_position)>-1:
+            label = 'others'
+        else:
+            label = np.NaN
+    return label
+
+
+def text_process(mess):
+    """
+    Takes in a string of text, then performs the following:
+    1. Lower case of all words
+    2. Remove all punctuation
+    3. Returns cleaned text
+    """
+
+    # transforms all to lower case words
+    mess = mess.lower()
+
+    mess = mess.replace('\\n', ' ')
+    # Check characters to see if they are in punctuation
+    nopunc = [char for char in mess if char not in string.punctuation]
+
+    # Join the characters again to form the string.
+    nopunc = ''.join(nopunc)
+
+    return nopunc
+
 
 if __name__ == "__main__":
-    #website = 'indeed_de' #444  or # 13198 with Salary-NaNs
-    #website = 'monster' #1033 or #  1253 with Salary-NaNs
-    website = 'indeed_us' #521 or # 3130 with Salary-NaNs
+    #website = 'indeed_de_all_2' #444  or # 13198 with Salary-NaNs
+    website = 'monster_all_2' #1033 or #  1253 with Salary-NaNs
+    #website = 'indeed_us_all_2'  # 521 or # 2989 with Salary-NaNs
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
-    csv_path = '/data/' + website + '_all.csv'
+    csv_path = '/data/' + website + '.csv'
 
-    df = pd.read_csv(path + csv_path, sep='\t')
+    df = pd.read_csv(path + csv_path, sep='\t', low_memory=False)
     length0 = df.shape[0]
     print('Uploaded: ' + csv_path + '\n')
     print('Containing ' + str(length0) + ' entries... \n')
     print(df.columns)
-    df = df.drop_duplicates(
-        subset=['description', 'salary', 'location', 'jobtype', 'industry', 'education', 'career', 'ref_code', 'url',
-                'job_title', 'company'], keep='last', inplace=False)
+    #df.drop_duplicates(subset=['description', 'salary', 'location', 'jobtype', 'industry', 'education', 'career', 'ref_code', 'url', 'job_title', 'company'], keep='last', inplace=True)
+    df.drop_duplicates(subset=['ref_code', 'url'], keep='last', inplace=True)
+
+    df = df.reset_index(drop=True)
     length1 = df.shape[0]
-    print('Removed ' + str(length0-length1) + ' duplicate entries: ' + str(length1) + '...\n')
+    print('Removed ' + str(length0 - length1) + ' duplicate entries: ' + str(length1) + '...\n')
 
     df = df[df.astype(str)['description'] != '[]']
     length2 = df.shape[0]
-    print('Removed ' + str(length1-length2) + ' empty job descriptions: ' + str(length2) + '...\n')
-
-    df = df.reset_index(drop=True)
+    print('Removed ' + str(length1 - length2) + ' empty job descriptions: ' + str(length2) + '...\n')
 
     # back calculate the posted date of job advertisement
     df.duration.replace(regex=True, inplace=True, to_replace=r'Today', value=r'0')
@@ -165,13 +202,17 @@ if __name__ == "__main__":
     df.loc[mask2, 'salary'] = df.loc[mask2, 'description'].apply(find_salary)
     mask3 = ~df.salary.isnull()
     df['currency'] = df.loc[mask3, 'salary'].apply(check_currency)
-    print('Extracted salary from job description if not available...\n')
+    print('Extracted salary from job description (if not available)...\n')
 
     # conversion german . to , only for indeed_de
-    if website =='indeed_de':
-        # df.loc[df.currency == '€', 'salary'] = df.loc[df.currency == '€', 'salary'].str.replace('.', ',000.')
+    if 'indeed_de' in website:
+        # df.loc[df.currency == '€', 'salary'] = df.loc[df.currency == '€', 'salary'].str.replace('.000,', ',000.')
         df['salary_extract'] = df['salary'].apply(extract_salary_after)
-        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.replace('.', ',')
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.replace('.000,00',
+                                                                                                                ',000')
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.replace(
+            '.000',
+            ',000')
     else:
         df['salary_extract'] = df['salary'].apply(extract_salary)
 
@@ -179,19 +220,18 @@ if __name__ == "__main__":
     df['salary_high'] = df['salary_extract'].str.split('-', n=1, expand=True)[1]
     df = clean_salary(df, ['salary_high', 'salary_low'])
     df = df.drop(columns='salary_extract', axis=1)
-    df = df.dropna(subset=['salary'])
+    #df = df.dropna(subset=['salary'])
 
     # fill low or high salary with high or low salary
-    no_high_salary = df['salary_high'].isnull() & df['salary_low'].isnull()
-    df.loc[no_high_salary, 'salary_high'] = df.loc[no_high_salary,'salary_low']
-    no_low_salary = df['salary_low'].isnull() & ~df['salary_high'].isnull()
+    no_high_salary = df['salary_high'].isnull() & df['salary_low'].notnull()
+    df.loc[no_high_salary, 'salary_high'] = df.loc[no_high_salary, 'salary_low']
+    no_low_salary = df['salary_low'].isnull() & df['salary_high'].notnull()
     df.loc[no_low_salary, 'salary_low'] = df.loc[no_low_salary, 'salary_high']
 
-    existing_salary_limits = ~df['salary_high'].isnull() & ~df['salary_low'].isnull()
-
+    existing_salary_limits = df['salary_high'].notnull() & df['salary_low'].notnull()
     # calculate salary average
     df.loc[existing_salary_limits, 'salary_average'] = (df.loc[existing_salary_limits, 'salary_high'] +
-                                                        df.loc[existing_salary_limits, 'salary_low'])/2
+                                                        df.loc[existing_salary_limits, 'salary_low']) / 2
 
     # convert all to Euro
     df['salary_low_euros'] = df.apply(lambda row: convert_euro(row.salary_low, row.currency), axis=1)
@@ -200,30 +240,24 @@ if __name__ == "__main__":
 
     # determining salary type: yearly, monthly, hourly, daily
     names = defaultdict(list)
-    names['yearly'] = ['year', 'annum', 'p.a', 'Jahr']
-    names['montly'] = ['month', 'Monat']
     names['hourly'] = ['hour', 'Stunde']
     names['daily'] = ['day', 'Tag']
+    names['montly'] = ['month', 'Monat']
+    names['yearly'] = ['year', 'annum', 'p.a', 'Jahr']
     df['salary'].fillna('', inplace=True)
     for key, values in names.items():
         for synonyms in values:
             df.loc[df['salary'].str.contains(synonyms), 'salary_type'] = key
     df['salary'].replace('', np.NaN, inplace=True)
     length3 = df.shape[0]
-    print('Removed ' + str(length2-length3) + ' NaN from Salary column: ' + str(length3) + '...\n')
+    print('Removed ' + str(length2 - length3) + ' NaN from Salary column: ' + str(length3) + '...\n')
 
-    #df.replace(np.NaN, 'Not available', inplace=True)
-    #df.loc[df['jobtype'].str.contains('Permanent') == True, 'jobtype'] = 'permanent'
-    #df['jobtype'].replace('Not available', np.NaN, inplace=True)
-    #df.loc[df.jobtype == 'Not available', 'jobtype'] = df.loc[df.jobtype == 'Not available', 'description'].apply(check_jobtype)
-    #df.loc[df.loc[df.jobtype == 'Not available', 'salary_type'] == 'yearly', 'jobtype'] = 'permanent'
-    #df.loc[df['jobtype'].str.contains('Not available') != True, 'jobtype'] = np.NaN
-    #print(df['jobtype'].unique())
+    df.loc[df.jobtype.notnull(), 'jobtype'] = df.loc[df.jobtype.notnull(), 'jobtype'].apply(clean_jobtype)
 
     # get location from description if not available
     mask4 = df.location.isnull()
     df.loc[mask4, 'location'] = df[mask4]['description'].apply(check_locations)
-    print('Extracted locations from job description if not available...\n')
+    print('Extracted locations from job description (if not available)...\n')
 
     # transforming scraped locations
     if website == 'indeed_us':
@@ -261,7 +295,7 @@ if __name__ == "__main__":
         df.loc[df.location.str.contains('München') == True, 'location'] = 'München'
         df.loc[df.location.str.contains('Main') == True, 'location'] = 'Frankfurt'
         location_UK = pd.read_csv(path + '/data/locations_UK.csv')
-        location_EU= pd.read_csv(path + '/data/locations.csv')
+        location_EU = pd.read_csv(path + '/data/locations.csv')
         location = location_UK.append(location_EU, ignore_index=True)
         df2 = pd.merge(df, location, on='location', how='left')
         df2 = df2.reset_index(drop=True)
@@ -272,11 +306,14 @@ if __name__ == "__main__":
     df2.loc[df2.location.str.contains('Deutschland'), 'location'] = 'NaN'
     print('Identified region and country for each location...\n')
 
+    # clean description
+    #df2.description = df2.description.apply(text_process)
+
     output = '/data/cleaned_' + website + '.csv'
 
     cols = ['job_title', 'company', 'description', 'salary', 'salary_low', 'salary_high',
             'salary_average', 'salary_low_euros', 'salary_high_euros', 'salary_average_euros',
-            'location', 'jobtype', 'posted_date', 'region', 'country','ref_code', 'url',
+            'location', 'jobtype', 'posted_date', 'region', 'country', 'ref_code', 'url',
             'currency', 'salary_type']
     df3 = df2[cols]
 
@@ -284,4 +321,3 @@ if __name__ == "__main__":
     print('Save ' + str(length4) + ' results in ' + output + '...\n')
     df3.to_csv(path + output, index=False)
     print('Done!')
-
