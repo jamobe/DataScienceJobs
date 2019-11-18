@@ -1,5 +1,9 @@
 # DataScienceJobs
-DSR Project (by Rachel and Janina): Analysing Data-related Job descriptions
+DSR Project (by Rachel and Janina).
+
+The project's objective is to build an application that will predict the salary range of advertised jobs for data professionals, based on the text of the job description. Use cases are for hiring managers looking to understand the appropriate salary ranges when searching for candidates and job candidates looking to understand what their job description might be worth in the market.
+
+We also plan to segement the market for data professionals to establish whether job titles for data professionals actually describe roles with similar skill sets.
 
 ## Workflow
 
@@ -21,8 +25,49 @@ econometrics, statistics, data analyst).
 * __url:__ url of the job posting
 * __extraction date:__ date when job was scraped
 * __duration:__ for how long has the job been published
-* __job type:__ type of job (e.g. permanent, temporary, ...)
-* __ref code:__ unique code for job description (given by website)
+* __jobtype:__ type of job (e.g. permanent, temporary, ...)
+* __ref_code:__ unique code for job description (given by website)
+
+#### 2. Cleaning
+
+Data were then cleaned to create a consistent dataset. Further columns were added to allow for identification of country, 
+limits and averages of salary ranges and conversion into common currencies. Python files for cleaning can be found in the folder 'Cleaning'
+
+* __job_title:__
+* __ref_code:__
+* __company:__
+* __description:__
+* __salary:__
+* __salary_low:__ (numeric) bottom of stated salary range
+* __salary_high:__ (numeric) top of stated salary range
+* __currency:__ currency (symbol) of stated salary
+* __salary_average:__ mid point of salary range
+* __salary_low_euros:__ (numeric) bottom of stated salary range in euros using October 2019 exchange rate averages (1.14 EUR/GBP, 0.9 EUR/USD)
+* __salary_high_euros:__(numeric) top of stated salary range in euros
+* __salary_average_euros:__ (numeric) mid point of stated salary range in euros
+* __salary_type:__ whether yearly, monthly, daily, hourly
+* __location:__ 
+* __jobtype:__
+* __posted_date:__ calculated date when job was posted (where available)
+* __extraction_date:__
+* __country:__ Country location of job 
+* __region:__ UK region, US State or German state where job is located
+* __url:__
+
+
+#### 3. Postgres Database
+
+Once the initial clean has taken place the data are pushed to a PostgresSQL database in AWS:
+
+    'postgresql://postgres:'+PASSWORD+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/'
 
 
 
+
+
+
+#### A1. Project Plan (Diagram)
+
+
+
+![alt text](Assets/DSJDiagram.png "Project Plan Diagram")
