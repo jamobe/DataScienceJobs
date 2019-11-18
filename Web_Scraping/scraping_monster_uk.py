@@ -72,20 +72,14 @@ def monster_summary(soup):
     return output
 
 
-def check_locations(string):
-    loc = pd.read_csv(parent_folder+'/data/locations_UK.csv')
-    UK_cities = loc.set_index('location').T.to_dict('list')
-    location = [key for key,val in UK_cities.items() if key in string]
-    return location
-
 if __name__ == "__main__":
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = 'econometrics'
-    # 'data'
-    # ,'data-scientist','machine-learning', 'business-intelligence', 'data-engineer', 'data-manager', 'econometrics','statistics', 'data-analyst'
+    searchTerm = 'business-intelligence'
+    # 'data', 'econometrics'
+    # ,'data-scientist','machine-learning', , 'data-engineer', 'data-manager', 'econometrics','statistics', 'data-analyst'
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
 
