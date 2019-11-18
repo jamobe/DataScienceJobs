@@ -83,13 +83,11 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    searchTerm = 'data-scientist'
-    # ,'data-scientist',
-    # 'machine-learning', 'data', 'business-intelligence', 'data-engineer', 'data-manager', 'econometrics','statistics', 'data-analyst'
+    searchTerm = 'econometrics'
+    # 'data'
+    # ,'data-scientist','machine-learning', 'business-intelligence', 'data-engineer', 'data-manager', 'econometrics','statistics', 'data-analyst'
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
-    # url = 'https://www.monster.co.uk/jobs/search/?q=maschine-learning&cy=uk'
-    # url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&cy=uk'
 
     #  GET request
     res = requests.get(url)
@@ -101,7 +99,7 @@ if __name__ == "__main__":
     data = defaultdict(list)
 
     for i in range(0, len(links)):
-        print(i)
+        print('scraping job posting ' + str(i) + ' of ' + str(len(links)))
         url = links[i]
         res = requests.get(url)
         time.sleep(1)  # ensuring at least 1 second between page grabs
@@ -129,6 +127,6 @@ if __name__ == "__main__":
 
     df['salary_low'] = df['salary'].str.split('-', n=1, expand=True)[0]
     df['salary_high'] = df['salary'].str.split('-', n=1, expand=True)[1]
-
-    df.to_csv(parent_folder + '/DataScienceJobs/data/monster_all.csv', sep='\t', header=None, mode='a', index=False)
+    print('scraped ' + str(df.shape[0]) + ' job postings.')
+    df.to_csv(parent_folder + '/DataScienceJobs/data/monster_all_2.csv', sep='\t', header=None, mode='a', index=False)
 
