@@ -8,9 +8,9 @@ from collections import defaultdict
 
 def extract_salary(string):
     """
-
-    :param string:
-    :return:
+    Extracts from a string the salary starting with £, $, € and followed by integers
+    :param string: text containing salaries
+    :return: (integer) salary
     """
     try:
         result = re.findall(r'(?:[\£\$\€].{1}[,\d]+.?\d*)', string)
@@ -22,9 +22,9 @@ def extract_salary(string):
 
 def extract_salary_after(string):
     """
-
-    :param string:
-    :return:
+    Extracts from a string the salary starting with integers and followed by £, $, €
+    :param string: text containing salaries
+    :return: (integer) salary
     """
     try:
         result = re.findall(r'([.|,\d]+,?\d*.[\£\$\€])', string)
@@ -37,7 +37,7 @@ def extract_salary_after(string):
 def find_salary(string):
     """
     Extracting salary from the job descriptions
-    :param string:
+    :param string: job descriptions
     :return: salary
     """
     string = str(string)
@@ -54,7 +54,7 @@ def find_salary(string):
 
 def check_currency(string):
     """
-    Extract currency from salary
+    Extract currency ('£', '€', 'EUR', '$') from salary
     :param string:
     :return: currency
     """
