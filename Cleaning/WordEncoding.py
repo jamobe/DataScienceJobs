@@ -56,5 +56,5 @@ if __name__ == "__main__":
     w2v_model.build_vocab(all_descriptions, progress_per=10000)
     w2v_model.train(all_descriptions, total_examples=w2v_model.corpus_count, epochs=30, report_delay=1)
     w2v_model.init_sims(replace=True)
-    with open('word2vec.pkl', 'wb') as file:
+    with open(path + '/data/word2vec.pkl', 'wb') as file:
         pickle.dump(w2v_model, file)
