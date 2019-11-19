@@ -161,9 +161,9 @@ def text_process(mess):
 
 
 if __name__ == "__main__":
-    #website = 'indeed_de_all_2' #444  or # 13198 with Salary-NaNs
-    website = 'monster_all_2' #1033 or #  1253 with Salary-NaNs
-    #website = 'indeed_us_all_2'  # 521 or # 2989 with Salary-NaNs
+    #website = 'indeed_de_all_2'
+    # website = 'monster_all_2'
+    # website = 'indeed_us_all_2'
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     df.duration = pd.to_numeric(df['duration'])
     df.extraction_date = pd.to_datetime(df.extraction_date)
     df['posted_date'] = df['extraction_date'] - pd.to_timedelta(df['duration'], unit='D')
-    df.drop(['extraction_date', 'duration'], axis=1, inplace=True)
+    df.drop(['duration'], axis=1, inplace=True)
     print('Back calculated the date of the job posting...\n')
 
     # Extracting salary from description, identifying currency, splitting between salary range (low, high)
@@ -206,13 +206,11 @@ if __name__ == "__main__":
 
     # conversion german . to , only for indeed_de
     if 'indeed_de' in website:
-        # df.loc[df.currency == '€', 'salary'] = df.loc[df.currency == '€', 'salary'].str.replace('.000,', ',000.')
         df['salary_extract'] = df['salary'].apply(extract_salary_after)
-        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.replace('.000,00',
-                                                                                                                ',000')
-        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.replace(
-            '.000',
-            ',000')
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str\
+            .replace('.000,00',',000')
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.\
+            replace('.000',',000')
     else:
         df['salary_extract'] = df['salary'].apply(extract_salary)
 
@@ -220,7 +218,7 @@ if __name__ == "__main__":
     df['salary_high'] = df['salary_extract'].str.split('-', n=1, expand=True)[1]
     df = clean_salary(df, ['salary_high', 'salary_low'])
     df = df.drop(columns='salary_extract', axis=1)
-    #df = df.dropna(subset=['salary'])
+    # df = df.dropna(subset=['salary'])
 
     # fill low or high salary with high or low salary
     no_high_salary = df['salary_high'].isnull() & df['salary_low'].notnull()
@@ -255,27 +253,42 @@ if __name__ == "__main__":
     df.loc[df.jobtype.notnull(), 'jobtype'] = df.loc[df.jobtype.notnull(), 'jobtype'].apply(clean_jobtype)
 
     # get location from description if not available
+    df.location.replace(to_replace = 'Nothing_found', value = np.NaN, inplace=True)
     mask4 = df.location.isnull()
     df.loc[mask4, 'location'] = df[mask4]['description'].apply(check_locations)
     print('Extracted locations from job description (if not available)...\n')
 
     # transforming scraped locations
-    if website == 'indeed_us':
+    if 'indeed_us' in website:
         df['state'] = df.location.str.split(',', n=1, expand=True)[1]
         df['state'] = df['state'].str.strip()
         df['state'] = df['state'].str.split(' ', n=1, expand=True)[0]
         df['state'] = df['state'].str.upper()
         df.loc[df.location.str.contains('Wisconsin') == True, 'state'] = 'WI'
         df.loc[df.location.str.contains('North Carolina') == True, 'state'] = 'NC'
+        df.loc[df.location.str.contains('South Carolina') == True, 'state'] = 'SC'
         df.loc[df.location.str.contains('Texas') == True, 'state'] = 'TX'
         df.loc[df.location.str.contains('Indiana') == True, 'state'] = 'IN'
         df.loc[df.location.str.contains('New Jersey') == True, 'state'] = 'NJ'
+        df.loc[df.location.str.contains('Washington') == True, 'state'] = 'WA'
+        df.loc[df.location.str.contains('California') == True, 'state'] = 'CA'
+        df.loc[df.location.str.contains('Illinois') == True, 'state'] = 'IL'
+        df.loc[df.location.str.contains('Hawaii') == True, 'state'] = 'HI'
+        df.loc[df.location.str.contains('Georgia') == True, 'state'] = 'GA'
+        df.loc[df.location.str.contains('Minnesota') == True, 'state'] = 'MN'
+        df.loc[df.location.str.contains('Massachusetts') == True, 'state'] = 'MA'
+        df.loc[df.location.str.contains('Florida') == True, 'state'] = 'FL'
+        df.loc[df.location.str.contains('Arizona') == True, 'state'] = 'AZ'
         locations_us = pd.read_csv(path + '/data/us-states.csv')
         df2 = pd.merge(df, locations_us, on='state', how='left')
-        df.location = df.location.str.split(',', n=1, expand=True)[0]
-        df.location = df.location.str.title()
-        df.location = df.location.str.strip()
-        df.loc[df.location.str.contains('United States') == True, 'country'] = 'USA'
+        df2.loc[df2.location.str.contains('Aguadilla') == True, 'region'] = 'Offshore'
+        df2.loc[df2.location.str.contains('Pago Pago') == True, 'region'] = 'Offshore'
+        df2.loc[df2.region.str.contains('Offshore') == True, 'country'] = 'USA'
+        df2.loc[df2.location.str.contains('Remote') == True, 'country'] = 'USA'
+        df2.loc[df2.location.str.contains('United States') == True, 'country'] = 'USA'
+        df2.location = df2.location.str.split(',', n=1, expand=True)[0]
+        df2.location = df2.location.str.title()
+        df2.location = df2.location.str.strip()
         df2 = df2.reset_index(drop=True)
     else:
         df.location = df.location.str.split(',', n=1, expand=True)[0]
@@ -294,16 +307,18 @@ if __name__ == "__main__":
         df.loc[df.location.str.contains('Zuffenhausen') == True, 'location'] = 'Stuttgart'
         df.loc[df.location.str.contains('München') == True, 'location'] = 'München'
         df.loc[df.location.str.contains('Main') == True, 'location'] = 'Frankfurt'
+        df.loc[df.location.str.contains('Birmingham') == True, 'location'] = 'Birmingham'
         location_UK = pd.read_csv(path + '/data/locations_UK.csv')
         location_EU = pd.read_csv(path + '/data/locations.csv')
         location = location_UK.append(location_EU, ignore_index=True)
         df2 = pd.merge(df, location, on='location', how='left')
+        df2.loc[df2.location.str.contains('Sweden') == True, 'country'] = 'Sweden'
         df2 = df2.reset_index(drop=True)
+
     print('Cleaned location data...\n')
 
-    df2.loc[df2.location.str.contains('Uk Wide'), 'location'] = 'NaN'
-    df2.loc[df2.location.str.contains('England'), 'location'] = 'NaN'
-    df2.loc[df2.location.str.contains('Deutschland'), 'location'] = 'NaN'
+    unknown_locations = df2.country.isnull() & df2.location.notnull()
+    print(df2.loc[unknown_locations]['location'])
     print('Identified region and country for each location...\n')
 
     # clean description
@@ -313,7 +328,7 @@ if __name__ == "__main__":
 
     cols = ['job_title', 'company', 'description', 'salary', 'salary_low', 'salary_high',
             'salary_average', 'salary_low_euros', 'salary_high_euros', 'salary_average_euros',
-            'location', 'jobtype', 'posted_date', 'region', 'country', 'ref_code', 'url',
+            'location', 'jobtype', 'posted_date','extraction_date', 'region', 'country', 'ref_code', 'url',
             'currency', 'salary_type']
     df3 = df2[cols]
 
