@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from collections import defaultdict
 import os.path
     
@@ -102,5 +103,19 @@ loc2 = loc2.append({'location': 'Schleswig-Holstein' , 'region' : 'Schleswig-Hol
 loc2 = loc2.append({'location': 'Kiel' , 'region' : 'Schleswig-Holstein', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Deutschland' , 'region' : '', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Hennigsdorf' , 'region' : 'Brandenburg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Gernsbach' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Ingelheim Am Rhein' , 'region' : 'Rheinland-Pfalz', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Oldenburg' , 'region' : 'Niedersachsen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Gießen' , 'region' : 'Hessen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Meuspath' , 'region' : 'Rheinland-Pfalz', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Scheßlitz' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Tübingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Walldorf' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Stolberg' , 'region' : np.NaN, 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Reutlingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Leonberg' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Oberkochen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Bayern' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Kusterdingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
 
 loc2.to_csv(path+'/data/locations.csv',index=False)
