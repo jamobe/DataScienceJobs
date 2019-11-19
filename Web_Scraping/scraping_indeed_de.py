@@ -18,9 +18,8 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    # 'data+scientist', 'econometrics'
-    searchTerm = 'business+intelligence'
-    # 'data', 'data+engineer', 'data+manager','statistics', 'data+analyst', 'machine+learning'
+    # 'data+scientist', 'econometrics', 'business+intelligence', 'statistics', 'data+engineer', 'machine+learning', 'data+analyst', 'data+manager', 'data'
+    searchTerm = 'ai+scientist'
 
     total_jobs = 0
     for i in range(0, 100):  # range(0:1000)
