@@ -62,7 +62,8 @@ def check_locations(pandas_df_col, country_col):
     
     lookup_UK = loc_UK.set_index('location').T.to_dict('list')
     lookup_GER = loc_GER.set_index('location').T.to_dict('list')
-    lookup_USA = loc_USA.set_index('location').T.to_dict('list')
+    zipbObj = zip(loc_USA['location'], loc_USA['location'])
+    lookup_US A= dict(zipbObj)
     
     a=[]
     for i in range(len(country_col)):
