@@ -1,4 +1,10 @@
+sqlalchemy
+nltk
+langdetect
+gensim
 bs4
 requests
 time
 re
+pandas
+numpy
