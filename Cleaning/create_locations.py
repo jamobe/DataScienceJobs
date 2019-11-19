@@ -10,7 +10,8 @@ data['location'] = ['Frankfurt','Berlin','Bern','Zurich','Amsterdam','Wien','Mun
 data['region'] = ['Hessen','Berlin','Bern','Zurich','North Holland','Wien','Bayern','Barcelona','Ile-de-France','Niedersachsen','South Holland','Masovia']
 data['country'] = ['Germany','Germany','Switzerland','Switzerland','Netherlands','Austria','Germany','Spain','France','Germany','Netherlands','Poland']
 loc2 = pd.DataFrame(data)
-    
+
+loc2 = loc2.append({'location': 'Rotterdam' , 'region' : 'South Holland', 'country':'Netherlands'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Dusseldorf' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Düsseldorf' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Bonn' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
