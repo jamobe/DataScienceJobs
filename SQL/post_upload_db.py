@@ -40,9 +40,9 @@ test_UK = pd.read_sql('''SELECT count(train_test_label) from all_data WHERE trai
 train_UK = pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'train' AND salary_average > 0 AND country = 'UK'
 ''', engine)
 
-test_GER= pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'test' AND salary_average > 0 AND country = 'GER'
+test_GER= pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'test' AND salary_average > 0 AND country = 'Germany'
 ''', engine)
-train_GER = pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'train' AND salary_average > 0 AND country = 'GER'
+train_GER = pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'train' AND salary_average > 0 AND country = 'Germany'
 ''', engine)
 
 test_USA = pd.read_sql('''SELECT count(train_test_label) from all_data WHERE train_test_label = 'test' AND salary_average > 0 AND country = 'USA'
