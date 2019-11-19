@@ -10,48 +10,7 @@ def clean_column(pandas_df_col):
     for i in range(len(a)):
         rep = {"[": " ",
                "]": " ",
-               "|": " ",
-               "''": " ",
-               "'": " ",
-               ",": " ",
-               "+": " ",
-               "/": " ",
-               "€": " ",
-               "£": " ",
-               "$": " ",
-               "benefits":" ",
-               "THE COMPANY": " ",
-               "THE ROLE": " ",
-               "THE BENEFITS": " ",
-               "HOW TO APPLY": " ",
-               "KEYWORDS": " ",
-               "YOUR SKILLS AND EXPERIENCE": " ",
-               "YOUR SKILLS AND EXPERTISE": " ",
-               "Please register your interest by sending your CV via the Apply link on this page":" ",
-               "BENEFITS":" ",
-               "CONTACT":" ",
-               "OVERVIEW":" ",
-               "SALARY":" ",
-               "For further details":" ",
-               "to enquire about other roles please contact":" ",
-               "Nick Mandella":" ",
-               "Harnham":" ",
-               "On a daily basis":" ",
-               "you will be:":" ",
-               "you will join:":" ",
-               "!" :" ",
-               "." : " ",
-               "0" :" ",
-              "1" : " ",
-              "2" : " ",
-              "3" :" ",
-              "4" : " ",
-              "5" : " ",
-              "6" : " ",
-              "7" :" ",
-              "8" : " ",
-              "9" : " ",
-              "\n":" "}
+             "\n":" "}
         rep = dict((re.escape(k), v) for k, v in rep.items()) 
         pattern = re.compile("|".join(rep.keys()))
         if type(a[i])!="str":a[i]=str(a[i])
@@ -187,11 +146,13 @@ def check_locations(pandas_df_col, country_col):
     parent_folder, current_folder = os.path.split(path)
     loc_UK = pd.read_csv(parent_folder+'/data/uk_location_lookup.csv')
     loc_GER = pd.read_csv(parent_folder+'/data/locations.csv')
-    loc_USA = pd.read_csv(parent_folder+'/data/us-states.csv')
+    loc_USA = pd.read_csv(parent_folder+'/data/us-states.csv')[['region','location']]
     
     lookup_UK = loc_UK.set_index('location').T.to_dict('list')
     lookup_GER = loc_GER.set_index('location').T.to_dict('list')
-    lookup_USA = loc_USA.set_index('location').T.to_dict('list')
+    zipbObj = zip(loc_USA['location'], loc_USA['location'])
+    lookup_US A= dict(zipbObj)
+
     
     a=[]
     for i in range(len(country_col)):
