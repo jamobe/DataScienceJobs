@@ -73,3 +73,31 @@ Dictionary of words to be deleted
               "7" :" ",
               "8" : " ",
               "9" : " "
+              
+              
+              
+### Technologies
+
+R,
+Python, scikit-learn, pandas, numpy, tensorflow, keras, pytorch, theano
+SQL,
+AWS,
+C+
+C++
+C#
+Java
+spark
+data
+kubernetes
+Azure
+Google Cloud
+Docker
+Jenkins
+flask
+pyspark
+CMTK
+torch
+scala
+lua
+cuda
+
