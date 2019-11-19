@@ -7,6 +7,8 @@ PASSWORD = pd.read_pickle('~/DataScienceJobs/data/SQL_password.pkl')
 engine = create_engine('postgresql://postgres:'+PASSWORD.iloc[0,0]+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
 
 
+engine.execute(" DELETE FROM all_data a USING all_data b WHERE a.id < b.id AND a.description = b.description;")
+
 # delete duplicates
 
 engine.execute(" DELETE FROM all_data a USING all_data b WHERE a.id < b.id AND a.description = b.description;")
