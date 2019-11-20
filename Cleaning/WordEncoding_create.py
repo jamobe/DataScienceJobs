@@ -74,7 +74,7 @@ if __name__ == "__main__":
     with open(path + '/Pickles/BOG_model.pkl', 'wb') as file:
         pickle.dump([BOG, BOG_fit, BOG_transform], file)
 
-    TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer)
+    TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer, min_df=20)
     TFIDF_fit = TFIDF.fit(df_en['description'])
     TFIDF_transform = TFIDF_fit.transform(df_en['description'])
     print('Trained TF-IDF model...\n')
