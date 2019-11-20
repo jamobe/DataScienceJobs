@@ -1,3 +1,5 @@
+spacy
+scikit-learn
 sqlalchemy
 nltk
 langdetect
