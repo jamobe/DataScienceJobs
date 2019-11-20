@@ -1,5 +1,5 @@
+# !python -m spacy download en_core_web_lg
 import pandas as pd
-import numpy as np
 import pickle
 import os.path
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -7,7 +7,6 @@ from sqlalchemy import create_engine
 from langdetect import detect
 import spacy
 from spacy.lang.en import English
-
 
 
 def text_process(mess):
@@ -39,7 +38,7 @@ def spacy_tokenizer(doc):
     :param doc: text
     :return:
     """
-    spacy.load('en_core_web_md')
+    spacy.load('en_core_web_lg')
     lemmatizer = spacy.lang.en.English()
     tokens = lemmatizer(doc)
     return [token.lemma_ for token in tokens]
@@ -56,24 +55,31 @@ if __name__ == "__main__":
     engine = create_engine(
         'postgresql://postgres:' + PASSWORD + '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data", engine)
+    print('Loaded data from SQL database...\n')
 
     df['language'] = df.description.apply(detect)
     df_en = df.loc[df.language == 'en']
+    print('Detected languages of each job descriptions...\n')
+
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
+    print('Performed some basic text cleaning...\n')
 
     BOG = CountVectorizer(analyzer=text_process, tokenizer=spacy_tokenizer, min_df=20)
     BOG_fit = BOG.fit(df_en['description'])
-    BOG_transform= BOG_fit.transform(df_en['description'])
+    BOG_transform = BOG_fit.transform(df_en['description'])
+    print('Trained Bag-Of-Words model...\n')
 
-    bog_model_path = path + '/data/BOG_spacy.pkl'
-    with open(bog_model_path, 'wb') as file:
+    with open(path + '/Pickles/BOG_transform.pkl', 'wb') as file:
+        pickle.dump(BOG_transform, file)
+    with open(path + '/Pickles/BOG_model.pkl', 'wb') as file:
         pickle.dump([BOG, BOG_fit, BOG_transform], file)
 
     TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer)
     TFIDF_fit = TFIDF.fit(df_en['description'])
     TFIDF_transform = TFIDF_fit.transform(df_en['description'])
+    print('Trained TF-IDF model...\n')
 
-    tfidf_model_path = path + '/data/TFIDF_spacy.pkl'
-    with open(tfidf_model_path, 'wb') as file:
+    with open(path + '/Pickles/TFIDF_transform.pkl', 'wb') as file:
+        pickle.dump(TFIDF_transform, file)
+    with open(path + '/Pickles/TFIDF_model.pkl', 'wb') as file:
         pickle.dump([TFIDF, TFIDF_fit, TFIDF_transform], file)
-
