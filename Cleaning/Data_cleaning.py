@@ -240,7 +240,7 @@ if __name__ == "__main__":
     names = defaultdict(list)
     names['hourly'] = ['hour', 'Stunde']
     names['daily'] = ['day', 'Tag']
-    names['montly'] = ['month', 'Monat']
+    names['monthly'] = ['month', 'Monat']
     names['yearly'] = ['year', 'annum', 'p.a', 'Jahr']
     df['salary'].fillna('', inplace=True)
     for key, values in names.items():
