@@ -98,7 +98,7 @@ def extract_headlines_from_result(soup):
 
 if __name__ == "__main__":
     #Define variables
-    searchTerm="econometrics"
+    searchTerm="data+scientist"
     PATH = "data/indeed_raw_pickles/"
 
     #create empty data frame with column headers
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     for i in range(0,1000,10):
         #proxy = next(proxy_pool)
         time.sleep(1) #ensuring at least 1 second between page grabs
-        url = "https://www.indeed.co.uk/jobs?q="+searchTerm+"&filter=0&l="+"&start="+str(i)
+        url = "https://www.indeed.co.uk/jobs?q="+searchTerm+"&sort=date&filter=0&l="+"&start="+str(i)
         res = requests.get(url)      
         soup = bs4.BeautifulSoup(res.content, features="lxml")
         df=pd.DataFrame()
