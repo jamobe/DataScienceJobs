@@ -7,7 +7,31 @@ PASSWORD = pd.read_pickle('~/DataScienceJobs/data/SQL_password.pkl')
 engine = create_engine('postgresql://postgres:'+PASSWORD.iloc[0,0]+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
 
 
-engine.execute(" DELETE FROM all_data a USING all_data b WHERE a.id < b.id AND a.description = b.description;")
+#insert data from landing table if it exists
+
+exists = pd.read_sql('''SELECT EXISTS (
+   SELECT 1
+   FROM   information_schema.tables 
+   WHERE  table_schema = 'public'
+   AND    table_name = 'landing'
+   );
+''', engine).iloc[0,0]
+
+if exists == True:
+    print("Landing table will be uploaded, are you sure you wish to continue?[yes/no]")
+    myinput = input()
+    if myinput == 'yes':
+        engine.execute('''
+        INSERT INTO all_data (job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url)
+        SELECT job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url FROM landing
+        ''')
+    
+    else:
+        print("data not uploaded")
+        pass
+
+else:
+    pass
 
 # delete duplicates
 
