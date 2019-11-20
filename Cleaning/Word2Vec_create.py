@@ -1,7 +1,3 @@
-# Download spacy models
-# !python -m spacy download en_core_web_md
-# !python -m spacy download de_core_news_md
-
 import pandas as pd
 import multiprocessing
 import os.path
@@ -42,7 +38,7 @@ if __name__ == "__main__":
         access = pickle.load(file)
 
     engine = create_engine('postgresql://postgres:' + access + '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where train_test_label like 'train'", engine)
+    df = pd.read_sql("select * from all_data", engine) #where train_test_label like 'train'
 
     df['language'] = df.description.apply(detect)
     df_en = df.loc[df.language == 'en']
@@ -51,10 +47,10 @@ if __name__ == "__main__":
     all_descriptions = df_en['description'].apply(text_process_en).to_list()
 
     cores = multiprocessing.cpu_count()
-    w2v_model = Word2Vec(min_count=20, window=2, size=300, sample=6e-5, alpha=0.03, min_alpha=0.0007, negative=20,
+    w2v_model = Word2Vec(min_count=3, window=2, size=300, sample=6e-5, alpha=0.03, min_alpha=0.0007, negative=20,
                          workers=cores - 1)
     w2v_model.build_vocab(all_descriptions, progress_per=10000)
     w2v_model.train(all_descriptions, total_examples=w2v_model.corpus_count, epochs=30, report_delay=1)
     w2v_model.init_sims(replace=True)
-    with open(path + '/data/word2vec.pkl', 'wb') as file:
+    with open(path + '/Pickles/word2vec.pkl', 'wb') as file:
         pickle.dump(w2v_model, file)
