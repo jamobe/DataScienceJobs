@@ -1,10 +1,15 @@
 ﻿location,region,country
-Southend,East,UK
-Huntingdon,East,UK
-Cambourne,East,UK
-Welwyn Garden City,East,UK
-Suffolk,East,UK
-Welwyn,East,UK
+Southend,East of England,UK
+Huntingdon,East of England,UK
+Cambourne,East of England,UK
+Welwyn Garden City,East of England,UK
+Suffolk,East of England,UK
+Welwyn,East of England,UK
+Great Baddow,East of England,UK
+Tadworth,East of England,UK
+Harpenden,East of England,UK
+Eye IP23,East of England,UK
+Potters Bar,East of England,UK
 Amber Valley,East Midlands,UK
 Annesley,East Midlands,UK
 Ashby-De-La-Zouch,East Midlands,UK
@@ -84,6 +89,12 @@ West Lindsey,East Midlands,UK
 Wollaston,East Midlands,UK
 Worksop,East Midlands,UK
 East Midlands Airport,East Midlands,UK
+Market Rasen,East Midlands,UK
+Alfreton,East Midlands,UK
+Shepshed,East Midlands,UK
+Crick,East Midlands,UK
+Wigston Magna LE18,East Midlands,UK
+Syston,East Midlands,UK
  Cambourne,East of England,UK
 Aldeburgh,East of England,UK
 Ampthill,East of England,UK
@@ -196,7 +207,9 @@ Wisbech PE13,East of England,UK
 Witham,East of England,UK
 Wittering,East of England,UK
 Wymondham,East of England,UK
-England,UK Unknown,UK
+St. Marys,East of England,UK
+Newmarket,East of England,UK
+Billericay,East of England,UK
 """King's Cross""",London,UK
 Acton,London,UK
 Aldwych,London,UK
@@ -297,6 +310,14 @@ Bracknell,London,UK
 Hammersmith,London,UK
 Richmond,London,UK
 King's Cross,London,UK
+Clerkenwell,London,UK
+Moorgate Station,London,UK
+Stanmore,London,UK
+Vauxhall,London,UK
+Bermondsey,London,UK
+Pinner HA5,London,UK
+Ilford,London,UK
+Battersea,London,UK
 Billingham,North East,UK
 Blyth,North East,UK
 Congleton,North East,UK
@@ -428,6 +449,12 @@ Nelson,North West,UK
 Darwen,North West,UK
 Blackburn,North West,UK
 Cheshire,North West,UK
+Stretford,North West,UK
+Ashton-Under-Lyne,North West,UK
+Speke,North West,UK
+Audenshaw,North West,UK
+Sale M33,North West,UK
+Withington,North West,UK
 Antrim,Northern Ireland,UK
 Belfast,Northern Ireland,UK
 Belfast BT1,Northern Ireland,UK
@@ -438,6 +465,7 @@ Dungannon BT70,Northern Ireland,UK
 Lisburn,Northern Ireland,UK
 Newry,Northern Ireland,UK
 Newry and Mourne,Northern Ireland,UK
+Ballymena,Northern Ireland,UK
 Douglas,Offshore,UK
 Gibraltar,Offshore,UK
 Jersey,Offshore,UK
@@ -467,6 +495,11 @@ St. Andrews,Scotland,UK
 Stirling,Scotland,UK
 Turnberry,Scotland,UK
 Westhill,Scotland,UK
+Kilmarnock,Scotland,UK
+Central Belt,Scotland,UK
+Tranent,Scotland,UK
+Bothwell,Scotland,UK
+East Kilbride,Scotland,UK
  Bourne End,South East,UK
 Abingdon,South East,UK
 Abingdon OX14,South East,UK
@@ -635,6 +668,23 @@ Aylesbury,South East,UK
 Epsom,South East,UK
 Berkshire,South East,UK
 Bourne End,South East,UK
+Albury,South East,UK
+Andover,South East,UK
+Wantage OX12,South East,UK
+Winnersh,South East,UK
+Pirbright,South East,UK
+Esher KT10,South East,UK
+Frimley Green,South East,UK
+Littlehampton,South East,UK
+Frimley,South East,UK
+Wooburn,South East,UK
+Enstone,South East,UK
+Earlswood,South East,UK
+Chandler's Ford,South East,UK
+Hadlow,South East,UK
+Hanslope,South East,UK
+St. Peter's,South East,UK
+Milton,South East,UK
 """St. Mary's""",South West,UK
 Avonmouth,South West,UK
 Barnstaple,South West,UK
@@ -727,6 +777,18 @@ South West,South West,UK
 Dorset,South West,UK
 """St. Marys""",South West,UK
 St. Mary's,South West,UK
+Somerset,South West,UK
+Clevedon,South West,UK
+Templecombe,South West,UK
+Wimborne,South West,UK
+Stonehouse,South West,UK
+Saint Ives,South West,UK
+Emersons Green,South West,UK
+Chipping Sodbury,South West,UK
+Frome,South West,UK
+Wilton,South West,UK
+Portland,South West,UK
+England,UK Unknown,UK
 Bridge,UK Unknown,UK
 Field Based,UK Unknown,UK
 Hall,UK Unknown,UK
@@ -769,6 +831,15 @@ Treforest,Wales,UK
 Wrexham,Wales,UK
 Tenby,Wales,UK
 Wales,Wales,UK
+Port Talbot,Wales,UK
+Pontyclun,Wales,UK
+Llandudno,Wales,UK
+St. Asaph LL17,Wales,UK
+Duffryn,Wales,UK
+Aberystwyth,Wales,UK
+Baglan,Wales,UK
+Carmarthen SA31,Wales,UK
+Anglesey,Wales,UK
  Henley in Arden,West Midlands,UK
 Alcester,West Midlands,UK
 Atherstone,West Midlands,UK
@@ -837,6 +908,8 @@ Wyre Forest,West Midlands,UK
 Henley in Arden,West Midlands,UK
 Hereford,West Midlands,UK
 Malvern,West Midlands,UK
+Oswestry,West Midlands,UK
+Kidderminster DY10,West Midlands,UK
 Barnsley,Yorkshire and The Humber,UK
 Barton-upon-Humber,Yorkshire and The Humber,UK
 Batley WF17,Yorkshire and The Humber,UK
@@ -889,30 +962,5 @@ Wath upon Dearne,Yorkshire and The Humber,UK
 York,Yorkshire and The Humber,UK
 Sheffield,Yorkshire and The Humber,UK
 Kingston upon Hull,Yorkshire and The Humber,UK
-Albury,South East,UK
-Market Rasen,East Midlands,UK
-Port Talbot,Wales,UK
-Kilmarnock,Scotland,UK
-Clerkenwell,London,UK
-Moorgate Station,London,UK
-Andover,South East,UK
-Stretford,North West,UK
-Great Baddow,East,UK
-Tadworth,East,UK
-Central Belt,Scotland,UK
-Pontyclun,Wales,UK
-Llandudno,Wales,UK
-Wantage OX12,South East,UK
-Oswestry,West Midlands,UK
-Ashton-Under-Lyne,North West,UK
-Winnersh,South East,UK
-Stanmore,London,UK
-Somerset,South West,UK
-Speke,North West,UK
-St. Asaph LL17,Wales,UK
-Pirbright,South East,UK
-Harpenden,East,UK
-Tranent,Scotland,UK
-Vauxhall,London,UK
-Clevedon,South West,UK
-Eye IP23,East,UK
+Normanton,Yorkshire and The Humber,UK
+Scunthorpe DN15,Yorkshire and The Humber,UK
