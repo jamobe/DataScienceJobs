@@ -28,7 +28,7 @@ country_regions = pd.read_sql(''' SELECT country, region FROM landing ''', engin
 
 loc_UK = pd.read_csv('~/DataScienceJobs/data/uk_location_lookup.csv')['region'].unique()
 loc_GER = pd.read_csv('~/DataScienceJobs/data/locations.csv')['region'].unique()
-loc_USA = pd.read_csv('~/DataScienceJobs/data/us-states.csv')['location'].unique()
+loc_USA = pd.read_csv('~/DataScienceJobs/data/us-states.csv')['region'].unique()
 
 country_region_dict={'UK':list(loc_UK),
                     'Germany': list(loc_GER),

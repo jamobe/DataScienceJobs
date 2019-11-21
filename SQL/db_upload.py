@@ -1,4 +1,12 @@
 def db_upload(PASSWORD, df):
+    '''
+    This function uploads the data to the landing table in the database.
+    There is a prompt to ensure you want to update data if there is data in the landing table already,
+    because it will overwrite whatever is there already.
+    params:
+    PASSWORD: your db password
+    df: dataframe you wish to upload
+    '''
     
     from sqlalchemy import create_engine
     import pandas as pd
@@ -11,8 +19,9 @@ def db_upload(PASSWORD, df):
        AND    table_name = 'landing'
        );
     ''', engine).iloc[0,0]
+    has_rows = pd.read_sql('''SELECT count(*) landing''',engine).iloc[0,0]
 
-    if exists == True:
+    if exists == True and has_rows > 1:
         print("The landing table already exists, are you sure you wish to continue?[yes/no]")
         myinput = input()
         if myinput == 'yes':
