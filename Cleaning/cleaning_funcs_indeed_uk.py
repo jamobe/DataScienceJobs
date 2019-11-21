@@ -146,12 +146,12 @@ def check_locations(pandas_df_col, country_col):
     parent_folder, current_folder = os.path.split(path)
     loc_UK = pd.read_csv(parent_folder+'/data/uk_location_lookup.csv')
     loc_GER = pd.read_csv(parent_folder+'/data/locations.csv')
-    loc_USA = pd.read_csv(parent_folder+'/data/us-states.csv')[['region','location']]
+    loc_USA = pd.read_csv(parent_folder+'/data/us-states.csv')[['region']]
     
     lookup_UK = loc_UK.set_index('location').T.to_dict('list')
     lookup_GER = loc_GER.set_index('location').T.to_dict('list')
-    zipbObj = zip(loc_USA['location'], loc_USA['location'])
-    lookup_USSA= dict(zipbObj)
+    zipbObj = zip(loc_USA['region'], loc_USA['region'])
+    lookup_USA= dict(zipbObj)
 
     
     a=[]
