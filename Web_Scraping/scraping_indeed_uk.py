@@ -98,7 +98,7 @@ def extract_headlines_from_result(soup):
 
 if __name__ == "__main__":
     #Define variables
-    searchTerm="data+scientist"
+    searchTerm="data+analyst"
     PATH = "data/indeed_raw_pickles/"
 
     #create empty data frame with column headers
