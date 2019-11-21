@@ -3,8 +3,8 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 #connect to the database
-PASSWORD = pd.read_pickle('~/DataScienceJobs/data/SQL_password.pkl')
-engine = create_engine('postgresql://postgres:'+PASSWORD.iloc[0,0]+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
+PASSWORD = pd.read_pickle('~/DataScienceJobs/data/SQL_password.pkl').iloc[0,0]
+engine = create_engine('postgresql://postgres:'+PASSWORD+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
 
 
 #insert data from landing table if it exists
@@ -18,7 +18,7 @@ exists = pd.read_sql('''SELECT EXISTS (
 ''', engine).iloc[0,0]
 
 if exists == True:
-    print("Landing table will be uploaded, are you sure you wish to continue?[yes/no]")
+    print("Landing table will be uploaded and then cleared, are you sure you wish to continue?[yes/no]")
     myinput = input()
     if myinput == 'yes':
         engine.execute('''
