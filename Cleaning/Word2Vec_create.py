@@ -40,7 +40,7 @@ if __name__ == "__main__":
     engine = create_engine('postgresql://postgres:' + access + '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data", engine) #where train_test_label like 'train'
 
-    df['language'] = df.description.apply(detect)
+    #df['language'] = df.description.apply(detect)
     df_en = df.loc[df.language == 'en']
 
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)

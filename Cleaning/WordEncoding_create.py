@@ -57,14 +57,14 @@ if __name__ == "__main__":
     df = pd.read_sql("select * from all_data", engine)
     print('Loaded data from SQL database...\n')
 
-    df['language'] = df.description.apply(detect)
+    #df['language'] = df.description.apply(detect)
     df_en = df.loc[df.language == 'en']
     print('Detected languages of each job descriptions...\n')
 
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
 
-    BOG = CountVectorizer(analyzer=text_process, tokenizer=spacy_tokenizer, min_df=20)
+    BOG = CountVectorizer(analyzer=text_process, tokenizer=spacy_tokenizer, min_df=3)
     BOG_fit = BOG.fit(df_en['description'])
     BOG_transform = BOG_fit.transform(df_en['description'])
     print('Trained Bag-Of-Words model...\n')
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     with open(path + '/Pickles/BOG_model.pkl', 'wb') as file:
         pickle.dump([BOG, BOG_fit, BOG_transform], file)
 
-    TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer, min_df=20)
+    TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer, min_df=3)
     TFIDF_fit = TFIDF.fit(df_en['description'])
     TFIDF_transform = TFIDF_fit.transform(df_en['description'])
     print('Trained TF-IDF model...\n')
