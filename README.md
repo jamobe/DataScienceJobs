@@ -57,9 +57,18 @@ limits and averages of salary ranges and conversion into common currencies. Pyth
 
 #### 3. Postgres Database
 
-Once the initial clean has taken place the data are pushed to a PostgresSQL database in AWS:
+Once the initial clean has taken place the data are pushed to a PostgresSQL database in AWS.
 
-    'postgresql://postgres:'+PASSWORD+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/'
+The dataframe is first pushed to a landing table, by using the db_upload function from ```SQL/db_upload.py```.
+
+This data is this checked by running:
+
+```SQL/db_upload_checks.py```
+
+If all tests are passed, then the push to database script is run, which pushes all data from the landing table into the all_data table, deletes any rows which are duplicates, and allocates an id and a train/test label.
+
+```SQL/db_push_to_main.py ```
+
 
 
 
