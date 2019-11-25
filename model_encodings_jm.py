@@ -140,11 +140,7 @@ if __name__ == "__main__":
                              'software_architecture', 'web_design', 'tools', 'cyber_security', 'cloud_computing',
                              'back_end-technologies', 'mobile']
 
-    tech_list = []
-    for i in categories_to_include:
-        for j in range(len(tech_dict[i])):
-            tech_list.append(tech_dict[i][j])
-    important_terms = list(set([x.lower() for x in tech_list]))
+    important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
     tech_terms_train = x_train['description'].apply(tech_process, args=(important_terms,))
     tech_terms_val = x_val['description'].apply(tech_process, args=(important_terms,))
