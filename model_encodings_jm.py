@@ -48,9 +48,7 @@ def spacy_tokenizer(doc):
     return [token.lemma_ for token in tokens]
 
 
-def encode_BOG(df, min_df):
-    df_en = df.loc[df.language == 'en']
-    print('Selected only English job descriptions...\n')
+def encode_BOG(df_en, min_df):
 
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
@@ -62,9 +60,7 @@ def encode_BOG(df, min_df):
     return BOG_fit
 
 
-def encode_TFIDF(df, min_df):
-    df_en = df.loc[df.language == 'en']
-    print('Selected only English job descriptions...\n')
+def encode_TFIDF(df_en, min_df):
 
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
@@ -109,10 +105,6 @@ if __name__ == "__main__":
     # then split the train data into train and validation
     x_train, x_val, y_train, y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
     print('Splitted Train, Validation and Test data...\n')
-
-    train_index = x_train.index
-    val_index = x_val.index
-    test_index = x_test.index
 
     columns_to_ohe_encode = ['company', 'country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
