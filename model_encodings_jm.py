@@ -169,10 +169,10 @@ if __name__ == "__main__":
     X_Val = np.hstack((OHE_val, TFIDF_val, TECH_val))
     X_Test = np.hstack((OHE_test, TFIDF_test, TECH_test))
 
-    with open(path + '/Pickles/TrainSetXY.pkl', 'wb') as file:
+    with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
         pickle.dump([X_Train, y_train], file)
-    with open(path + '/Pickles/ValSetXY.pkl', 'wb') as file:
+    with open(path + '/data/ValSetXY.pkl', 'wb') as file:
         pickle.dump([X_Val, y_val], file)
-    with open(path + '/Pickles/TestSetXY.pkl', 'wb') as file:
+    with open(path + '/data/TestSetXY.pkl', 'wb') as file:
         pickle.dump([X_Test, y_test], file)
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
