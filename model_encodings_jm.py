@@ -125,7 +125,6 @@ if __name__ == "__main__":
     print('Performed One-Hot-Encoding for columns: Company, Country, Region...\n')
 
     BOG_model = encode_BOG(x_train, min_df=3)
-
     BOG_train = BOG_model.transform(x_train['description']).toarray()
     BOG_val = BOG_model.transform(x_val['description']).toarray()
     BOG_test = BOG_model.transform(x_test['description']).toarray()
