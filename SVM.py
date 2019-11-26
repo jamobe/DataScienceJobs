@@ -22,15 +22,22 @@ if __name__ == "__main__":
     scaled_X_val = scaler.transform(X_val)
     scaled_X_test = scaler.transform(X_test)
 
+    X_trainval = np.concatenate([scaled_X_train, scaled_X_val])
+    y_trainval = np.concatenate([y_train, y_val])
+
     parameters = {'kernel': ('linear', 'rbf'), 'C': [1, 10]}
 
     svr = svm.SVR(verbose=1, max_iter=10000, gamma='scale')
-    clf = GridSearchCV(svr, parameters, n_jobs=-1)
-    clf.fit(scaled_X_train, y_train)
+    gsvr = GridSearchCV(svr, parameters, n_jobs=-1)
+    gsvr.fit(X_trainval, y_trainval)
 
-    y_pred = clf.predict(scaled_X_test)
+    with open(path + '/Pickles/svr_model.pkl', 'wb') as file:
+        pickle.dump(gsvr, file)
+
+    y_pred = gsvr.predict(scaled_X_test)
 
     print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
     print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
     print('R2 Score:', np.sqrt(metrics.r2_score(y_test, y_pred)))
+
