@@ -1,7 +1,6 @@
 import requests, bs4, time
 import pandas as pd
 import os.path
-from datetime import datetime
 from datetime import date
 from collections import defaultdict
 
@@ -75,27 +74,23 @@ def monster_summary(soup):
 if __name__ == "__main__":
 
     path = os.getcwd()
-    parent_folder, current_folder = os.path.split(path)
-
-    searchTerm = 'ai-scientist'
-    # 'data', 'econometrics', 'business-intelligence', 'statistics', 'data-engineer', 'machine-learning', 'data-analyst', 'data-manager', 'data-scientist'
+    # 'ai-scientist', 'data', 'econometrics', 'business-intelligence', 'statistics'
+    searchTerm = 'data-engineer'
+    # 'machine-learning', 'data-analyst', 'data-manager', 'data-scientist'
+    print('Scraping job descriptions for the search term: ' + searchTerm)
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
-
-    #  GET request
     res = requests.get(url)
     soup = bs4.BeautifulSoup(res.content, features='html.parser')
-
     all_links = monster_links(soup)
     links = [s for s in all_links if "job-openings" in s]
-
     data = defaultdict(list)
 
     for i in range(0, len(links)):
         print('scraping job posting ' + str(i) + ' of ' + str(len(links)))
         url = links[i]
         res = requests.get(url)
-        time.sleep(1)  # ensuring at least 1 second between page grabs
+        time.sleep(1)
         soup = bs4.BeautifulSoup(res.content, features='html.parser')
         data['title'].append(monster_jobtitle(soup))
         data['description'].append(monster_descr(soup))
@@ -117,9 +112,11 @@ if __name__ == "__main__":
     df['job_title'] = df['title'].str.split('-', n=1, expand=True)[0]
     df['company'] = df['title'].str.split('-', n=1, expand=True)[1]
     df.drop(['title'], axis=1, inplace=True)
-
     df['salary_low'] = df['salary'].str.split('-', n=1, expand=True)[0]
     df['salary_high'] = df['salary'].str.split('-', n=1, expand=True)[1]
     print('scraped ' + str(df.shape[0]) + ' job postings.')
-    df.to_csv(parent_folder + '/DataScienceJobs/data/monster_all_2.csv', sep='\t', header=None, mode='a', index=False)
 
+    if os.path.isfile(path + '/data/monster_all.csv'):
+        df.to_csv(path + '/data/monster_all.csv', sep='\t', header=None, mode='a', index=False)
+    else:
+        df.to_csv(path + '/data/monster_all.csv', sep='\t', index=False)
