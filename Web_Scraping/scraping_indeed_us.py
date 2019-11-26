@@ -119,8 +119,10 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    # 'data', 'econometrics', 'business+intelligence', 'statistics', 'data+engineer', 'machine+learning', 'data+analyst', 'data+manager', 'data+scientist'
-    searchTerm = 'ai+scientist'
+    # 'econometrics', 'business+intelligence', 'statistics', 'data+engineer', 'machine+learning', 'data+analyst', 'data+manager', 'data+scientist'
+    searchTerm = 'data'
+    # 'ai+scientist'
+    print('Scraping job descriptions for the search term: ' + searchTerm)
 
     total_jobs = 0
     for i in range(0, 100):  # range(0:1000)
@@ -164,8 +166,11 @@ if __name__ == "__main__":
 
         df_final = df[cols]
         total_jobs = total_jobs + df_final.shape[0]
-        #if i == 0:
-        #    df_final.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all_2.csv', sep='\t', index=False)
-        #else:
-        df_final.to_csv(parent_folder + '/DataScienceJobs/data/indeed_us_all_2.csv', sep='\t', header=None, mode='a', index=False)
+
+        if os.path.isfile(path + '/data/indeed_us_all.csv'):
+            df_final.to_csv(path + '/data/indeed_us_all.csv', sep='\t', header=None, mode='a',
+                            index=False)
+        else:
+            df_final.to_csv(path + '/data/indeed_us_all.csv', sep='\t', index=False)
+
     print('scraped ' + str(total_jobs) + ' job postings.')
