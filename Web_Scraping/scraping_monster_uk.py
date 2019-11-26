@@ -74,7 +74,7 @@ def monster_summary(soup):
 if __name__ == "__main__":
 
     path = os.getcwd()
-    # 'ai-scientist', 'data', 'econometrics', 'business-intelligence', 'statistics'
+    # Search Terms: 'ai-scientist', 'data', 'econometrics', 'business-intelligence', 'statistics'
     searchTerm = 'data-engineer'
     # 'machine-learning', 'data-analyst', 'data-manager', 'data-scientist'
     print('Scraping job descriptions for the search term: ' + searchTerm)
