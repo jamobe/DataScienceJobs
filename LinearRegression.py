@@ -17,9 +17,11 @@ if __name__ == "__main__":
     X_trainval = np.concatenate([X_train, X_val])
     y_trainval = np.concatenate([y_train, y_val])
 
-
     regr = linear_model.RidgeCV(alphas=[1e-3, 1e-2, 1e-1, 1])
     regr.fit(X_trainval, y_trainval)  # training the algorithm
+
+    with open(path + '/Pickles/linReg_model.pkl', 'wb') as file:
+        pickle.dump(regr, file)
 
     y_pred_t = regr.predict(X_test)
 
