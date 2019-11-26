@@ -119,7 +119,7 @@ if __name__ == "__main__":
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
 
-    # 'econometrics', 'business+intelligence', 'statistics', 'data+engineer', 'machine+learning', 'data+analyst', 'data+manager', 'data+scientist'
+    # Search Terms: 'econometrics', 'business+intelligence', 'statistics', 'data+engineer', 'machine+learning', 'data+analyst', 'data+manager', 'data+scientist'
     searchTerm = 'data'
     # 'ai+scientist'
     print('Scraping job descriptions for the search term: ' + searchTerm)
