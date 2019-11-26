@@ -155,6 +155,9 @@ if __name__ == "__main__":
     X_Train = np.hstack((OHE_train, TFIDF_train, TECH_train))
     X_Val = np.hstack((OHE_val, TFIDF_val, TECH_val))
     X_Test = np.hstack((OHE_test, TFIDF_test, TECH_test))
+    print('Train Set:' + str(X_Train.shape))
+    print('Validation Set:' + str(X_Val.shape))
+    print('Test Set:' + str(X_Test.shape))
 
     with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
         pickle.dump([X_Train, y_train], file)

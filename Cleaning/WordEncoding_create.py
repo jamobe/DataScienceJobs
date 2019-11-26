@@ -4,7 +4,6 @@ import pickle
 import os.path
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sqlalchemy import create_engine
-from langdetect import detect
 import spacy
 from spacy.lang.en import English
 
@@ -54,12 +53,12 @@ if __name__ == "__main__":
 
     engine = create_engine(
         'postgresql://postgres:' + PASSWORD + '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data", engine)
+    df_en = pd.read_sql("select * from all_data where language like 'en'", engine)
     print('Loaded data from SQL database...\n')
 
     #df['language'] = df.description.apply(detect)
-    df_en = df.loc[df.language == 'en']
-    print('Detected languages of each job descriptions...\n')
+    #df_en = df.loc[df.language == 'en']
+    #print('Detected languages of each job descriptions...\n')
 
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
