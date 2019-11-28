@@ -6,22 +6,22 @@ import os.path
 path = os.getcwd()
     
 data = defaultdict(list)
-data['location'] = ['Frankfurt','Berlin','Bern','Zurich','Amsterdam','Wien','Munich','Barcelona','Paris','Aurich','Den Haag','Warsaw']
-data['region'] = ['Hessen','Berlin','Bern','Zurich','North Holland','Wien','Bayern','Barcelona','Ile-de-France','Niedersachsen','South Holland','Masovia']
-data['country'] = ['Germany','Germany','Switzerland','Switzerland','Netherlands','Austria','Germany','Spain','France','Germany','Netherlands','Poland']
+data['location'] = ['Frankfurt','Berlin','Munich','Aurich']
+data['region'] = ['Hessen','Berlin','Bayern','Niedersachsen']
+data['country'] = ['Germany','Germany','Germany','Germany']
 loc2 = pd.DataFrame(data)
 
-loc2 = loc2.append({'location': 'Rotterdam' , 'region' : 'South Holland', 'country':'Netherlands'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Rotterdam' , 'region' : 'South Holland', 'country':'Netherlands'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Dusseldorf' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Düsseldorf' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Bonn' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Stuttgart' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Vilnius' , 'region' : 'Vilnius', 'country':'Lithuania'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Dublin' , 'region' : 'Leinster', 'country':'Ireland'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Wynyard' , 'region' : 'Tasmania', 'country':'Australia'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Eindhoven' , 'region' : 'North Brabant', 'country':'Netherlands'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Melbourne' , 'region' : 'Victoria', 'country':'Australia'} , ignore_index=True)
-loc2 = loc2.append({'location': 'Haeren' , 'region' : 'Brussels', 'country':'Belgium'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Vilnius' , 'region' : 'Vilnius', 'country':'Lithuania'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Dublin' , 'region' : 'Leinster', 'country':'Ireland'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Wynyard' , 'region' : 'Tasmania', 'country':'Australia'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Eindhoven' , 'region' : 'North Brabant', 'country':'Netherlands'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Melbourne' , 'region' : 'Victoria', 'country':'Australia'} , ignore_index=True)
+#loc2 = loc2.append({'location': 'Haeren' , 'region' : 'Brussels', 'country':'Belgium'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Hamburg' , 'region' : 'Hamburg', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'München' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Köln' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
@@ -133,4 +133,25 @@ loc2 = loc2.append({'location': 'Herford' , 'region' : 'Nordrhein-Westfalen', 'c
 loc2 = loc2.append({'location': 'Gerlingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Bad Neustadt An Der Saale' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
 loc2 = loc2.append({'location': 'Donauwörth' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Lingen' , 'region' : 'Niedersachsen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Neuss' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Norderstedt' , 'region' : 'Schleswig-Holstein', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Baden-Baden' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Westfalen' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Braunschweig' , 'region' : 'Niedersachsen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Zirndorf' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Ettlingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Kassel' , 'region' : 'Hessen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Ravensburg' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Sindelfingen' , 'region' : 'Baden-Württemberg', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Koblenz' , 'region' : 'Rheinland-Pfalz', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Barsinghausen' , 'region' : 'Niedersachsen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Mülheim An Der Ruhr' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Jülich' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Kempten (Allgäu)' , 'region' : 'Bayern', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Regierungsbezirk Düsseldorf' , 'region' : 'Nordrhein-Westfalen', 'country':'Germany'} , ignore_index=True)
+loc2 = loc2.append({'location': 'Langen' , 'region' : 'Hessen', 'country':'Germany'} , ignore_index=True)
+
+
+
 loc2.to_csv(path+'/data/locations.csv',index=False)

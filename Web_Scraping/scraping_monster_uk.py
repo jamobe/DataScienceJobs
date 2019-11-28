@@ -74,9 +74,10 @@ def monster_summary(soup):
 if __name__ == "__main__":
 
     path = os.getcwd()
-    # Search Terms: 'ai-scientist', 'data', 'econometrics', 'business-intelligence', 'statistics'
-    searchTerm = 'data-engineer'
-    # 'machine-learning', 'data-analyst', 'data-manager', 'data-scientist'
+    # completed Search Terms: 'ai-scientist', 'data', 'econometrics', 'business-intelligence', 'statistics',
+    # 'data-engineer', 'machine-learning', 'data-analyst', 'data-manager', 'data-scientist'
+    searchTerm = 'data-scientist'
+
     print('Scraping job descriptions for the search term: ' + searchTerm)
 
     url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
