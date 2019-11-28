@@ -161,9 +161,9 @@ def text_process(mess):
 
 
 if __name__ == "__main__":
-    # website = 'indeed_de_all_2'
-    # website = 'monster_all_2'
-    website = 'indeed_us_all_2'
+    # website = 'indeed_de_all'
+    # website = 'monster_all'
+    website = 'indeed_us_all'
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
@@ -174,7 +174,6 @@ if __name__ == "__main__":
     print('Uploaded: ' + csv_path + '\n')
     print('Containing ' + str(length0) + ' entries... \n')
     print(df.columns)
-    # df.drop_duplicates(subset=['description', 'salary', 'location', 'jobtype', 'industry', 'education', 'career', 'ref_code', 'url', 'job_title', 'company'], keep='last', inplace=True)
     df.drop_duplicates(subset=['description', 'ref_code', 'url'], keep='last', inplace=True)
 
     df = df.reset_index(drop=True)
@@ -266,6 +265,9 @@ if __name__ == "__main__":
         df['state'] = df['state'].str.split(' ', n=1, expand=True)[0]
         df['state'] = df['state'].str.upper()
         df.loc[df.location.str.contains('Wisconsin') == True, 'state'] = 'WI'
+        df.loc[df.location.str.contains('Nevada') == True, 'state'] = 'NV'
+        df.loc[df.location.str.contains('Ohio') == True, 'state'] = 'OH'
+        df.loc[df.location.str.contains('Idaho') == True, 'state'] = 'ID'
         df.loc[df.location.str.contains('New York') == True, 'state'] = 'NY'
         df.loc[df.location.str.contains('Delaware') == True, 'state'] = 'DE'
         df.loc[df.location.str.contains('North Carolina') == True, 'state'] = 'NC'
@@ -286,6 +288,8 @@ if __name__ == "__main__":
         locations_us = pd.read_csv(path + '/data/us-states.csv')
         df2 = pd.merge(df, locations_us, on='state', how='left')
         df2.loc[df2.location.str.contains('Aguadilla') == True, 'region'] = 'Offshore'
+        df2.loc[df2.location.str.contains('Yigo') == True, 'region'] = 'Offshore'
+        df2.loc[df2.location.str.contains('Guaynabo Municipio') == True, 'region'] = 'Offshore'
         df2.loc[df2.location.str.contains('Pago Pago') == True, 'region'] = 'Offshore'
         df2.loc[df2.region.str.contains('Offshore') == True, 'country'] = 'USA'
         df2.loc[df2.location.str.contains('Remote') == True, 'country'] = 'USA'
@@ -318,15 +322,12 @@ if __name__ == "__main__":
         df2 = pd.merge(df, location, on='location', how='left')
         df2.loc[df2.location.str.contains('Sweden') == True, 'country'] = 'Sweden'
         df2 = df2.reset_index(drop=True)
-
+    df2.dropna(subset=['country', 'region'], inplace=True)
     print('Cleaned location data...\n')
 
     unknown_locations = df2.country.isnull() & df2.location.notnull()
     print(df2.loc[unknown_locations]['location'].value_counts())
     print('Identified region and country for each location...\n')
-
-    # clean description
-    #df2.description = df2.description.apply(text_process)
 
     output = '/data/cleaned_' + website + '.csv'
 
