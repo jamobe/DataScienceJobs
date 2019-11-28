@@ -176,13 +176,27 @@ loc = loc.append({'location' : 'Kensington' , 'region' : 'London'} , ignore_inde
 loc = loc.append({'location' : 'Sale' , 'region' : 'North West'} , ignore_index=True)
 loc = loc.append({'location' : 'Sandwich' , 'region' : 'South East'} , ignore_index=True)
 loc = loc.append({'location' : 'Washington' , 'region' : 'North East'} , ignore_index=True)
-
-
-
-
-
-
+loc = loc.append({'location' : 'Abingdon' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Attleborough' , 'region' : 'East of England'} , ignore_index=True)
+loc = loc.append({'location' : 'Farnborough' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Bracknell' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Hitchin' , 'region' : 'East of England'} , ignore_index=True)
+loc = loc.append({'location' : 'B633Bl' , 'region' : 'West Midlands'} , ignore_index=True)
+loc = loc.append({'location' : 'St Helens' , 'region' : 'North West'} , ignore_index=True)
+loc = loc.append({'location' : 'Irlam' , 'region' : 'North West'} , ignore_index=True)
+loc = loc.append({'location' : 'Worcestershire' , 'region' : 'West Midlands'} , ignore_index=True)
+loc = loc.append({'location' : 'Epsom' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Hornchurch' , 'region' : 'London'} , ignore_index=True)
+loc = loc.append({'location' : 'Winnersh' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Manchester City Centre' , 'region' : 'North West'} , ignore_index=True)
+loc = loc.append({'location' : 'Haddenham' , 'region' : 'South East'} , ignore_index=True)
+loc = loc.append({'location' : 'Wisbech' , 'region' : 'East of England'} , ignore_index=True)
+loc = loc.append({'location' : 'Bury St Edmunds' , 'region' : 'East of England'} , ignore_index=True)
+loc = loc.append({'location' : 'Welwyn Garden City' , 'region' : 'East of England'} , ignore_index=True)
+loc = loc.append({'location' : 'Derbyshire' , 'region' : 'East Midlands'} , ignore_index=True)
+loc = loc.append({'location' : 'Skegness' , 'region' : 'East Midlands'} , ignore_index=True)
+loc = loc.append({'location' : 'Windlesham' , 'region' : 'South East'} , ignore_index=True)
 
 loc.location = loc.location.str.title()
-loc['country'] = 'United Kingdom'
+loc['country'] = 'UK'
 loc.to_csv(path + '/data/locations_UK.csv', index=False)
