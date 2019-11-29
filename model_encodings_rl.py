@@ -128,7 +128,7 @@ if __name__ == "__main__":
     BOG_train = BOG_model.transform(x_train['description']).toarray()
     BOG_val = BOG_model.transform(x_val['description']).toarray()
     BOG_test = BOG_model.transform(x_test['description']).toarray()
-    feature_names_bog = list(BOG_model.get_feature_names())
+    feature_names_BOG = list(BOG_model.get_feature_names())
 
     TFIDF_model = encode_TFIDF(x_train, min_df=3)
     TFIDF_train = TFIDF_model.transform(x_train['description']).toarray()
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     tech_terms_val = x_val['description'].apply(tech_process, args=(important_terms,))
     tech_terms_test = x_test['description'].apply(tech_process, args=(important_terms,))
     
-    feature_names_tech = important_terms
+    feature_names_TECH = important_terms
 
     mlb = MultiLabelBinarizer(classes=important_terms)
     mlb.fit(tech_terms_train)
@@ -156,22 +156,37 @@ if __name__ == "__main__":
     TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
 
-    X_Train = np.hstack((OHE_train, TFIDF_train, TECH_train))
-    X_Val = np.hstack((OHE_val, TFIDF_val, TECH_val))
-    X_Test = np.hstack((OHE_test, TFIDF_test, TECH_test))
-    print('Train Set:' + str(X_Train.shape))
-    print('Validation Set:' + str(X_Val.shape))
-    print('Test Set:' + str(X_Test.shape))
+#     X_train = np.hstack((OHE_train, TFIDF_train, TECH_train))
+#     X_val = np.hstack((OHE_val, TFIDF_val, TECH_val))
+#     X_test = np.hstack((OHE_test, TFIDF_test, TECH_test))
+#     print('Train Set:' + str(X_train.shape))
+#     print('Validation Set:' + str(X_val.shape))
+#     print('Test Set:' + str(X_test.shape))
     
-    feature_names = feature_names_OHE + feature_names_TFIDF + feature_names_tech
+#     feature_names = feature_names_OHE + feature_names_TFIDF + feature_names_tech
     
-    with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
-        pickle.dump([X_Train, y_train], file)
-    with open(path + '/data/ValSetXY.pkl', 'wb') as file:
-        pickle.dump([X_Val, y_val], file)
-    with open(path + '/data/TestSetXY.pkl', 'wb') as file:
-        pickle.dump([X_Test, y_test], file)
+    
+#     with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
+#         pickle.dump([X_train, y_train], file)
+#     with open(path + '/data/ValSetXY.pkl', 'wb') as file:
+#         pickle.dump([X_val, y_val], file)
+#     with open(path + '/data/TestSetXY.pkl', 'wb') as file:
+#         pickle.dump([X_test, y_test], file)
+#     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
+    
+#     with open(path + '/data/feature_names.pkl', 'wb') as file:
+#         pickle.dump(feature_names, file)
+     
+   # output different encodings encoded data
+    with open(path + '/data/OHE.pkl', 'wb') as file:
+        pickle.dump([OHE_train,OHE_val,OHE_test,feature_names_OHE], file)
+    with open(path + '/data/TFIDF.pkl', 'wb') as file:
+        pickle.dump([TFIDF_train,TFIDF_val,TFIDF_test,feature_names_TFIDF], file)
+    with open(path + '/data/BOG.pkl', 'wb') as file:
+        pickle.dump([BOG_train,BOG_val,BOG_test,feature_names_BOG], file)
+    with open(path + '/data/TECH.pkl', 'wb') as file:
+        pickle.dump([TECH_train,TECH_val,TECH_test,feature_names_TECH], file) 
+    with open(path + '/data/yTrainValTest.pkl', 'wb') as file:
+        pickle.dump([y_train,y_val,y_test], file) 
+    
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
-    
-    with open(path + '/data/feature_names.pkl', 'wb') as file:
-        pickle.dump(feature_names, file)
