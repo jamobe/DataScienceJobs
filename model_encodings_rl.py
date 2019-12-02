@@ -106,6 +106,11 @@ if __name__ == "__main__":
     x_train, x_val, y_train, y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
     print('Splitted Train, Validation and Test data...\n')
 
+    train_index= x_train['id']
+    val_index = x_val['id']
+    test_index = x_test['id']
+    
+    
     columns_to_ohe_encode = ['company', 'country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
     val_enc = x_val[columns_to_ohe_encode]
@@ -125,15 +130,15 @@ if __name__ == "__main__":
     print('Performed One-Hot-Encoding for columns: Company, Country, Region...\n')
 
     BOG_model = encode_BOG(x_train, min_df=3)
-    BOG_train = BOG_model.transform(x_train['description']).toarray()
-    BOG_val = BOG_model.transform(x_val['description']).toarray()
-    BOG_test = BOG_model.transform(x_test['description']).toarray()
+    BOG_train = BOG_model.transform(x_train['job_title']+x_train['description']).toarray()
+    BOG_val = BOG_model.transform(x_val['job_title']+x_val['description']).toarray()
+    BOG_test = BOG_model.transform(x_test['job_title']+x_test['description']).toarray()
     feature_names_BOG = list(BOG_model.get_feature_names())
 
     TFIDF_model = encode_TFIDF(x_train, min_df=3)
-    TFIDF_train = TFIDF_model.transform(x_train['description']).toarray()
-    TFIDF_val = TFIDF_model.transform(x_val['description']).toarray()
-    TFIDF_test = TFIDF_model.transform(x_test['description']).toarray()
+    TFIDF_train = TFIDF_model.transform(x_train['job_title']+x_train['description']).toarray()
+    TFIDF_val = TFIDF_model.transform(x_val['job_title']+x_val['description']).toarray()
+    TFIDF_test = TFIDF_model.transform(x_test['job_title']+x_test['description']).toarray()
     feature_names_TFIDF= list(TFIDF_model.get_feature_names())
 
     tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
@@ -143,9 +148,10 @@ if __name__ == "__main__":
 
     important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
-    tech_terms_train = x_train['description'].apply(tech_process, args=(important_terms,))
-    tech_terms_val = x_val['description'].apply(tech_process, args=(important_terms,))
-    tech_terms_test = x_test['description'].apply(tech_process, args=(important_terms,))
+    
+    tech_terms_train = (x_train['job_title']+x_train['description']).apply(tech_process, args=(important_terms,))
+    tech_terms_val = (x_val['job_title']+x_val['description']).apply(tech_process, args=(important_terms,))
+    tech_terms_test = (x_test['job_title']+x_test['description']).apply(tech_process, args=(important_terms,))
     
     feature_names_TECH = important_terms
 
@@ -188,5 +194,11 @@ if __name__ == "__main__":
         pickle.dump([TECH_train,TECH_val,TECH_test,feature_names_TECH], file) 
     with open(path + '/data/yTrainValTest.pkl', 'wb') as file:
         pickle.dump([y_train,y_val,y_test], file) 
+    with open(path + '/data/IndexTrainValTest.pkl', 'wb') as file:
+        pickle.dump([train_index,val_index,test_index], file) 
     
+    # output full data frame
+    with open(path + '/data/x_data.pkl', 'wb') as file:
+        pickle.dump([x_train,x_val,x_test], file)
+        
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
