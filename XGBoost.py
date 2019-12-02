@@ -4,16 +4,26 @@ import pickle
 import xgboost as xgb
 from bayes_opt import BayesianOptimization
 from sklearn import metrics
+import pandas as pd
+
+def mean_absolute_percentage_error(y_true, y_pred): 
+
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+def mean_absolute_range_percentage_error(y_true, y_pred): 
+    error = np.abs(y_true- y_pred)-10000
+    error[error < 0] = 0
+    return np.mean(error/y_true)*100
+
 
 if __name__ == "__main__":
     path = os.getcwd()
-
-    with open(path + '/data/TrainSetXY.pkl', 'rb') as file:
-        X_train, y_train = pickle.load(file)
-    with open(path + '/data/ValSetXY.pkl', 'rb') as file:
-        X_val, y_val = pickle.load(file)
-    with open(path + '/data/TestSetXY.pkl', 'rb') as file:
-        X_test, y_test = pickle.load(file)
+    with open(path + '/data/x_data_for_models.pkl', 'rb') as file:
+            X_train,X_val,X_test = pickle.load(file)
+    with open(path + '/data/yTrainValTest.pkl', 'rb') as file:
+            y_train,y_val,y_test= pickle.load(file) 
+    with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:
+        train_index,val_index,test_index= pickle.load(file)
 
     params = {
         # Learning Task Parameters
@@ -73,12 +83,34 @@ if __name__ == "__main__":
     xgb_reg = xgb.XGBRegressor(**params)
     xgb_reg.fit(X_train, y_train, **fit_params)
 
-    y_pred = xgb_reg.predict(X_test)
+    y_pred = xgb_reg.predict(X_val)
+    y_pred_train = xgb_reg.predict(X_train)
 
-    print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
-    print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
-    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
-    print('R2 Score:', np.sqrt(metrics.r2_score(y_test, y_pred)))
+    print('Mean Absolute Error: {0:.0f}'.format( metrics.mean_absolute_error(y_val, y_pred)))
+    print('Mean Absolute Percentage Error: {0:.1f}'.format(mean_absolute_percentage_error(y_val, y_pred)))
+    print('Mean Absolute Range Percentage Error: {0:.1f}'.format(mean_absolute_range_percentage_error(y_val, y_pred)))
 
-    with open(path + '/Pickles/xgb_model_2.pkl', 'wb') as file:
+    print('Mean Squared Error: {0:.0f}'.format(metrics.mean_squared_error(y_val, y_pred)))
+    print('Root Mean Squared Error:{0:.0f}'.format(np.sqrt(metrics.mean_squared_error(y_val, y_pred))))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred))))
+
+
+    print('Mean Absolute Error Train: {0:.0f}'.format( metrics.mean_absolute_error(y_train, y_pred_train)))
+    print('Mean Absolute Percentage Error Train: {0:.1f}'.format(mean_absolute_percentage_error(y_train, y_pred_train)))
+    print('Mean Absolute Range Percentage Error Train: {0:.1f}'.format(mean_absolute_range_percentage_error(y_train, y_pred_train)))
+    print('R2 Score Train :{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
+
+
+    # save model in pickles file
+    with open(path + '/Pickles/xgb_model.pkl', 'wb') as file:
         pickle.dump(xgb_reg, file)
+
+    #save predictions in data file
+    xgb_preds_val = pd.DataFrame({'id':val_index, 'y_pred_xgb': y_pred, 'y_true': y_val})
+    xgb_preds_train= pd.DataFrame({'id':train_index, 'y_pred_xgb': y_pred_train, 'y_true':y_train})
+
+    with open(path + '/data/XGBpredtrain.pkl', 'wb') as file:
+            pickle.dump([xgb_preds_train], file)
+
+    with open(path + '/data/XGBpredval.pkl', 'wb') as file:
+            pickle.dump([xgb_preds_val], file)
