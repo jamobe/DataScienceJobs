@@ -22,19 +22,10 @@ def text_process(mess):
     4. Returns a list of the cleaned text
     """
     punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-
-    # transforms all to lower case words
     mess = mess.lower()
-
-    # Check characters to see if they are in punctuation
     nopunc = [char for char in mess if char not in punctuations]
-
-    # Join the characters again to form the string.
     nopunc = ''.join(nopunc)
-
-    # Now just remove any stopwords
     return [word for word in nopunc.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
-
 
 def spacy_tokenizer(doc):
     """
@@ -49,27 +40,46 @@ def spacy_tokenizer(doc):
 
 
 def encode_BOG(df_en, min_df):
-
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
-
     BOG = CountVectorizer(analyzer=text_process, tokenizer=spacy_tokenizer, min_df=min_df)
     BOG_fit = BOG.fit(df_en['description'])
     print('Trained Bag-Of-Words model...\n')
-
     return BOG_fit
 
 
 def encode_TFIDF(df_en, min_df):
-
     df_en.description.replace(regex=r"\\n", value=r" ", inplace=True)
     print('Performed some basic text cleaning...\n')
-
     TFIDF = TfidfVectorizer(analyzer=text_process, use_idf=True, tokenizer=spacy_tokenizer, min_df=min_df)
     TFIDF_fit = TFIDF.fit(df_en['description'])
     print('Trained TF-IDF model...\n')
-
     return TFIDF_fit
+
+
+def transform_vocab(wordlist, model):
+    filtered_wl = [word for word in wordlist if word in model.wv.vocab]
+    return model.wv[filtered_wl]
+
+
+def padding(wordlist, padding_length):
+    paddings = padding_length - len(wordlist)
+    padded_wordlist = paddings *[len(wordlist[0])*[0]] + wordlist[0:padding_length].tolist()
+    return np.array(padded_wordlist)
+
+
+def w2v_clean_encode(df, model):
+    df.loc[:,'description_list'] = df.loc[:,'description'].apply(text_process)
+    df.loc[:,'description_list'] = df.loc[:,'description_list'].apply(transform_vocab, args=(model,))
+    return df
+
+
+def padding_transform(df, padding_length):
+    df.loc[:,'description_list'] = df.loc[:,'description_list'].apply(padding, args=(padding_length,))
+    W2V_array = np.zeros([len(df['description_list']), len(df['description_list'].iloc[0]), len(df['description_list'].iloc[0][0])])
+    for i in range(len(df['description_list'])):
+        W2V_array[i, :, :] = df['description_list'].iloc[i]
+    return W2V_array
 
 
 def tech_process(mess, important_terms):
@@ -109,8 +119,7 @@ if __name__ == "__main__":
     train_index= x_train['id']
     val_index = x_val['id']
     test_index = x_test['id']
-    
-    
+
     columns_to_ohe_encode = ['company', 'country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
     val_enc = x_val[columns_to_ohe_encode]
@@ -141,6 +150,25 @@ if __name__ == "__main__":
     TFIDF_test = TFIDF_model.transform(x_test['job_title']+x_test['description']).toarray()
     feature_names_TFIDF= list(TFIDF_model.get_feature_names())
 
+    with open(path + '/Pickles/word2vec.pkl', 'rb') as file:
+        w2v_model = pickle.load(file)
+
+    x_train = w2v_clean_encode(x_train, w2v_model)
+    x_val = w2v_clean_encode(x_val, w2v_model)
+    x_test = w2v_clean_encode(x_test, w2v_model)
+
+    x_train.loc[:,'lengths'] = x_train.loc[:,'description_list'].apply(len)
+    vocab_size = len(w2v_model.wv.vocab)
+    embedding_dim = w2v_model.wv.vector_size
+    padding_length = int(round(x_train['lengths'].mean()))
+
+    W2V_train = padding_transform(x_train, padding_length)
+    W2V_val = padding_transform(x_val, padding_length)
+    W2V_test = padding_transform(x_test, padding_length)
+
+    with open(path + '/data/W2V.pkl', 'wb') as file:
+        pickle.dump([W2V_train, W2V_val, W2V_test], file)
+
     tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
     categories_to_include = ['front_end-technologies', 'databases', 'software-infrastructure-devops', 'data-science',
                              'software_architecture', 'web_design', 'tools', 'cyber_security', 'cloud_computing',
@@ -148,7 +176,6 @@ if __name__ == "__main__":
 
     important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
-    
     tech_terms_train = (x_train['job_title']+x_train['description']).apply(tech_process, args=(important_terms,))
     tech_terms_val = (x_val['job_title']+x_val['description']).apply(tech_process, args=(important_terms,))
     tech_terms_test = (x_test['job_title']+x_test['description']).apply(tech_process, args=(important_terms,))
@@ -170,8 +197,7 @@ if __name__ == "__main__":
 #     print('Test Set:' + str(X_test.shape))
     
 #     feature_names = feature_names_OHE + feature_names_TFIDF + feature_names_tech
-    
-    
+
 #     with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
 #         pickle.dump([X_train, y_train], file)
 #     with open(path + '/data/ValSetXY.pkl', 'wb') as file:
