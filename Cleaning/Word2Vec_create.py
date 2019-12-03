@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from gensim.models import Word2Vec
 import pickle
 from sqlalchemy import create_engine
+import re
 
 
 def text_process_en(mess):
@@ -19,7 +20,8 @@ def text_process_en(mess):
 
     # transforms all to lower case words
     mess = mess.lower()
-
+    mess = re.sub(r'[^A-Za-z0-9]+', ' ', mess)  # remove non alphanumeric character
+    mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
     # Check characters to see if they are in punctuation
     nopunc = [char for char in mess if char not in string.punctuation]
 
@@ -27,7 +29,7 @@ def text_process_en(mess):
     nopunc = ''.join(nopunc)
 
     # Now just remove any stopwords
-    return [word for word in nopunc.split() if word not in stopwords.words('english')]
+    return [word for word in mess.split() if word not in stopwords.words('english')]
 
 
 if __name__ == "__main__":
@@ -48,5 +50,5 @@ if __name__ == "__main__":
     w2v_model.build_vocab(all_descriptions, progress_per=10000)
     w2v_model.train(all_descriptions, total_examples=w2v_model.corpus_count, epochs=30, report_delay=1)
     w2v_model.init_sims(replace=True)
-    with open(path + '/Pickles/word2vec.pkl', 'wb') as file:
+    with open(path + '/Pickles/word2vec_2.pkl', 'wb') as file:
         pickle.dump(w2v_model, file)
