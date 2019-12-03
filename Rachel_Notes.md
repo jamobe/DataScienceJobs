@@ -101,3 +101,11 @@ scala
 lua
 cuda
 
+
+# Junior posts
+Junior, Student, assistant, sandwich year, graduate, intern, trainee, traineeship, studentship
+
+
+dependencies I had to install
+
+#urllib3
