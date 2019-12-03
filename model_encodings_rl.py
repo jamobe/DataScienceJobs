@@ -69,7 +69,7 @@ def padding(wordlist, padding_length):
 
 
 def w2v_clean_encode(df, model):
-    df.loc[:,'description_list'] = df.loc[:,'description'].apply(text_process)
+    df.loc[:,'description_list'] = df.loc[:,'full_description'].apply(text_process)
     df.loc[:,'description_list'] = df.loc[:,'description_list'].apply(transform_vocab, args=(model,))
     return df
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like'en'", engine)
     print('Loaded data from SQL database...\n')
-
+    df['full_description'] =  df['job_title']+' '+ df['description']
     df1 = df.dropna(subset=['salary_average_euros', 'region', 'country', 'train_test_label',
                             'company', 'description'], axis=0)
     df1 = df1.loc[df1.salary_type == 'yearly']
@@ -139,15 +139,15 @@ if __name__ == "__main__":
     print('Performed One-Hot-Encoding for columns: Company, Country, Region...\n')
 
     BOG_model = encode_BOG(x_train, min_df=3)
-    BOG_train = BOG_model.transform(x_train['job_title']+x_train['description']).toarray()
-    BOG_val = BOG_model.transform(x_val['job_title']+x_val['description']).toarray()
-    BOG_test = BOG_model.transform(x_test['job_title']+x_test['description']).toarray()
+    BOG_train = BOG_model.transform(x_train['full_description']).toarray()
+    BOG_val = BOG_model.transform(x_val['full_description']).toarray()
+    BOG_test = BOG_model.transform(x_test['full_description']).toarray()
     feature_names_BOG = list(BOG_model.get_feature_names())
 
     TFIDF_model = encode_TFIDF(x_train, min_df=3)
-    TFIDF_train = TFIDF_model.transform(x_train['job_title']+x_train['description']).toarray()
-    TFIDF_val = TFIDF_model.transform(x_val['job_title']+x_val['description']).toarray()
-    TFIDF_test = TFIDF_model.transform(x_test['job_title']+x_test['description']).toarray()
+    TFIDF_train = TFIDF_model.transform(x_train['full_description']).toarray()
+    TFIDF_val = TFIDF_model.transform(x_val['full_description']).toarray()
+    TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
     feature_names_TFIDF= list(TFIDF_model.get_feature_names())
 
     with open(path + '/Pickles/word2vec.pkl', 'rb') as file:
@@ -176,9 +176,9 @@ if __name__ == "__main__":
 
     important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
-    tech_terms_train = (x_train['job_title']+x_train['description']).apply(tech_process, args=(important_terms,))
-    tech_terms_val = (x_val['job_title']+x_val['description']).apply(tech_process, args=(important_terms,))
-    tech_terms_test = (x_test['job_title']+x_test['description']).apply(tech_process, args=(important_terms,))
+    tech_terms_train = (x_train['full_description']).apply(tech_process, args=(important_terms,))
+    tech_terms_val = (x_val['description']).apply(tech_process, args=(important_terms,))
+    tech_terms_test = (x_test['job_title']+' '+x_test['description']).apply(tech_process, args=(important_terms,))
     
     feature_names_TECH = important_terms
 
