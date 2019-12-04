@@ -10,7 +10,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import spacy
 from spacy.lang.en import English
-
+import re
 
 
 def text_process(mess):
@@ -21,11 +21,14 @@ def text_process(mess):
     3. Remove all stopwords
     4. Returns a list of the cleaned text
     """
-    punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
+    # punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
+
     mess = mess.lower()
-    nopunc = [char for char in mess if char not in punctuations]
-    nopunc = ''.join(nopunc)
-    return [word for word in nopunc.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
+    mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character [^A-Za-z0-9]
+    mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
+    #nopunc = [char for char in mess if char not in punctuations]
+    #nopunc = ''.join(nopunc)
+    return [word for word in mess.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
 
 def spacy_tokenizer(doc):
     """
