@@ -10,7 +10,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import spacy
 from spacy.lang.en import English
-
+import XGBoost
 
 
 def text_process(mess):
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
     feature_names_TFIDF= list(TFIDF_model.get_feature_names())
 
-    with open(path + '/Pickles/word2vec.pkl', 'rb') as file:
+    with open(path + '/Pickles/word2vec_2.pkl', 'rb') as file:
         w2v_model = pickle.load(file)
 
     x_train = w2v_clean_encode(x_train, w2v_model)
@@ -165,6 +165,8 @@ if __name__ == "__main__":
     W2V_train = padding_transform(x_train, padding_length)
     W2V_val = padding_transform(x_val, padding_length)
     W2V_test = padding_transform(x_test, padding_length)
+
+
 
     with open(path + '/data/W2V.pkl', 'wb') as file:
         pickle.dump([W2V_train, W2V_val, W2V_test], file)
