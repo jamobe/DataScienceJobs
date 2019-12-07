@@ -9,8 +9,9 @@ from sklearn import preprocessing
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import spacy
+import re
 from spacy.lang.en import English
-import XGBoost
+
 
 
 def text_process(mess):
@@ -22,6 +23,8 @@ def text_process(mess):
     4. Returns a list of the cleaned text
     """
     punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
+    mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character
+    mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
     mess = mess.lower()
     nopunc = [char for char in mess if char not in punctuations]
     nopunc = ''.join(nopunc)
@@ -191,25 +194,17 @@ if __name__ == "__main__":
     TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
 
-#     X_train = np.hstack((OHE_train, TFIDF_train, TECH_train))
-#     X_val = np.hstack((OHE_val, TFIDF_val, TECH_val))
-#     X_test = np.hstack((OHE_test, TFIDF_test, TECH_test))
-#     print('Train Set:' + str(X_train.shape))
-#     print('Validation Set:' + str(X_val.shape))
-#     print('Test Set:' + str(X_test.shape))
-    
-#     feature_names = feature_names_OHE + feature_names_TFIDF + feature_names_tech
+    # output models
+    with open(path + '/Pickles/OHE_model.pkl', 'wb') as file:
+        pickle.dump(enc, file)
+    with open(path + '/Pickles/TFIDF_model.pkl', 'wb') as file:
+        pickle.dump(TFIDF_model, file)
+    with open(path + '/Pickles/BOG_model.pkl', 'wb') as file:
+        pickle.dump(BOG_model, file)
+    with open(path + '/Pickles/TECH_model.pkl', 'wb') as file:
+        pickle.dump(mlb, file)
 
-#     with open(path + '/data/TrainSetXY.pkl', 'wb') as file:
-#         pickle.dump([X_train, y_train], file)
-#     with open(path + '/data/ValSetXY.pkl', 'wb') as file:
-#         pickle.dump([X_val, y_val], file)
-#     with open(path + '/data/TestSetXY.pkl', 'wb') as file:
-#         pickle.dump([X_test, y_test], file)
-#     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
-    
-#     with open(path + '/data/feature_names.pkl', 'wb') as file:
-#         pickle.dump(feature_names, file)
+
      
    # output different encodings encoded data
     with open(path + '/data/OHE.pkl', 'wb') as file:
