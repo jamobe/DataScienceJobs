@@ -24,7 +24,10 @@ if __name__ == "__main__":
             y_train,y_val,y_test= pickle.load(file) 
     with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:
         train_index,val_index,test_index= pickle.load(file)
-
+    
+    y_train = np.log(y_train)
+    y_val = np.log(y_val)
+        
     params = {
         # Learning Task Parameters
         'objective': 'reg:squarederror',
@@ -83,8 +86,10 @@ if __name__ == "__main__":
     xgb_reg = xgb.XGBRegressor(**params)
     xgb_reg.fit(X_train, y_train, **fit_params)
 
-    y_pred = xgb_reg.predict(X_val)
-    y_pred_train = xgb_reg.predict(X_train)
+    y_pred = np.exp(xgb_reg.predict(X_val))
+    y_pred_train = np.exp(xgb_reg.predict(X_train))
+    y_train = np.exp(y_train)
+    y_val = np.exp(y_val)
 
     print('Mean Absolute Error: {0:.0f}'.format( metrics.mean_absolute_error(y_val, y_pred)))
     print('Mean Absolute Percentage Error: {0:.1f}'.format(mean_absolute_percentage_error(y_val, y_pred)))
