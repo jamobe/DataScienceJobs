@@ -33,8 +33,8 @@
 # if __name__ == "__main__":
 #     app.run()
 
-
-from flask import Flask, render_template, request
+from flask import Flask, request, render_template,jsonify
+#from flask import Flask, render_template, request
 import pickle
 import spacy
 import re
@@ -99,40 +99,56 @@ def load_xgb_model():
         xgb_reg = pickle.load(file)
     return xgb_reg
 
+def encode_TFIDF():
+    TFIDF_model = load_TFIDF_encoding()
+    original_message = request.form['text']
+    clean_message = text_process(original_message)
+    clean_string = [' '.join(clean_message)]
+    return TFIDF_model.transform(clean_string).toarray()
+
+def encode_OHE():
+    company = 0
+    region = request.form['region']
+    country = request.form['country']
+    values = np.array([company, country, region]).reshape(1, 3)
+    values = pd.DataFrame(values, columns=('company', 'country', 'region'))
+    OHE_model = load_OHE_encoding()
+    return OHE_model.transform(values).toarray()
+
+def select_vars():
+    feature_names_OHE = load_feature_names_OHE()
+    feature_names_TFIDF = load_feature_names_TFIDF()
+    TFIDF_encoded = encode_TFIDF()
+    OHE_encoded = encode_OHE()
+    df = pd.DataFrame(np.hstack((OHE_encoded, TFIDF_encoded)), columns=list(feature_names_OHE) + list(feature_names_TFIDF))
+    cols = [c for c in df.columns if 'company_' not in c]
+    return df[cols]
+
+def salary_prediction():
+    df_model = select_vars()
+    xgb_reg = load_xgb_model()
+    return np.exp(xgb_reg.predict(df_model))
+
+def do_something(country,region,text):
+   country = country.upper()
+   region = region.upper()
+   text = text.upper()
+   combine = country + region+text
+   return combine
+
 @app.route('/', methods=['GET', 'POST'])
 def form():
     return render_template('Form_Page.html')
 
 
-@app.route('/hello', methods=['GET', 'POST'])
-def hello():
-    #return render_template('Result.html', name=request.form['name'], msg=request.form['msg'])
-    TFIDF_model = load_TFIDF_encoding()
-    original_message = request.form['msg']
-    clean_message = text_process(original_message)
-    clean_string = [' '.join(clean_message)]
-    encoded = TFIDF_model.transform(clean_string).toarray()
-    shape_tf = encoded.shape
-
-    company = 0
-    region = request.form['name']
-    country = request.form['country']
-    values = np.array([company,country,region]).reshape(1,3)
-    values = pd.DataFrame(values,columns=('company','country','region'))
-    OHE_model = load_OHE_encoding()
-    OHE_encoded = OHE_model.transform(values).toarray()
-
-    feature_names_OHE = load_feature_names_OHE()
-    feature_names_TFIDF = load_feature_names_TFIDF()
-
-    df = pd.DataFrame(np.hstack((OHE_encoded, encoded)), columns=list(feature_names_OHE) + list(feature_names_TFIDF))
-    cols = [c for c in df.columns if 'company_' not in c]
-    df_model = df[cols]
-
-    xgb_reg = load_xgb_model()
-
-    est = np.exp(xgb_reg.predict(df_model))
-    return render_template('Result.html', name=region, country = country, company = est, msg = np.sum(OHE_encoded))
+@app.route('/join', methods=['GET','POST'])
+def my_form_post():
+    combine = str(salary_prediction())
+    result = {
+        "output": combine
+    }
+    result = {str(key): value for key, value in result.items()}
+    return jsonify(result=result)
 
 if __name__ == "__main__":
     app.run()
