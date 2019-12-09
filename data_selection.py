@@ -30,7 +30,7 @@ if __name__ == "__main__":
     
     X_train = pd.DataFrame(np.hstack((OHE_train,TFIDF_train )), columns = list(feature_names_OHE)+list(feature_names_TFIDF))
     X_val = pd.DataFrame(np.hstack((OHE_val,TFIDF_val)), columns =list(feature_names_OHE)+list(feature_names_TFIDF))
-    X_test = pd.DataFrame(np.hstack((OHE_test,TFIDF_test), columns = list(feature_names_OHE)+list(feature_names_TFIDF))
+    X_test = pd.DataFrame(np.hstack((OHE_test,TFIDF_test)), columns = list(feature_names_OHE)+list(feature_names_TFIDF))
     
 #     #
 #     reg_av = x_train.groupby(by = 'region').agg({'salary_average_euros' : ['mean']})   
@@ -49,12 +49,12 @@ if __name__ == "__main__":
 
 
     #remove 'company' and region variables
-    cols = [c for c in X_train.columns if 'company_' not in c] 
+    cols = [c for c in X_train.columns if 'company_' not in c]
 #     cols = [c for c in X_train.columns if ('company_' not in c and 'region_' not in c )] 
-    X_train = X_train[cols]
-    X_val = X_val[cols]
-    X_test = X_test[cols]
+    X_train2 = X_train[cols]
+    X_val2 = X_val[cols]
+    X_test2 = X_test[cols]
     feature_names = cols
     
     with open(path + '/data/x_data_for_models.pkl', 'wb') as file:
-        pickle.dump([X_train,X_val,X_test], file)
+        pickle.dump([X_train2,X_val2,X_test2], file)
