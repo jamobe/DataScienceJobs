@@ -84,11 +84,24 @@ def load_OHE_encoding():
         OHE_model = pickle.load(file)
     return OHE_model
 
+def load_feature_names_TFIDF():
+    with open('data/TFIDF.pkl', 'rb') as file:
+        feature_names_TFIDF = pickle.load(file)[3]
+    return feature_names_TFIDF
+
+def load_feature_names_OHE():
+    with open('data/OHE.pkl', 'rb') as file:
+        feature_names_OHE = pickle.load(file)[3]
+    return feature_names_OHE
+
+def load_xgb_model():
+    with open('Pickles/xgb_model.pkl', 'rb') as file:
+        xgb_reg = pickle.load(file)
+    return xgb_reg
 
 @app.route('/', methods=['GET', 'POST'])
 def form():
     return render_template('Form_Page.html')
-
 
 
 @app.route('/hello', methods=['GET', 'POST'])
@@ -101,29 +114,25 @@ def hello():
     encoded = TFIDF_model.transform(clean_string).toarray()
     shape_tf = encoded.shape
 
-    company = 'None'
+    company = 0
     region = request.form['name']
     country = request.form['country']
-    values = np.array([company,region,country]).reshape(1,3)
-    values = pd.DataFrame(values,columns=('company', 'region', 'country') )
+    values = np.array([company,country,region]).reshape(1,3)
+    values = pd.DataFrame(values,columns=('company','country','region'))
     OHE_model = load_OHE_encoding()
     OHE_encoded = OHE_model.transform(values).toarray()
-    shape_ohe = OHE_encoded.shape
 
-    with open('data/OHE.pkl', 'rb') as file:
-        OHE_train,OHE_val,OHE_test,feature_names_OHE = pickle.load(file)
+    feature_names_OHE = load_feature_names_OHE()
+    feature_names_TFIDF = load_feature_names_TFIDF()
 
-    with open('data/TFIDF.pkl', 'rb') as file:
-        TFIDF_train,TFIDF_val,TFIDF_test,feature_names_TFIDF = pickle.load(file)
     df = pd.DataFrame(np.hstack((OHE_encoded, encoded)), columns=list(feature_names_OHE) + list(feature_names_TFIDF))
     cols = [c for c in df.columns if 'company_' not in c]
     df_model = df[cols]
 
+    xgb_reg = load_xgb_model()
 
-    with open('Pickles/xgb_model.pkl', 'rb') as file:
-        xgb_reg = pickle.load(file)
     est = np.exp(xgb_reg.predict(df_model))
-    return render_template('Result.html', name=region, msg=encoded, country = shape_tf, company = est)
+    return render_template('Result.html', name=region, country = country, company = est, msg = np.sum(OHE_encoded))
 
 if __name__ == "__main__":
     app.run()
