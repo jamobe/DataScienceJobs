@@ -70,9 +70,20 @@ If all tests are passed, then the push to database script is run, which pushes a
 ```SQL/db_push_to_main.py ```
 
 
+#### 4. Encoding data and selecting columns to model with
 
+Data are taken from the database, split into train, test, validation and Job descriptions are encoded (One Hot encoding, TFIDF, Bag of Words, Word2Vec), by running:
+``` model_encodings_rl.py```
 
+files are outputted locally to the data folder.
 
+To choose the variables used in modelling, run:
+
+``` data selection```
+
+#### model training
+
+Run ```XGBoost.py``` for the XGboost predictions on the train and validations sets.
 
 
 #### A1. Project Plan (Diagram)
