@@ -29,13 +29,13 @@ def text_process(mess):
 
     # punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
 
-
     mess = mess.lower()
     mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character [^A-Za-z0-9]
     mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
-    #nopunc = [char for char in mess if char not in punctuations]
-    #nopunc = ''.join(nopunc)
+    # nopunc = [char for char in mess if char not in punctuations]
+    # nopunc = ''.join(nopunc)
     return [word for word in mess.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
+
 
 def spacy_tokenizer(doc):
     """
@@ -74,19 +74,20 @@ def transform_vocab(wordlist, model):
 
 def padding(wordlist, padding_length):
     paddings = padding_length - len(wordlist)
-    padded_wordlist = paddings *[len(wordlist[0])*[0]] + wordlist[0:padding_length].tolist()
+    padded_wordlist = paddings * [len(wordlist[0]) * [0]] + wordlist[0:padding_length].tolist()
     return np.array(padded_wordlist)
 
 
 def w2v_clean_encode(df, model):
-    df.loc[:,'description_list'] = df.loc[:,'full_description'].apply(text_process)
-    df.loc[:,'description_list'] = df.loc[:,'description_list'].apply(transform_vocab, args=(model,))
+    df.loc[:, 'description_list'] = df.loc[:, 'full_description'].apply(text_process)
+    df.loc[:, 'description_list'] = df.loc[:, 'description_list'].apply(transform_vocab, args=(model,))
     return df
 
 
 def padding_transform(df, padding_length):
-    df.loc[:,'description_list'] = df.loc[:,'description_list'].apply(padding, args=(padding_length,))
-    W2V_array = np.zeros([len(df['description_list']), len(df['description_list'].iloc[0]), len(df['description_list'].iloc[0][0])])
+    df.loc[:, 'description_list'] = df.loc[:, 'description_list'].apply(padding, args=(padding_length,))
+    W2V_array = np.zeros(
+        [len(df['description_list']), len(df['description_list'].iloc[0]), len(df['description_list'].iloc[0][0])])
     for i in range(len(df['description_list'])):
         W2V_array[i, :, :] = df['description_list'].iloc[i]
     return W2V_array
@@ -94,7 +95,7 @@ def padding_transform(df, padding_length):
 
 def tech_process(mess, important_terms):
     mess = mess.lower()
-    mess = mess.replace("\\n"," ")
+    mess = mess.replace("\\n", " ")
     punctuations = '[].:;"()/\\'
     nopunc = [char for char in mess if char not in punctuations]
     nopunc = ''.join(nopunc)
@@ -110,7 +111,7 @@ if __name__ == "__main__":
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like'en'", engine)
     print('Loaded data from SQL database...\n')
-    df['full_description'] =  df['job_title']+' '+ df['description']
+    df['full_description'] = df['job_title'] + ' ' + df['description']
     df1 = df.dropna(subset=['salary_average_euros', 'region', 'country', 'train_test_label',
                             'company', 'description'], axis=0)
     df1 = df1.loc[df1.salary_type == 'yearly']
@@ -118,6 +119,15 @@ if __name__ == "__main__":
 
     # first split the train from the test as denoted in the database
     df_train = df1.loc[df1['train_test_label'] == 'train']
+
+    # Upsample training set
+    high_salary = df_train[df_train['salary_average_euros']>=80000]
+    low_salary = df_train[df_train['salary_average_euros'] < 80000]
+
+    upsample = high_salary.sample(n=len(low_salary))
+
+    df_train = df_train.append(upsample)
+
     x_test = df1.loc[df1['train_test_label'] == 'test']
     df_train_y = df_train['salary_average_euros']
     y_test = x_test['salary_average_euros']
@@ -126,7 +136,7 @@ if __name__ == "__main__":
     x_train, x_val, y_train, y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
     print('Splitted Train, Validation and Test data...\n')
 
-    train_index= x_train['id']
+    train_index = x_train['id']
     val_index = x_val['id']
     test_index = x_test['id']
 
@@ -158,7 +168,7 @@ if __name__ == "__main__":
     TFIDF_train = TFIDF_model.transform(x_train['full_description']).toarray()
     TFIDF_val = TFIDF_model.transform(x_val['full_description']).toarray()
     TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
-    feature_names_TFIDF= list(TFIDF_model.get_feature_names())
+    feature_names_TFIDF = list(TFIDF_model.get_feature_names())
 
     with open(path + '/Pickles/word2vec_2.pkl', 'rb') as file:
         w2v_model = pickle.load(file)
@@ -167,7 +177,7 @@ if __name__ == "__main__":
     x_val = w2v_clean_encode(x_val, w2v_model)
     x_test = w2v_clean_encode(x_test, w2v_model)
 
-    x_train.loc[:,'lengths'] = x_train.loc[:,'description_list'].apply(len)
+    x_train.loc[:, 'lengths'] = x_train.loc[:, 'description_list'].apply(len)
     vocab_size = len(w2v_model.wv.vocab)
     embedding_dim = w2v_model.wv.vector_size
     padding_length = int(round(x_train['lengths'].mean()))
@@ -175,8 +185,6 @@ if __name__ == "__main__":
     W2V_train = padding_transform(x_train, padding_length)
     W2V_val = padding_transform(x_val, padding_length)
     W2V_test = padding_transform(x_test, padding_length)
-
-
 
     with open(path + '/data/W2V.pkl', 'wb') as file:
         pickle.dump([W2V_train, W2V_val, W2V_test], file)
@@ -190,8 +198,8 @@ if __name__ == "__main__":
 
     tech_terms_train = (x_train['full_description']).apply(tech_process, args=(important_terms,))
     tech_terms_val = (x_val['description']).apply(tech_process, args=(important_terms,))
-    tech_terms_test = (x_test['job_title']+' '+x_test['description']).apply(tech_process, args=(important_terms,))
-    
+    tech_terms_test = (x_test['job_title'] + ' ' + x_test['description']).apply(tech_process, args=(important_terms,))
+
     feature_names_TECH = important_terms
 
     mlb = MultiLabelBinarizer(classes=important_terms)
@@ -211,24 +219,22 @@ if __name__ == "__main__":
     with open(path + '/Pickles/TECH_model.pkl', 'wb') as file:
         pickle.dump(mlb, file)
 
-
-     
-   # output different encodings encoded data
+    # output different encodings encoded data
     with open(path + '/data/OHE.pkl', 'wb') as file:
-        pickle.dump([OHE_train,OHE_val,OHE_test,feature_names_OHE], file)
+        pickle.dump([OHE_train, OHE_val, OHE_test, feature_names_OHE], file)
     with open(path + '/data/TFIDF.pkl', 'wb') as file:
-        pickle.dump([TFIDF_train,TFIDF_val,TFIDF_test,feature_names_TFIDF], file)
+        pickle.dump([TFIDF_train, TFIDF_val, TFIDF_test, feature_names_TFIDF], file)
     with open(path + '/data/BOG.pkl', 'wb') as file:
-        pickle.dump([BOG_train,BOG_val,BOG_test,feature_names_BOG], file)
+        pickle.dump([BOG_train, BOG_val, BOG_test, feature_names_BOG], file)
     with open(path + '/data/TECH.pkl', 'wb') as file:
-        pickle.dump([TECH_train,TECH_val,TECH_test,feature_names_TECH], file) 
+        pickle.dump([TECH_train, TECH_val, TECH_test, feature_names_TECH], file)
     with open(path + '/data/yTrainValTest.pkl', 'wb') as file:
-        pickle.dump([y_train,y_val,y_test], file) 
+        pickle.dump([y_train, y_val, y_test], file)
     with open(path + '/data/IndexTrainValTest.pkl', 'wb') as file:
-        pickle.dump([train_index,val_index,test_index], file) 
-    
-    # output full data frame
+        pickle.dump([train_index, val_index, test_index], file)
+
+        # output full data frame
     with open(path + '/data/x_data.pkl', 'wb') as file:
-        pickle.dump([x_train,x_val,x_test], file)
-        
+        pickle.dump([x_train, x_val, x_test], file)
+
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
