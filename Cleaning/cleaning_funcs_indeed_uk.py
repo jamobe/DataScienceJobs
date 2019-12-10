@@ -184,3 +184,42 @@ def clean_salary_type(pandas_df_col):
 
     return pandas_df_col.map(times)   
                         
+def region_from_nominatim(string):    
+    import urllib
+    import json
+    import requests, bs4, time
+    '''Use open street map api to extract regions for those places not in lookup
+         Note you are limited to 1 request a second'''
+    string = string +' UK'
+    search_query = urllib.parse.quote(string)
+    url = 'https://nominatim.openstreetmap.org/search/'+search_query+"?format=json&addressdetails=1&limit=1"
+    time.sleep(1)
+    res = requests.get(url)
+    result = json.loads(res.content)
+    try:
+        region = result[0]['address']['state_district'].strip()
+    except:
+        try:
+            region = result[0]['address']['state'].strip()
+        except:
+                string = string.replace("[", " ").replace("]", " ")
+                length = -(len(string.split(' ')))
+                string = string.split(' ')[length]
+                string = string +' UK'
+                search_query = urllib.parse.quote(string)
+                url = 'https://nominatim.openstreetmap.org/search/'+search_query+"?format=json&addressdetails=1&limit=1"
+                res = requests.get(url)
+                result = json.loads(res.content)
+                try:
+                    region = result[0]['address']['state_district'].strip()
+                except:
+                    region = result[0]['address']['state'].strip()
+
+    if region == 'East of England':
+        pass
+    else:
+        region = region.split('England')[0].strip()
+    if region == 'Yorkshire and the Humber':
+        region = 'Yorkshire and The Humber'
+    
+    return region

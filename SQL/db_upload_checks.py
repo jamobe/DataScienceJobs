@@ -86,3 +86,5 @@ if __name__ == "__main__":
 
     if salary_low_check == 0:
         print(" salary highs no more than 3 times salarly lows: check passed")
+    else:
+        print ("salaries violating 1/3 ratio check {}".format(salary_ratio_check.iloc[0,0]))
