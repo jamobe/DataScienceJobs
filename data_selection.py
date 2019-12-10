@@ -55,6 +55,7 @@ if __name__ == "__main__":
     X_val2 = X_val[cols]
     X_test2 = X_test[cols]
     feature_names = cols
+
     
     with open(path + '/data/x_data_for_models.pkl', 'wb') as file:
         pickle.dump([X_train2,X_val2,X_test2], file)

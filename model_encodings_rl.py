@@ -130,7 +130,7 @@ if __name__ == "__main__":
     val_index = x_val['id']
     test_index = x_test['id']
 
-    columns_to_ohe_encode = ['company', 'country', 'region']
+    columns_to_ohe_encode = ['country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
     val_enc = x_val[columns_to_ohe_encode]
     test_enc = x_test[columns_to_ohe_encode]
