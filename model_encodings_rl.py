@@ -129,6 +129,8 @@ if __name__ == "__main__":
     train_index= x_train['id']
     val_index = x_val['id']
     test_index = x_test['id']
+    # train_high_salary = x_train.loc[x_train['salary_average_euros']>70000,'id']
+    # train_low_salary = x_train.loc[x_train['salary_average_euros'] > 70000, 'id']
 
     columns_to_ohe_encode = ['country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
@@ -200,7 +202,7 @@ if __name__ == "__main__":
     TECH_val = mlb.transform(tech_terms_val)
     TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
-
+    import pdb; pdb.set_trace()
     # output models
     with open(path + '/Pickles/OHE_model.pkl', 'wb') as file:
         pickle.dump(enc, file)
@@ -211,8 +213,7 @@ if __name__ == "__main__":
     with open(path + '/Pickles/TECH_model.pkl', 'wb') as file:
         pickle.dump(mlb, file)
 
-
-     
+    import pdb; pdb.set_trace()
    # output different encodings encoded data
     with open(path + '/data/OHE.pkl', 'wb') as file:
         pickle.dump([OHE_train,OHE_val,OHE_test,feature_names_OHE], file)
@@ -230,5 +231,9 @@ if __name__ == "__main__":
     # output full data frame
     with open(path + '/data/x_data.pkl', 'wb') as file:
         pickle.dump([x_train,x_val,x_test], file)
-        
+
+
+
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
+    print(OHE_train.shape)
+    print(TFIDF_train.shape)
