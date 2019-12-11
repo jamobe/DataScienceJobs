@@ -92,26 +92,32 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
+    html.Div([
         html.H1(children='From job descriptions to salary predictions'),
         html.H3(children='by Rachel Lund and Janina Mothes'),
-        html.Div(children='''Dash: A web application framework for Python.'''),
-        dcc.Graph(id='UMAP_jobs'),
-        html.Hr(),
-        html.H4('Predict salary for a job descriptions.'),
-        html.Div('Enter your jobs description here (only English language):'),
-        dcc.Textarea(id='description', placeholder='paste your job description', cols=100, rows=7, required=True),
+    ], style={'textAlign': 'center'}),
+    html.Div([
         html.Div([
-            html.P('Select a country:'),
-            dcc.RadioItems(id='country', options=[{'label': i, 'value': i} for i in all_options.keys()], value='UK'),
-            html.P('Select a region:'),
-            dcc.Dropdown(
-                id='region',
-                style=dict(width='40%')
-            ),
-        ]),
-        html.Button(id='submit', children='predict salary', n_clicks=0),
-        html.Div(id='prediction'),
+            dcc.Graph(id='UMAP_jobs'),
+        ], style={'width': '59hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        html.Div([
+            html.H4(children='Predict salary for a job descriptions:'),
+            html.Div(children='Enter your jobs description here (in English only):'),
+            dcc.Textarea(id='description', value='We need a Python genius', cols=60, rows=20, required=True),
+            html.Div([
+                html.P(children='Select a country:'),
+                dcc.RadioItems(id='country', options=[{'label': i, 'value': i} for i in all_options.keys()], value='UK'),
+                html.P(children='Select a region:'),
+                dcc.Dropdown(
+                    id='region',
+                    style=dict(width='40hh')
+                ),
+            ], style={'padding': 30}),
+            html.Button(id='submit', children='predict salary', n_clicks=0, style={'fontSize': 14}),
+            html.Div(id='prediction', style={'fontSize': 20, 'padding': 50}),
+        ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'})
     ])
+])
 
 @app.callback(
     Output(component_id='region', component_property='options'),
@@ -141,8 +147,8 @@ def predict_umap(description, n_clicks):
         umap_pred = umap_prediction(tfidf_encode)
         data.append(dict(type='scatter', x=umap_pred[:, 0], y=umap_pred[:, 1], mode='markers', marker={'size': 12, "color": 'black', "cmid": 0}))
     return {'data': data,
-            'layout': dict(title='UMAP visualization for: job descriptions', hovermode='closest', xaxis=dict(title=''), yaxis=dict(title=''),
-                           width=800, height=800)}
+            'layout': dict(title='UMAP visualization for: job descriptions', legend=dict(orientation="h"),
+                           hovermode='closest', xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700)}
 
 
 @app.callback(
@@ -165,7 +171,6 @@ def predict_salary(description, country, region, n_clicks):
             _, _, _, feature_names_TFIDF = pickle.load(file)
         X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)),columns=list(feature_names_OHE) + list(feature_names_TFIDF))
         predicted = np.exp(xgb_reg.predict(X))
-        print(type(predicted))
     else:
         predicted = n_clicks
     return 'predicted salary: {} €'.format(predicted)
