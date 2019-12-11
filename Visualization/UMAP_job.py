@@ -18,7 +18,7 @@ def load_data(path):
                             '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
     df = df.dropna(subset=['region', 'country', 'description', 'job_title'], axis=0)
-    df['full_description'] = df['job_title']+ ' ' + df['description']
+    df['full_description'] = df['job_title'] + ' ' + df['description']
     return df
 
 
@@ -82,6 +82,19 @@ def clustering(umap_array):
         pickle.dump(clusterer, file)
     return cluster_labels
 
+def find_label(rf):
+    rf['name'] = 'unknown'
+    for cluster in rf.label.unique():
+        df = rf.loc[rf['label'] == cluster]
+        counts = []
+        names = {'Data Scientist':'Scientist', 'Data Engineer':'Engineer', 'Data Analyst':'Analyst', 'Developer':'Develop'}
+        for keys, values in names.items():
+            total = len(df)
+            counts.append(df['title'].str.contains(values).sum()/total)
+        most_common = np.array(counts).argmax()
+        if np.array(counts).max() >= 0.25:
+            rf.loc[rf['label'] == cluster, 'name'] = list(names)[most_common]
+    return rf
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
@@ -95,6 +108,16 @@ if __name__ == '__main__':
                        'label': [x for x in cluster_labels],
                        'company': df['company'],
                        'region': df['region'],
-                       'title': df['job_title']})
+                       'title': df['job_title'],
+                       'salary': df['salary_average_euros']})
+    rf = find_label(rf)
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
-        pickle.dump([rf, cluster_labels], file)
+        pickle.dump(rf, file)
+    data_dist = []
+    rf = rf.dropna(subset=['salary', 'title'], axis=0)
+    cluster_name = rf.name.unique()
+    for cluster in cluster_name:
+        rf_sub = rf.loc[rf['name'] == cluster]
+        data_dist.append(rf_sub.salary)
+    with open(path + '/Visualization/dist_jobs.pkl', 'wb') as file:
+        pickle.dump([data_dist, cluster_name], file)
