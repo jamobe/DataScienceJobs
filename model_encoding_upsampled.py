@@ -134,12 +134,24 @@ if __name__ == "__main__":
     # Upsample training set
     high_salary = x_train[x_train['salary_average_euros'] >= 90000]
     low_salary = x_train[x_train['salary_average_euros'] < 90000]
+    
+    high_salary2 = x_train[x_train['salary_average_euros'] >= 40000]
+    low_salary2 = x_train[x_train['salary_average_euros'] < 40000]
 
+    # add upper upsample
     upsample = high_salary.sample(n=1000, replace=True)
     upsample_y = y_train[upsample.index]
     x_train = x_train.append(upsample)
     y_train = y_train.append(upsample_y)
 
+    # add lower upsample
+    upsample2 = low_salary2.sample(n=1000, replace=True)
+    upsample2_y = y_train[upsample2.index]
+    x_train = x_train.append(upsample2)
+    y_train = y_train.append(upsample2_y)
+    
+    
+    
     train_index = x_train['id']
     val_index = x_val['id']
     test_index = x_test['id']
