@@ -2,11 +2,13 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_daq as daq
 from dash.dependencies import Input, Output
 import pandas as pd
 import numpy as np
 import pickle
 import os.path
+import plotly.graph_objs as go
 from UMAP_job import spacy_tokenizer, text_process
 
 df_uk = pd.read_csv('https://raw.githubusercontent.com/jamobe/DataScienceJobs/master/data/uk_location_lookup.csv')
@@ -86,6 +88,15 @@ def tech_process(mess, important_terms):
     return [x for x in important_terms if x in nopunc]
 
 
+def close_words(df, word, neighbors, model):
+    close_words = model.wv.most_similar([word], topn=neighbors)
+    word_list = []
+    for i in range(neighbors):
+        word_list.append(close_words[i][0])
+    subdf = df[df['word'].isin(word_list)]
+    return subdf
+
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
@@ -127,18 +138,28 @@ app.layout = html.Div([
     html.Hr(),
     html.Div([
             html.Div([
-                dcc.Graph(id='umap_words')
+                dcc.Graph(id='UMAP_words')
             ], style={'width': '59hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
             html.Div([
                 html.Div([
                     html.H3(children='Find similar words:'),
                     html.Div(children='Enter your word here (in English only):'),
-                    dcc.Input(id='word', value='Python', required=True),
+                    dcc.Input(id='word', value='python', required=True),
+                    html.Div([
+                        html.Div([
+                            daq.Slider(id='number_similar', min=1, max=1000, step=1, value=10,
+                                   marks={1: '1',500: '500',1000: '1000'},
+                                   handleLabel={"showCurrentValue": True, "label": " "}),
+                        ], style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
+                        html.Div([
+                            dcc.Input(id='number_similar_input', value=10, type='number',min=1, max=1000, step=1)
+                        ],style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
+                    ], style={'padding': 30}),
                 ], style={'padding': 30}),
                 html.Button(id='word_submit', children='Find similar words', n_clicks=0, style={'fontSize': 14}),
-                html.Div(id='similar_words_results', style={'fontSize': 20, 'padding': 50}),
-            ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
 
+            ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        html.Div(id='similar_words_results', style={'fontSize': 20, 'padding': 50}),
         ]),
 ])
 
@@ -192,11 +213,52 @@ def predict_salary(description, country, region, n_clicks):
             _, _, _, feature_names_OHE = pickle.load(file)
         with open(path + '/data/TFIDF.pkl', 'rb') as file:
             _, _, _, feature_names_TFIDF = pickle.load(file)
-        X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)),columns=list(feature_names_OHE) + list(feature_names_TFIDF))
+        X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)), columns=list(feature_names_OHE) + list(feature_names_TFIDF))
         predicted = np.exp(xgb_reg.predict(X))
     else:
         predicted = n_clicks
     return 'predicted salary: {} €'.format(predicted)
+
+
+@app.callback(
+    [Output(component_id='UMAP_words', component_property='figure'),
+     Output(component_id='similar_words_results', component_property='children')],
+    [Input(component_id='word', component_property='value'),
+     Input(component_id='number_similar', component_property='value'),
+     Input(component_id='word_submit', component_property='n_clicks')]
+)
+def predict_umap_word(input_word, closest,  n_clicks):
+    with open(path + '/Pickles/word2vec_4.pkl', 'rb') as file:
+        w2v_model = pickle.load(file)
+    with open(path + '/Visualization/umap_words.pkl', 'rb') as file:
+        w2v, word_mapper = pickle.load(file)
+    data_word = [dict(type='scatter', x=w2v.x, y=w2v.y, mode='markers', marker=dict(color='lightgrey'),
+                     text=w2v['word'], name='whole vocabulary')]
+    if n_clicks > 0:
+        input_word = input_word.lower()
+        if input_word in w2v_model.wv.vocab:
+            search_word = w2v.loc[w2v['word'] == input_word]
+            similar_words = close_words(w2v, input_word, closest, w2v_model)
+            data_word.append(dict(type='scatter', x=similar_words.x, y=similar_words.y, mode='markers',
+                                  marker=dict(color='green', size=8), text=similar_words['word'], name='similar words'))
+            data_word.append(dict(type='scatter', x=search_word.x, y=search_word.y, mode='markers',
+                                  marker=dict(color='red', size=12), text=search_word['word'], name=input_word))
+            output = 'Similar words: ' + ', '.join(word for word in similar_words['word'])
+        else:
+            output = 'word not in vocabulary'
+    else:
+        output = ' '
+    figure = go.Figure(data=data_word,layout=dict(title='UMAP visualization for: vocabulary', legend=dict(orientation="h"),
+                           hovermode='closest', xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700))
+    return figure, output
+
+
+@app.callback(
+    Output(component_id='number_similar', component_property='value'),
+    [Input(component_id='number_similar_input', component_property='value')]
+)
+def map_input_slider(value):
+    return value
 
 
 if __name__ == '__main__':
