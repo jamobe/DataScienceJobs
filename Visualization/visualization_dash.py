@@ -249,7 +249,7 @@ def predict_umap_word(input_word, closest,  n_clicks):
             output = 'word not in vocabulary'
     else:
         output = ' '
-    figure = go.Figure(data=data_word,layout=dict(title='UMAP visualization for: vocabulary', legend=dict(orientation="h"),
+    figure = go.Figure(data=data_word, layout=dict(title='UMAP visualization for: vocabulary', title_x=0.5, legend=dict(orientation="h"),
                            hovermode='closest', xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700))
     return figure, output
 
