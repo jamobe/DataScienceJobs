@@ -148,7 +148,7 @@ if __name__ == "__main__":
     OHE_train = enc.transform(train_enc).toarray()
     OHE_val = enc.transform(val_enc).toarray()
     OHE_test = enc.transform(test_enc).toarray()
-    print('Performed One-Hot-Encoding for columns: Company, Country, Region...\n')
+    print('Performed One-Hot-Encoding for columns: Country, Region...\n')
 
     BOG_model = encode_BOG(x_train, min_df=3)
     BOG_train = BOG_model.transform(x_train['full_description']).toarray()
