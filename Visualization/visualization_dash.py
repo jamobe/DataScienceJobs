@@ -226,10 +226,10 @@ def predict_salary(description, country, region, n_clicks):
         with open(path + '/data/TFIDF.pkl', 'rb') as file:
             _, _, _, feature_names_TFIDF = pickle.load(file)
         X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)), columns=list(feature_names_OHE) + list(feature_names_TFIDF))
-        predicted = np.exp(xgb_reg.predict(X))
+        predicted = int(np.exp(xgb_reg.predict(X)))
     else:
         predicted = n_clicks
-    return 'predicted salary: {} €'.format(predicted)
+    return 'predicted salary: %2d€' % predicted
 
 
 @app.callback(
