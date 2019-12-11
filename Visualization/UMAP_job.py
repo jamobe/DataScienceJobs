@@ -67,16 +67,16 @@ def encode_TFIDF(df):
 
 
 def umap_jobs(array):
-    umapper = umap.UMAP(n_neighbors=20, min_dist=0.0, n_components=2, random_state=42)
-    mapper = umapper.fit(array)
+    umapper = umap.UMAP(n_neighbors=16, min_dist=0.0, n_components=2, random_state=42)
+    #mapper = umapper.fit(array)
     umap_array = umapper.fit_transform(array)
     with open(path + '/Visualization/umap_encoder.pkl', 'wb') as file:
-        pickle.dump(mapper, file)
+        pickle.dump(umapper, file)
     return umap_array
 
 
 def clustering(umap_array):
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=150, min_samples=1)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=250, min_samples=5)
     cluster_labels = clusterer.fit_predict(umap_array[:, 0:2])
     with open(path + '/Visualization/cluster_labeler.pkl', 'wb') as file:
         pickle.dump(clusterer, file)
