@@ -9,6 +9,8 @@ import numpy as np
 import pickle
 import os.path
 import plotly.graph_objs as go
+from sqlalchemy import create_engine
+import plotly.figure_factory as ff
 from UMAP_job import spacy_tokenizer, text_process
 
 df_uk = pd.read_csv('https://raw.githubusercontent.com/jamobe/DataScienceJobs/master/data/uk_location_lookup.csv')
@@ -22,10 +24,35 @@ all_options = {
 }
 
 path = os.getcwd()
+country_list=['UK', 'Germany', 'USA']
 
-def create_trace(rf, clusters):
+with open(path + '/Visualization/dist_jobs.pkl', 'rb') as file:
+    job_dist, job_cluster = pickle.load(file)
+
+fig0 = ff.create_distplot(job_dist, job_cluster, bin_size = 5000)
+fig0.update_layout(title="Salary distribution by cluster name", title_x=0.5, xaxis_title='average salary [in €]', yaxis_title='number of jobs')
+
+def load_salary_data(country_list):
+    with open(path + '/data/SQL_access.pkl', 'rb') as file:
+        PASSWORD = pickle.load(file)
+    engine = create_engine('postgresql://postgres:' + PASSWORD +
+                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
+    df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
+    df = df.dropna(subset=['salary_average_euros', 'region', 'country', 'description', 'job_title'], axis=0)
+    data_dist = []
+    for country in country_list:
+        rf = df.loc[df['country'] == country]
+        data_dist.append(rf.salary_average_euros)
+    return data_dist
+
+data_dist = load_salary_data(country_list)
+fig = ff.create_distplot(data_dist, country_list, bin_size = 5000)
+fig.update_layout(title="Salary distribution by country", title_x=0.5, xaxis_title='average salary [in €]', yaxis_title='number of jobs')
+
+
+def create_trace(rf):
     data = []
-    rf = find_label(rf)
+    clusters = rf.label.unique()
     for idx, cluster in enumerate(clusters):
         rf_sub = rf.loc[rf['label'] == cluster]
         if cluster == -1:
@@ -33,22 +60,6 @@ def create_trace(rf, clusters):
         else:
             data.append(dict(type='scatter', x=rf_sub.x, y=rf_sub.y, mode='markers', marker={"color": cluster, "cauto": 0}, hovertext=rf_sub['title'], name=str(rf_sub['name'].unique()[0])))
     return data
-
-
-def find_label(rf):
-    rf['name'] = 'unknown'
-    for cluster in rf.label.unique():
-        df = rf.loc[rf['label'] == cluster]
-        counts = []
-        names = {'Data Scientist':'Scientist', 'Data Engineer':'Engineer', 'Data Analyst':'Analyst', 'Developer':'Develop'}
-        for keys, values in names.items():
-            total = len(df)
-            counts.append(df['title'].str.contains(values).sum()/total)
-        most_common = np.array(counts).argmax()
-        if np.array(counts).max() >= 0.25:
-            rf.loc[rf['label'] == cluster, 'name']= list(names)[most_common]
-    return rf
-
 
 def TFIDF_encoding(df):
     with open(path + '/Pickles/TFIDF_model.pkl', 'rb') as file:
@@ -128,10 +139,10 @@ app.layout = html.Div([
 
     html.Div([
         html.Div([
-            dcc.Graph(id='salary_distribution_jobtitle')
+            dcc.Graph(id='salary_distribution_jobtitle', figure=fig0)
         ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
         html.Div([
-            dcc.Graph(id='salary_distribution_country')
+            dcc.Graph(id='salary_distribution_country', figure=fig)
         ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
 
     ]),
@@ -184,8 +195,8 @@ def set_region_value(available_options):
 )
 def predict_umap(description, n_clicks):
     with open(path + '/Visualization/umap_jobs.pkl', 'rb') as file:
-        rf, cluster_labels = pickle.load(file)
-    data = create_trace(rf, np.unique(cluster_labels))
+        rf = pickle.load(file)
+    data = create_trace(rf)
     predict = pd.DataFrame({'description': [description]})
     if n_clicks > 0:
         tfidf_encode = TFIDF_encoding(predict)
