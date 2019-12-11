@@ -86,21 +86,15 @@ def clustering(umap_array):
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     path = os.getcwd()
-
     df = load_data(path)
-
     encoded_array = encode_TFIDF(df)
-
     umap_array = umap_jobs(encoded_array)
-
     cluster_labels = clustering(umap_array)
-
     rf = pd.DataFrame({'x': [x for x in umap_array[:, 0]],
                        'y': [y for y in umap_array[:, 1]],
                        'label': [x for x in cluster_labels],
                        'company': df['company'],
                        'region': df['region'],
                        'title': df['job_title']})
-
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump([rf, cluster_labels], file)
