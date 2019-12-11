@@ -108,15 +108,38 @@ app.layout = html.Div([
                 html.P(children='Select a country:'),
                 dcc.RadioItems(id='country', options=[{'label': i, 'value': i} for i in all_options.keys()], value='UK'),
                 html.P(children='Select a region:'),
-                dcc.Dropdown(
-                    id='region',
-                    style=dict(width='40hh')
-                ),
+                dcc.Dropdown(id='region',style=dict(width='40hh')),
             ], style={'padding': 30}),
             html.Button(id='submit', children='predict salary', n_clicks=0, style={'fontSize': 14}),
             html.Div(id='prediction', style={'fontSize': 20, 'padding': 50}),
         ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'})
-    ])
+    ]),
+
+    html.Div([
+        html.Div([
+            dcc.Graph(id='salary_distribution_jobtitle')
+        ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        html.Div([
+            dcc.Graph(id='salary_distribution_country')
+        ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+
+    ]),
+    html.Hr(),
+    html.Div([
+            html.Div([
+                dcc.Graph(id='umap_words')
+            ], style={'width': '59hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+            html.Div([
+                html.Div([
+                    html.H3(children='Find similar words:'),
+                    html.Div(children='Enter your word here (in English only):'),
+                    dcc.Input(id='word', value='Python', required=True),
+                ], style={'padding': 30}),
+                html.Button(id='word_submit', children='Find similar words', n_clicks=0, style={'fontSize': 14}),
+                html.Div(id='similar_words_results', style={'fontSize': 20, 'padding': 50}),
+            ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+
+        ]),
 ])
 
 @app.callback(
