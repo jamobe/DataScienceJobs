@@ -146,13 +146,14 @@ app.layout = html.Div([
                     html.Div(children='Enter your word here (in English only):'),
                     dcc.Input(id='word', value='python', required=True),
                     html.Div([
+                        html.Div(children='Select number of similar words:'),
                         html.Div([
-                            daq.Slider(id='number_similar', min=1, max=1000, step=1, value=10,
-                                   marks={1: '1',500: '500',1000: '1000'},
+                            daq.Slider(id='number_similar', min=1, max=100, step=1, value=10,
+                                   marks={1: '1',50: '50',100: '100'},
                                    handleLabel={"showCurrentValue": True, "label": " "}),
                         ], style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
                         html.Div([
-                            dcc.Input(id='number_similar_input', value=10, type='number',min=1, max=1000, step=1)
+                            dcc.Input(id='number_similar_input', value=10, type='number',min=1, max=100, step=1)
                         ],style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
                     ], style={'padding': 30}),
                 ], style={'padding': 30}),
