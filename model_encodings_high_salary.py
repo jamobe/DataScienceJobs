@@ -12,6 +12,7 @@ import spacy
 import re
 from spacy.lang.en import English
 import re
+import pdb
 
 
 def text_process(mess):
@@ -109,7 +110,7 @@ if __name__ == "__main__":
         PASSWORD = pickle.load(file)
     engine = create_engine('postgresql://postgres:' + PASSWORD +
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where language like'en'", engine)
+    df = pd.read_sql("select * from all_data where language like'en' and salary_average_euros>=70000", engine)
     print('Loaded data from SQL database...\n')
     df['full_description'] = df['job_title'] + ' ' + df['description']
     df1 = df.dropna(subset=['salary_average_euros', 'region', 'country', 'train_test_label',
@@ -118,50 +119,18 @@ if __name__ == "__main__":
     df1 = df1.reset_index(drop=True)
 
     # first split the train from the test as denoted in the database
-    df_train = df1.loc[df1['train_test_label'] == 'train']
+    x_train= df1.loc[df1['train_test_label'] == 'train']
+    pdb.set_trace()
 
+    # then separate out the validation set based on the all model split
+    with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:
+        val_index = pickle.load(file)[1]
 
-    x_test = df1.loc[df1['train_test_label'] == 'test']
-    df_train_y = df_train['salary_average_euros']
-    y_test = x_test['salary_average_euros']
+    x_train = x_train[~x_train['id'].isin(val_index)]
+    train_high_index = x_train['id']
+    #test_index = x_test['id']
+    y_train = x_train['salary_average_euros']
 
-    # then split the train data into train and validation
-    x_train, x_val, y_train, y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
-    print('Split Train, Validation and Test data...\n')
-
-    #train_index = x_train['id']
-
-    # Upsample training set
-    high_salary = x_train[x_train['salary_average_euros'] >= 100000]
-    low_salary = x_train[x_train['salary_average_euros'] < 90000]
-    
-    #high_salary2 = x_train[x_train['salary_average_euros'] >= 40000]
-    #low_salary2 = x_train[x_train['salary_average_euros'] < 40000]
-
-    # add upper upsample
-    upsample = high_salary.sample(n=1000, replace=True)
-    upsample_y = y_train[upsample.index]
-    x_train = x_train.append(upsample)
-    y_train = y_train.append(upsample_y)
-
-    # add lower upsample
-    #upsample2 = low_salary2.sample(n=1000, replace=True)
-    #upsample2_y = y_train[upsample2.index]
-    #x_train = x_train.append(upsample2)
-    #y_train = y_train.append(upsample2_y)
-    
-    
-    
-    train_index = x_train['id']
-    val_index = x_val['id']
-    test_index = x_test['id']
-
-    columns_to_ohe_encode = ['country', 'region']
-    train_enc = x_train[columns_to_ohe_encode]
-    val_enc = x_val[columns_to_ohe_encode]
-    test_enc = x_test[columns_to_ohe_encode]
-
-    # only train encoding on train data
     #import encodings from all data
 
     with open(path + '/Pickles/OHE_model.pkl', 'rb') as file:
@@ -173,43 +142,33 @@ if __name__ == "__main__":
     with open(path + '/Pickles/TECH_model.pkl', 'rb') as file:
         mlb = pickle.load(file)
 
+
+    columns_to_ohe_encode = ['country', 'region']
+    train_enc = x_train[columns_to_ohe_encode]
+    #val_enc = x_val[columns_to_ohe_encode]
+    #test_enc = x_test[columns_to_ohe_encode]
+
     # get the names of the OHE features
-    feature_names_OHE = list(enc.get_feature_names(columns_to_ohe_encode))
+    #feature_names_OHE = list(enc.get_feature_names(columns_to_ohe_encode))
 
     # create encoding
     OHE_train = enc.transform(train_enc).toarray()
-    OHE_val = enc.transform(val_enc).toarray()
-    OHE_test = enc.transform(test_enc).toarray()
+    #OHE_val = enc.transform(val_enc).toarray()
+    #OHE_test = enc.transform(test_enc).toarray()
     print('Performed One-Hot-Encoding for columns: Company, Country, Region...\n')
 
+
     BOG_train = BOG_model.transform(x_train['full_description']).toarray()
-    BOG_val = BOG_model.transform(x_val['full_description']).toarray()
-    BOG_test = BOG_model.transform(x_test['full_description']).toarray()
-    feature_names_BOG = list(BOG_model.get_feature_names())
+   # BOG_val = BOG_model.transform(x_val['full_description']).toarray()
+    #BOG_test = BOG_model.transform(x_test['full_description']).toarray()
+    #feature_names_BOG = list(BOG_model.get_feature_names())
+
 
     TFIDF_train = TFIDF_model.transform(x_train['full_description']).toarray()
-    TFIDF_val = TFIDF_model.transform(x_val['full_description']).toarray()
-    TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
-    feature_names_TFIDF = list(TFIDF_model.get_feature_names())
+    #TFIDF_val = TFIDF_model.transform(x_val['full_description']).toarray()
+    #TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
+    #feature_names_TFIDF = list(TFIDF_model.get_feature_names())
 
-    with open(path + '/Pickles/word2vec_2.pkl', 'rb') as file:
-        w2v_model = pickle.load(file)
-
-    x_train = w2v_clean_encode(x_train, w2v_model)
-    x_val = w2v_clean_encode(x_val, w2v_model)
-    x_test = w2v_clean_encode(x_test, w2v_model)
-
-    x_train.loc[:, 'lengths'] = x_train.loc[:, 'description_list'].apply(len)
-    vocab_size = len(w2v_model.wv.vocab)
-    embedding_dim = w2v_model.wv.vector_size
-    padding_length = int(round(x_train['lengths'].mean()))
-
-    W2V_train = padding_transform(x_train, padding_length)
-    W2V_val = padding_transform(x_val, padding_length)
-    W2V_test = padding_transform(x_test, padding_length)
-
-    with open(path + '/data/W2V.pkl', 'wb') as file:
-        pickle.dump([W2V_train, W2V_val, W2V_test], file)
 
     tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
     categories_to_include = ['front_end-technologies', 'databases', 'software-infrastructure-devops', 'data-science',
@@ -219,47 +178,35 @@ if __name__ == "__main__":
     important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
     tech_terms_train = (x_train['full_description']).apply(tech_process, args=(important_terms,))
-    tech_terms_val = (x_val['description']).apply(tech_process, args=(important_terms,))
-    tech_terms_test = (x_test['job_title'] + ' ' + x_test['description']).apply(tech_process, args=(important_terms,))
+    #tech_terms_val = (x_val['description']).apply(tech_process, args=(important_terms,))
+    #tech_terms_test = (x_test['job_title'] + ' ' + x_test['description']).apply(tech_process, args=(important_terms,))
 
-    feature_names_TECH = important_terms
+    #feature_names_TECH = important_terms
 
     mlb = MultiLabelBinarizer(classes=important_terms)
     mlb.fit(tech_terms_train)
     TECH_train = mlb.transform(tech_terms_train)
-    TECH_val = mlb.transform(tech_terms_val)
-    TECH_test = mlb.transform(tech_terms_test)
+    #TECH_val = mlb.transform(tech_terms_val)
+    #TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
 
-    # output models
-    # with open(path + '/Pickles/OHE_model.pkl', 'wb') as file:
-    #     pickle.dump(enc, file)
-    # with open(path + '/Pickles/TFIDF_model.pkl', 'wb') as file:
-    #     pickle.dump(TFIDF_model, file)
-    # with open(path + '/Pickles/BOG_modelpkl', 'wb') as file:
-    #     pickle.dump(BOG_model, file)
-    # with open(path + '/Pickles/TECH_model.pkl', 'wb') as file:
-    #     pickle.dump(mlb, file)
-
+    import pdb; pdb.set_trace()
     # output different encodings encoded data
-    with open(path + '/data/OHE_upsampled.pkl', 'wb') as file:
-        pickle.dump([OHE_train, OHE_val, OHE_test, feature_names_OHE], file)
-    with open(path + '/data/TFIDF_upsampled.pkl', 'wb') as file:
-        pickle.dump([TFIDF_train, TFIDF_val, TFIDF_test, feature_names_TFIDF], file)
-    with open(path + '/data/BOG_upsampled.pkl', 'wb') as file:
-        pickle.dump([BOG_train, BOG_val, BOG_test, feature_names_BOG], file)
-    with open(path + '/data/TECH_upsampled.pkl', 'wb') as file:
-        pickle.dump([TECH_train, TECH_val, TECH_test, feature_names_TECH], file)
-    with open(path + '/data/yTrainValTest_upsampled.pkl', 'wb') as file:
-        pickle.dump([y_train, y_val, y_test], file)
-    with open(path + '/data/IndexTrainValTest_upsampled.pkl', 'wb') as file:
-        pickle.dump([train_index, val_index, test_index], file)
+    with open(path + '/data/OHE_high_salary.pkl', 'wb') as file:
+        pickle.dump(OHE_train, file)
+    with open(path + '/data/TFIDF_high_salary.pkl', 'wb') as file:
+        pickle.dump(TFIDF_train, file)
+    with open(path + '/data/BOG_high_salary.pkl', 'wb') as file:
+        pickle.dump(BOG_train, file)
+    with open(path + '/data/TECH_high_salary.pkl', 'wb') as file:
+        pickle.dump(TECH_train, file)
+    with open(path + '/data/yTrainValTest_high_salary.pkl', 'wb') as file:
+        pickle.dump(y_train, file)
+    with open(path + '/data/IndexTrainValTest_high_salary.pkl', 'wb') as file:
+        pickle.dump(train_high_index, file)
 
         # output full data frame
-    with open(path + '/data/x_data_upsampled.pkl', 'wb') as file:
-        pickle.dump([x_train, x_val, x_test], file)
+    with open(path + '/data/x_data_high_salary.pkl', 'wb') as file:
+        pickle.dump(x_train, file)
 
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
-
-    print(OHE_train.shape)
-    print(TFIDF_train.shape)
