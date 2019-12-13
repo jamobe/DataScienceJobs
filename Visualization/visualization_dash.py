@@ -3,6 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_daq as daq
+import dash_table
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import numpy as np
@@ -41,10 +42,10 @@ def create_trace(rf, cluster_column):
         df = rf.loc[rf[cluster_column] == cluster]
         if cluster in ['unclassified', 0]:
             data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
-                             text=df['title'], name='unclassified'))
+                             text=df['title'].map(str)+ '<br>' + df['salary'].map(str) + '€', name='unclassified'))
         else:
             data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
-                             text=df['title'], name=str(cluster)))
+                             text=df['title'].map(str)+ '<br>' + df['salary'].map(str)+ '€', name=str(cluster)))
     return data
 
 
@@ -98,7 +99,7 @@ all_options = {
 path = os.getcwd()
 
 with open(path + '/Visualization/plots_density.pkl', 'rb') as file:
-    fig0, all_fig, cluster_names = pickle.load(file)
+    fig0, all_fig, cluster_names, df_overview = pickle.load(file)
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -122,7 +123,7 @@ app.layout = html.Div([
             html.Div([
                 html.P(children='Select a country:'),
                 dcc.RadioItems(id='country',
-                               options=[{'label': i, 'value': i} for i in all_options.keys()], value='UK'),
+                               options=[{'label': i, 'value': i} for i in all_options.keys()], value='Germany'),
                 html.P(children='Select a region:'),
                 dcc.Dropdown(id='region', style=dict(width='40hh')),
             ], style={'padding': 30}),
@@ -130,7 +131,6 @@ app.layout = html.Div([
             html.Div(id='prediction', style={'fontSize': 20, 'padding': 50}),
         ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'})
     ]),
-
 
 
     html.Div([
@@ -143,6 +143,9 @@ app.layout = html.Div([
         dcc.Dropdown(id='select_job_type', value=5,
                      options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
                      style={'width': '40%'}),
+        # dash_table.DataTable(id='statistics_table', columns=[{"name": i, "id": i} for i in df_overview.columns],
+        #                     data=df_overview.to_dict('records'), style_cell={'maxWidth': 0, 'overflow':'hidden',
+        #                     'textOverflow': 'ellipsis'})
     ]),
     html.Hr(),
     html.Div([

@@ -110,13 +110,20 @@ def create_density_plots(df):
                    'Data Engineer': 'rgb(148, 103, 189)'}
     color_list = [color for color in colors_dict.values()]
     data_dist = []
+    cluster_overview = pd.DataFrame(columns=['role', 'mean salary','median salary', 'min salary',
+                                             'max salary', 'counts'])
     df = df.dropna(subset=['salary', 'title'], axis=0)
     cluster_names = df.name.unique()
     all_figures = []
-    for cluster in cluster_names:
+    for idx, cluster in enumerate(cluster_names):
         df_cluster = df.loc[rf['name'] == cluster]
         data_dist.append(df_cluster.salary)
-
+        cluster_overview.loc[idx, 'role'] = cluster
+        cluster_overview.loc[idx, 'mean salary'] = df_cluster.salary.mean()
+        cluster_overview.loc[idx, 'median salary'] = df_cluster.salary.median()
+        cluster_overview.loc[idx, 'min salary'] = df_cluster.salary.min()
+        cluster_overview.loc[idx, 'max salary'] = df_cluster.salary.max()
+        cluster_overview.loc[idx, 'counts'] = len(df_cluster.salary)
         country_list = ['UK', 'Germany', 'USA']
         data_dist_country = []
         for country in country_list:
@@ -127,6 +134,13 @@ def create_density_plots(df):
         fig.update_layout(title="Salary distribution by country for " + cluster, title_x=0.5,
                           xaxis_title='salary [in €]', yaxis_title='density')
         all_figures.append(fig)
+
+    cluster_overview.loc[len(cluster_names+1), 'role'] = 'all'
+    cluster_overview.loc[len(cluster_names+1), 'mean salary'] = df.salary.mean()
+    cluster_overview.loc[len(cluster_names+1), 'median salary'] = df.salary.median()
+    cluster_overview.loc[len(cluster_names+1), 'min salary'] = df.salary.min()
+    cluster_overview.loc[len(cluster_names+1), 'max salary'] = df.salary.max()
+    cluster_overview.loc[len(cluster_names+1), 'counts'] = len(df.salary)
 
     country_list = ['UK', 'Germany', 'USA']
     data_dist_country = []
@@ -143,7 +157,7 @@ def create_density_plots(df):
     figure0 = ff.create_distplot(data_dist, cluster_names, colors=color_list, show_hist=False, bin_size=5000)
     figure0.update_layout(title="Salary distribution by cluster name", title_x=0.5, xaxis_title='salary [in €]',
                           yaxis_title='density')
-    return figure0, all_figures, output_name
+    return figure0, all_figures, output_name, cluster_overview
 
 
 def create_word_umap(input_path):
@@ -185,10 +199,10 @@ if __name__ == '__main__':
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)
 
-    fig0, all_fig, cluster_name = create_density_plots(rf)
+    fig0, all_fig, cluster_name, df_overview = create_density_plots(rf)
 
     with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-        pickle.dump([fig0, all_fig, cluster_name], file)
+        pickle.dump([fig0, all_fig, cluster_name, df_overview], file)
 
     w2v, word_mapper = create_word_umap(path)
 
