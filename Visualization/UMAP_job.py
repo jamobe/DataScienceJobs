@@ -180,9 +180,8 @@ if __name__ == '__main__':
                        'country': df['country'],
                        'title': df['job_title'],
                        'salary': df['salary_average_euros'],
-                       'full_description': df['full_description'],
-                       'salary_indicator': [0 if np.isnan(x) else 1 for x in df['salary_average_euros']]})
-    print(rf['salary','salary_indicator'])
+                       'full_description': df['full_description'],})
+
     rf = find_label(rf)
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)

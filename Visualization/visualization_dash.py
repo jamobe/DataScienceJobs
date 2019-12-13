@@ -14,10 +14,11 @@ from UMAP_job import spacy_tokenizer, text_process
 import warnings
 warnings.filterwarnings("ignore")
 
+
 def load_salary_data(country_list):
     with open(path + '/data/SQL_access.pkl', 'rb') as file:
-        PASSWORD = pickle.load(file)
-    engine = create_engine('postgresql://postgres:' + PASSWORD +
+        password = pickle.load(file)
+    engine = create_engine('postgresql://postgres:' + password +
                             '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
     df = df.dropna(subset=['salary_average_euros', 'region', 'country', 'description', 'job_title'], axis=0)
@@ -38,9 +39,11 @@ def create_trace(rf, cluster_column):
         colors = colors_dict[cluster]
         df = rf.loc[rf[cluster_column] == cluster]
         if cluster in ['unclassified', 0]:
-            data.append(dict(type='scatter', x=df.x, y=df.y, mode = 'markers', marker={'color':colors}, text=df['title'], name = 'unclassified'))
+            data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color':colors},
+                             text=df['title'], name = 'unclassified'))
         else:
-            data.append(dict(type='scatter', x=df.x, y=df.y, mode = 'markers', marker={'color': colors}, text=df['title'], name = str(cluster)))
+            data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
+                             text=df['title'], name = str(cluster)))
     return data
 
 
@@ -145,8 +148,9 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(id='salary_distribution_jobtitle', figure=fig0)
         ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
-        dcc.Dropdown(id='select_job_type', value=5, options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
-                         style={'width':'40%'}),
+        dcc.Dropdown(id='select_job_type', value=5,
+                     options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
+                     style={'width':'40%'}),
     ]),
     html.Hr(),
     html.Div([
@@ -194,16 +198,13 @@ def set_region_value(available_options):
 
 
 @app.callback(
-    [Output(component_id='prediction', component_property='children'),
-     Output(component_id='UMAP_jobs', component_property='figure')],
+    Output(component_id='prediction', component_property='children'),
     [Input(component_id='submit', component_property='n_clicks')],
     state=[State(component_id='description', component_property='value'),
      State(component_id='country', component_property='value'),
      State(component_id='region', component_property='value')]
 )
 def predict_salary(n_clicks, description, country, region):
-    with open(path + '/Visualization/umap_jobs.pkl', 'rb') as file:
-        rf = pickle.load(file)
     with open(path + '/Pickles/xgb_model.pkl', 'rb') as file:
         xgb_reg = pickle.load(file)
     with open(path + '/data/OHE.pkl', 'rb') as file:
@@ -211,7 +212,6 @@ def predict_salary(n_clicks, description, country, region):
     with open(path + '/data/TFIDF.pkl', 'rb') as file:
          _, _, _, feature_names_TFIDF = pickle.load(file)
 
-    data = create_trace(rf,'name')
     if n_clicks>0:
         predict = pd.DataFrame({'description': [description], 'country': [country], 'region': [region]})
         tfidf_encode = TFIDF_encoding(predict)
@@ -219,22 +219,36 @@ def predict_salary(n_clicks, description, country, region):
         X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)),
                          columns=list(feature_names_OHE) + list(feature_names_TFIDF))
         predicted = round(int(np.exp(xgb_reg.predict(X))) / 500) * 500
+    else:
+        predicted = 0
+    return 'predicted salary: %2d€' % predicted
 
-        stack_predict = pd.DataFrame(np.repeat(predict.values, 15, axis=0))
-        stack_predict.columns = predict.columns
+
+@app.callback(
+    Output(component_id='UMAP_jobs', component_property='figure'),
+    [Input(component_id='submit', component_property='n_clicks')],
+    state=[State(component_id='description', component_property='value')]
+)
+def update_umap(n_clicks, description):
+    with open(path + '/Visualization/umap_jobs.pkl', 'rb') as file:
+        rf = pickle.load(file)
+
+    data = create_trace(rf,'name')
+    if n_clicks>0:
+        predict_job = pd.DataFrame({'description': [description]})
+        stack_predict = pd.DataFrame(np.repeat(predict_job.values, 15, axis=0))
+        stack_predict.columns = predict_job.columns
         tfidf_encode_stack = TFIDF_encoding(stack_predict)
         umap_pred = umap_prediction(tfidf_encode_stack)
         x_mean = np.median(umap_pred[:, 0]).reshape(-1)
         y_mean = np.median(umap_pred[:, 1]).reshape(-1)
         data.append(dict(type='scatter', x=x_mean, y=y_mean, mode='markers', name='your job',
                              marker={'size': 10, "color": 'black', "cmid": 0}))
-    else:
-        predicted = 0
 
     umap_figure = go.Figure(data=data, layout=dict(title='UMAP visualization for: job descriptions',
                                                    legend=dict(orientation="h"), hovermode='closest',
                                                    xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700))
-    return 'predicted salary: %2d€' % predicted, umap_figure
+    return umap_figure
 
 
 @app.callback(
