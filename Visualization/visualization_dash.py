@@ -10,16 +10,16 @@ import pickle
 import os.path
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
-from UMAP_job import spacy_tokenizer, text_process
+
 import warnings
 warnings.filterwarnings("ignore")
 
 
 def load_salary_data(country_list):
-    with open(path + '/data/SQL_access.pkl', 'rb') as file:
-        password = pickle.load(file)
+    with open(path + '/data/SQL_access.pkl', 'rb') as password_file:
+        password = pickle.load(password_file)
     engine = create_engine('postgresql://postgres:' + password +
-                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
+                           '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
     df = df.dropna(subset=['salary_average_euros', 'region', 'country', 'description', 'job_title'], axis=0)
     data_dist = []
@@ -39,52 +39,43 @@ def create_trace(rf, cluster_column):
         colors = colors_dict[cluster]
         df = rf.loc[rf[cluster_column] == cluster]
         if cluster in ['unclassified', 0]:
-            data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color':colors},
-                             text=df['title'], name = 'unclassified'))
+            data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
+                             text=df['title'], name='unclassified'))
         else:
             data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
-                             text=df['title'], name = str(cluster)))
+                             text=df['title'], name=str(cluster)))
     return data
 
 
-def TFIDF_encoding(df):
-    with open(path + '/Pickles/TFIDF_model.pkl', 'rb') as file:
-        TFIDF_model = pickle.load(file)
-    tfidf_array = TFIDF_model.transform(df['description']).toarray()
+def tfidf_encoding(df):
+    with open(path + '/Pickles/TFIDF_model.pkl', 'rb') as tfidf_file:
+        tfidf_model = pickle.load(tfidf_file)
+    tfidf_array = tfidf_model.transform(df['description']).toarray()
     return tfidf_array
 
 
-def OHE_encoding(df):
-    with open(path + '/Pickles/OHE_model.pkl', 'rb') as file:
-        OHE_model = pickle.load(file)
-    OHE_array = OHE_model.transform(df.loc[:,['country', 'region']]).toarray()
-    return OHE_array
+def ohe_encoding(df):
+    with open(path + '/Pickles/OHE_model.pkl', 'rb') as ohe_file:
+        ohe_model = pickle.load(ohe_file)
+    ohe_array = ohe_model.transform(df.loc[:, ['country', 'region']]).toarray()
+    return ohe_array
 
 
 def umap_prediction(tfidf_array):
-    with open(path + '/Visualization/umap_encoder.pkl', 'rb') as file:
-        mapper = pickle.load(file)
+    with open(path + '/Visualization/umap_encoder.pkl', 'rb') as umap_file:
+        mapper = pickle.load(umap_file)
     umap_array = mapper.transform(tfidf_array)
     return umap_array
 
 
 def cluster_prediction(umap_array):
-    with open(path + '/Visualization/cluster_labeler.pkl', 'rb') as file:
-        clusterer = pickle.load(file)
+    with open(path + '/Visualization/cluster_labeler.pkl', 'rb') as cluster_file:
+        clusterer = pickle.load(cluster_file)
     cluster_labels = clusterer.fit_predict(umap_array[:, 0:2])
     return cluster_labels
 
 
-def tech_process(mess, important_terms):
-    mess = mess.lower()
-    mess = mess.replace("\\n"," ")
-    punctuations = '[].:;"()/\\'
-    nopunc = [char for char in mess if char not in punctuations]
-    nopunc = ''.join(nopunc)
-    return [x for x in important_terms if x in nopunc]
-
-
-def close_words(df, word, neighbors, model):
+def find_close_words(df, word, neighbors, model):
     close_words = model.wv.most_similar([word], topn=neighbors)
     word_list = []
     for i in range(neighbors):
@@ -132,7 +123,7 @@ app.layout = html.Div([
                 dcc.RadioItems(id='country',
                                options=[{'label': i, 'value': i} for i in all_options.keys()], value='UK'),
                 html.P(children='Select a region:'),
-                dcc.Dropdown(id='region',style=dict(width='40hh')),
+                dcc.Dropdown(id='region', style=dict(width='40hh')),
             ], style={'padding': 30}),
             html.Button(id='submit', children='predict salary', n_clicks=0, style={'fontSize': 14}),
             html.Div(id='prediction', style={'fontSize': 20, 'padding': 50}),
@@ -150,7 +141,7 @@ app.layout = html.Div([
         ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
         dcc.Dropdown(id='select_job_type', value=5,
                      options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
-                     style={'width':'40%'}),
+                     style={'width': '40%'}),
     ]),
     html.Hr(),
     html.Div([
@@ -166,18 +157,18 @@ app.layout = html.Div([
                         html.Div(children='Select number of similar words:'),
                         html.Div([
                             daq.Slider(id='number_similar', min=1, max=100, step=1, value=10,
-                                   marks={1: '1',50: '50',100: '100'},
-                                   handleLabel={"showCurrentValue": True, "label": " "}),
-                        ], style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
+                                       marks={1: '1', 50: '50', 100: '100'},
+                                       handleLabel={"showCurrentValue": True, "label": " "}),
+                        ], style={'display': 'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
                         html.Div([
-                            dcc.Input(id='number_similar_input', value=10, type='number',min=1, max=100, step=1)
-                        ],style={'display':'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
+                            dcc.Input(id='number_similar_input', value=10, type='number', min=1, max=100, step=1)
+                        ], style={'display': 'inline-block', 'padding': 30, 'vertical-align': 'middle'}),
                     ], style={'padding': 30}),
                 ], style={'padding': 30}),
                 html.Button(id='word_submit', children='Find similar words', n_clicks=0, style={'fontSize': 14}),
 
             ], style={'width': '39hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
-        html.Div(id='similar_words_results', style={'fontSize': 20, 'padding': 50}),
+            html.Div(id='similar_words_results', style={'fontSize': 20, 'padding': 50}),
         ]),
 ])
 
@@ -201,24 +192,24 @@ def set_region_value(available_options):
     Output(component_id='prediction', component_property='children'),
     [Input(component_id='submit', component_property='n_clicks')],
     state=[State(component_id='description', component_property='value'),
-     State(component_id='country', component_property='value'),
-     State(component_id='region', component_property='value')]
+           State(component_id='country', component_property='value'),
+           State(component_id='region', component_property='value')]
 )
 def predict_salary(n_clicks, description, country, region):
-    with open(path + '/Pickles/xgb_model.pkl', 'rb') as file:
-        xgb_reg = pickle.load(file)
-    with open(path + '/data/OHE.pkl', 'rb') as file:
-        _, _, _, feature_names_OHE = pickle.load(file)
-    with open(path + '/data/TFIDF.pkl', 'rb') as file:
-         _, _, _, feature_names_TFIDF = pickle.load(file)
+    with open(path + '/Pickles/xgb_model.pkl', 'rb') as xgb_file:
+        xgb_reg = pickle.load(xgb_file)
+    with open(path + '/data/OHE.pkl', 'rb') as ohe_file:
+        _, _, _, feature_names_ohe = pickle.load(ohe_file)
+    with open(path + '/data/TFIDF.pkl', 'rb') as tfidf_file:
+        _, _, _, feature_names_tfidf = pickle.load(tfidf_file)
 
-    if n_clicks>0:
+    if n_clicks > 0:
         predict = pd.DataFrame({'description': [description], 'country': [country], 'region': [region]})
-        tfidf_encode = TFIDF_encoding(predict)
-        ohe_encode = OHE_encoding(predict)
-        X = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)),
-                         columns=list(feature_names_OHE) + list(feature_names_TFIDF))
-        predicted = round(int(np.exp(xgb_reg.predict(X))) / 500) * 500
+        tfidf_encode = tfidf_encoding(predict)
+        ohe_encode = ohe_encoding(predict)
+        x = pd.DataFrame(np.hstack((ohe_encode, tfidf_encode)),
+                         columns=list(feature_names_ohe) + list(feature_names_tfidf))
+        predicted = round(int(np.exp(xgb_reg.predict(x))) / 500) * 500
     else:
         predicted = 0
     return 'predicted salary: %2d€' % predicted
@@ -230,20 +221,20 @@ def predict_salary(n_clicks, description, country, region):
     state=[State(component_id='description', component_property='value')]
 )
 def update_umap(n_clicks, description):
-    with open(path + '/Visualization/umap_jobs.pkl', 'rb') as file:
-        rf = pickle.load(file)
+    with open(path + '/Visualization/umap_jobs.pkl', 'rb') as umap_file:
+        rf = pickle.load(umap_file)
 
-    data = create_trace(rf,'name')
-    if n_clicks>0:
+    data = create_trace(rf, 'name')
+    if n_clicks > 0:
         predict_job = pd.DataFrame({'description': [description]})
         stack_predict = pd.DataFrame(np.repeat(predict_job.values, 15, axis=0))
         stack_predict.columns = predict_job.columns
-        tfidf_encode_stack = TFIDF_encoding(stack_predict)
+        tfidf_encode_stack = tfidf_encoding(stack_predict)
         umap_pred = umap_prediction(tfidf_encode_stack)
         x_mean = np.median(umap_pred[:, 0]).reshape(-1)
         y_mean = np.median(umap_pred[:, 1]).reshape(-1)
         data.append(dict(type='scatter', x=x_mean, y=y_mean, mode='markers', name='your job',
-                             marker={'size': 10, "color": 'black', "cmid": 0}))
+                         marker={'size': 10, "color": 'black', "cmid": 0}))
 
     umap_figure = go.Figure(data=data, layout=dict(title='UMAP visualization for: job descriptions',
                                                    legend=dict(orientation="h"), hovermode='closest',
@@ -264,20 +255,20 @@ def select_density_plot(selected_job_type):
      Output(component_id='similar_words_results', component_property='children')],
     [Input(component_id='word_submit', component_property='n_clicks')],
     state=[State(component_id='word', component_property='value'),
-     State(component_id='number_similar', component_property='value')]
+           State(component_id='number_similar', component_property='value')]
 )
-def predict_umap_word( n_clicks, input_word, closest):
-    with open(path + '/Pickles/word2vec_4.pkl', 'rb') as file:
-        w2v_model = pickle.load(file)
-    with open(path + '/Visualization/umap_words.pkl', 'rb') as file:
-        w2v, word_mapper = pickle.load(file)
+def predict_umap_word(n_clicks, input_word, closest):
+    with open(path + '/Pickles/word2vec_4.pkl', 'rb') as w2v_file:
+        w2v_model = pickle.load(w2v_file)
+    with open(path + '/Visualization/umap_words.pkl', 'rb') as umap_w2v_file:
+        w2v, word_mapper = pickle.load(umap_w2v_file)
     data_word = [dict(type='scatter', x=w2v.x, y=w2v.y, mode='markers', marker=dict(color='lightgrey'),
-                     text=w2v['word'], name='whole vocabulary')]
+                      text=w2v['word'], name='whole vocabulary')]
     if n_clicks > 0:
         input_word = input_word.lower()
         if input_word in w2v_model.wv.vocab:
             search_word = w2v.loc[w2v['word'] == input_word]
-            similar_words = close_words(w2v, input_word, closest, w2v_model)
+            similar_words = find_close_words(w2v, input_word, closest, w2v_model)
             data_word.append(dict(type='scatter', x=similar_words.x, y=similar_words.y, mode='markers',
                                   marker=dict(color='green', size=8), text=similar_words['word'], name='similar words'))
             data_word.append(dict(type='scatter', x=search_word.x, y=search_word.y, mode='markers',
