@@ -96,9 +96,10 @@ if __name__ == "__main__":
 
         
             # 4. check for yearly salaries with upper range more than three times the lower range
-    salary_ratio_check = pd.read_sql(''' SELECT count(*) FROM landing WHERE salary_type = 'yearly' AND salary_high/salary_low > 3 ''', engine)
+    salary_ratio_check = pd.read_sql(''' SELECT count(*) FROM all_data WHERE salary_type = 'yearly' AND salary_high_euros/salary_low_euros > 3 ''', engine).iloc[0,0]
 
-    if salary_low_check == 0:
+    if salary_ratio_check == 0:
         print(" salary highs no more than 3 times salarly lows: check passed")
     else:
-        print ("salaries violating 1/3 ratio check {}".format(salary_ratio_check.iloc[0,0]))
+        print ("salaries violating 1/3 ratio check:")
+        print("salary_ratio_check")
