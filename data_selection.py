@@ -60,6 +60,7 @@ if __name__ == "__main__":
     X_val = pd.DataFrame(np.hstack((OHE_val,TFIDF_val)), columns =list(feature_names_OHE)+list(feature_names_TFIDF))
     X_test = pd.DataFrame(np.hstack((OHE_test,TFIDF_test)), columns = list(feature_names_OHE)+list(feature_names_TFIDF))
 
+
     try:
        # for split high/low salary
         X_train_hs = pd.DataFrame(np.hstack((OHE_train_hs, TFIDF_train_hs)),

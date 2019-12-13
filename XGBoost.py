@@ -84,6 +84,7 @@ if __name__ == "__main__":
     params.update(params_1)
 
     xgb_reg = xgb.XGBRegressor(**params)
+    import pdb; pdb.set_trace()
     xgb_reg.fit(X_train, y_train, **fit_params)
 
     y_pred = np.exp(xgb_reg.predict(X_val))
