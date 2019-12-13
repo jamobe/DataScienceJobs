@@ -10,6 +10,7 @@ import pickle
 import os.path
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
+from preprocessing_dash import spacy_tokenizer, text_process
 
 import warnings
 warnings.filterwarnings("ignore")
