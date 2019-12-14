@@ -7,9 +7,11 @@ import os.path
 from sqlalchemy import create_engine
 import hdbscan
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MultiLabelBinarizer
 import spacy
 from spacy.lang.en import English
 import plotly.figure_factory as ff
+import plotly.graph_objs as go
 import warnings
 
 
@@ -195,6 +197,15 @@ def create_word_umap(input_path):
     return word2vector, word_mapped
 
 
+def tech_process(mess, important_terms, abbr):
+    mess = mess.lower()
+    mess = mess.replace("\\n", " ")
+    punctuations = '[].:;"()/\\'
+    nopunc = [char for char in mess if char not in punctuations]
+    nopunc = ''.join(nopunc)
+    return [abbr.get(x, x) for x in important_terms if x in nopunc]
+
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     path = os.getcwd()
@@ -216,11 +227,56 @@ if __name__ == '__main__':
     # rf = find_label(rf)
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)
+    cluster_name = rf.name.unique()
+    #fig0, all_fig, cluster_name, df_overview = create_density_plots(rf)
 
-    fig0, all_fig, cluster_name, df_overview = create_density_plots(rf)
+    #with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
+    #    pickle.dump([fig0, all_fig, cluster_name, df_overview], file)
 
-    with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-        pickle.dump([fig0, all_fig, cluster_name, df_overview], file)
+    #with open(path + '/Pickles/broad_tech_dictionary.pickle') as tech_file:
+    #    tech_dict = pickle.load(tech_file)
+    tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
+    categories_to_include = ['front_end-technologies', 'databases', 'software-infrastructure-devops', 'data-science',
+                             'software_architecture', 'web_design', 'tools', 'cyber_security', 'cloud_computing',
+                             'back_end-technologies', 'mobile']
+
+    tech_list = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
+    abbr = {' bi ': ' business bntelligence ', ' ai ': ' artifical intelligence ', ' databases ': ' database ',
+            ' db ': ' database ', ' aws ': ' amazon web services ', 'nlp': 'natural language processing'}
+    rf['tech_list'] = rf['full_description'].apply(tech_process, args=(tech_list, abbr))
+
+    mlb = MultiLabelBinarizer()
+    tech = pd.DataFrame(mlb.fit_transform(rf.pop('tech_list')), columns=mlb.classes_, index=rf.index)
+    all_bar_fig = []
+    for cluster in cluster_name:
+        sub_rf = rf.loc[rf['name'] == cluster]
+        bar_plot = pd.DataFrame(tech.loc[sub_rf.index].sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False), columns=['counts'])
+        bar_plot = bar_plot[bar_plot.index != '  ']
+        bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name=cluster)
+        layout = dict(title='Most important technologies for a ' + cluster, yaxis=dict(autorange="reversed"))
+        bar_fig = go.Figure(data=bar_data, layout=layout)
+        all_bar_fig.append(bar_fig)
+
+    bar_plot = pd.DataFrame(tech.sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False), columns=['counts'])
+    bar_plot = bar_plot[bar_plot.index != '  ']
+    bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name='all')
+    layout = dict(title='Most important technologies for a all', yaxis=dict(autorange="reversed"))
+    bar_fig = go.Figure(data=bar_data, layout=layout)
+    all_bar_fig.append(bar_fig)
+
+    rf_tech = rf[['salary']].join(tech)
+    new_rf = pd.DataFrame(columns=rf_tech.columns[2:])
+    for column in rf_tech.columns[2:]:
+        new_rf.loc[1, column] = rf_tech.loc[rf_tech[column] == 1, 'salary'].mean()
+    top_tech = new_rf.T.sort_values(by=1, ascending=False)
+    top_tech_bar = go.Bar(x=top_tech[1][0:9], y=top_tech.index[0:9], orientation='h')
+    layout = dict(title='Advertised salary average (€) of job ads by technologies referenced', yaxis=dict(autorange="reversed"))
+    top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
+    with open(path + '/Visualization/bar_salary.pkl', 'wb') as file:
+        pickle.dump(top_tech_fig, file)
+
+    with open(path + '/Visualization/bar_cluster.pkl', 'wb') as file:
+        pickle.dump(all_bar_fig, file)
 
     w2v, word_mapper = create_word_umap(path)
 
