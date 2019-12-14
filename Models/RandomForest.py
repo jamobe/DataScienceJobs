@@ -7,14 +7,15 @@ import pandas as pd
 
 # define functions
 
-def mean_absolute_percentage_error(y_true, y_pred): 
 
+def mean_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-def mean_absolute_range_percentage_error(y_true, y_pred): 
-    error = np.abs((y_true - y_pred))-10000
+def mean_range_percentage_error(y_true, y_pred):
+    error = np.abs(y_true- y_pred)-10000
     error[error < 0] = 0
     return np.mean(error/y_true)*100
+
 
 if __name__ == "__main__":
     path = os.getcwd()
@@ -34,30 +35,39 @@ if __name__ == "__main__":
     with open(path + '/Pickles/RF_model.pkl', 'wb') as file:
             pickle.dump([model], file)
             
-    y_pred = model.predict(X_val)
+    y_pred_val = model.predict(X_val)
     y_pred_train = model.predict(X_train)
+    y_pred_test= model.predict(X_test)
 
 
-    print('Mean Absolute Error: {0:.0f}'.format( metrics.mean_absolute_error(y_val, y_pred)))
-    print('Mean Absolute Percentage Error: {0:.1f}'.format(mean_absolute_percentage_error(y_val, y_pred)))
-    print('Mean Absolute Range Percentage Error: {0:.1f}'.format(mean_absolute_range_percentage_error(y_val, y_pred)))
+    print('Train:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_train, y_pred_train)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_train)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_train, y_pred_train)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
 
-    print('Mean Squared Error: {0:.0f}'.format(metrics.mean_squared_error(y_val, y_pred)))
-    print('Root Mean Squared Error:{0:.0f}'.format(np.sqrt(metrics.mean_squared_error(y_val, y_pred))))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred))))
+    print('Validation:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_val, y_pred_val)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_val, y_pred_val)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_val, y_pred_val)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred_val))))
 
-
-    print('Mean Absolute Error Train: {0:.0f}'.format( metrics.mean_absolute_error(y_train, y_pred_train)))
-    print('Mean Absolute Percentage Error Train: {0:.1f}'.format(mean_absolute_percentage_error(y_train, y_pred_train)))
-    print('Mean Absolute Range Percentage Error Train: {0:.1f}'.format(mean_absolute_range_percentage_error(y_train, y_pred_train)))
-    print('R2 Score Train :{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
+    print('Test:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_test, y_pred_test)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_test, y_pred_test)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_test, y_pred_test))))
 
     
-    rf_preds_val = pd.DataFrame({'id':val_index, 'y_pred_rf': y_pred, 'y_true': y_val})
+    rf_preds_val = pd.DataFrame({'id':val_index, 'y_pred_rf': y_pred_val, 'y_true': y_val})
     rf_preds_train = pd.DataFrame({'id':train_index, 'y_pred_rf': y_pred_train, 'y_true':y_train})
+    rf_preds_test = pd.DataFrame({'id':test_index, 'y_pred_rf': y_pred_test, 'y_true':y_test})
 
     with open(path + '/data/RFpredtrain.pkl', 'wb') as file:
             pickle.dump([rf_preds_train], file)
 
     with open(path + '/data/RFpredval.pkl', 'wb') as file:
             pickle.dump([rf_preds_val], file)
+
+    with open(path + '/data/RFpredtest.pkl', 'wb') as file:
+        pickle.dump([rf_preds_test], file)
