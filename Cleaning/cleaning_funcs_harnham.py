@@ -74,7 +74,7 @@ def check_locations(pandas_df_col, country_col):
             location = [val[0] for key,val in lookup_GER.items() if key in string]
         elif country_col[i] == 'USA':
             
-            location = [val[0] for key,val in lookup_USA.items() if key in string]
+            location = [val for key,val in lookup_USA.items() if key in string]
         else:
             location = np.nan        
         
