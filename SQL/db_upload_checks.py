@@ -43,7 +43,7 @@ if __name__ == "__main__":
         if country_regions['region'][i] in country_region_dict[country_regions['country'][i]]:
             count +=1
         else:
-            pass
+               print(country_regions['region'][i],print(country_regions['country'][i]))
 
 
     length = pd.read_sql(''' SELECT count(*) FROM landing ''', engine).iloc[0,0]

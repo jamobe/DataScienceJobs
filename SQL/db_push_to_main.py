@@ -25,8 +25,8 @@ if __name__ == "__main__":
         myinput = input()
         if myinput == 'yes':
             engine.execute('''
-            INSERT INTO all_data (job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url)
-            SELECT job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url FROM landing
+            INSERT INTO all_data (job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url, language)
+            SELECT job_title, ref_code, company,description, salary,salary_low,salary_high,currency,salary_average,salary_low_euros,salary_high_euros,salary_average_euros,salary_type,location,jobtype,posted_date,extraction_date,country,region,url, language FROM landing
             ''')
             engine.execute('''DELETE FROM landing ''')
         else:
