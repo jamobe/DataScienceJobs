@@ -8,15 +8,15 @@ from sklearn import metrics
 
 import pandas as pd
 
+def mean_percentage_error(y_true, y_pred):
 
-def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-
-def mean_absolute_range_percentage_error(y_true, y_pred):
-    error = np.abs(y_true - y_pred) - 10000
+def mean_range_percentage_error(y_true, y_pred):
+    error = np.abs(y_true- y_pred)-10000
     error[error < 0] = 0
-    return np.mean(error / y_true) * 100
+    return np.mean(error/y_true)*100
+
 
 
 if __name__ == "__main__":
@@ -30,6 +30,7 @@ if __name__ == "__main__":
 
     y_train = np.log(y_train)
     y_val = np.log(y_val)
+    t_test = np.log(y_val)
 
     params = {
         # Learning Task Parameters
@@ -88,37 +89,50 @@ if __name__ == "__main__":
     params.update(params_1)
 
     xgb_reg = xgb.XGBRegressor(**params)
+
+
     xgb_reg.fit(X_train, y_train, **fit_params)
 
-    y_pred = np.exp(xgb_reg.predict(X_val))
+    y_pred_val = np.exp(xgb_reg.predict(X_val))
     y_pred_train = np.exp(xgb_reg.predict(X_train))
+    y_pred_test = np.exp(xgb_reg.predict(X_test))
+
     y_train = np.exp(y_train)
     y_val = np.exp(y_val)
+    y_test = np.exp(y_test)
 
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_val, y_pred)))
-    print('Mean Absolute Percentage Error: {0:.1f}'.format(mean_absolute_percentage_error(y_val, y_pred)))
-    print('Mean Absolute Range Percentage Error: {0:.1f}'.format(mean_absolute_range_percentage_error(y_val, y_pred)))
+    print('Train:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_train, y_pred_train)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_train)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_train, y_pred_train)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
 
-    print('Mean Squared Error: {0:.0f}'.format(metrics.mean_squared_error(y_val, y_pred)))
-    print('Root Mean Squared Error:{0:.0f}'.format(np.sqrt(metrics.mean_squared_error(y_val, y_pred))))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred))))
+    print('Validation:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_val, y_pred_val)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_val, y_pred_val)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_val, y_pred_val)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred_val))))
 
-    print('Mean Absolute Error Train: {0:.0f}'.format(metrics.mean_absolute_error(y_train, y_pred_train)))
-    print('Mean Absolute Percentage Error Train: {0:.1f}'.format(mean_absolute_percentage_error(y_train, y_pred_train)))
-    print('Mean Absolute Range Percentage Error Train: {0:.1f}'.format(
-        mean_absolute_range_percentage_error(y_train, y_pred_train)))
-    print('R2 Score Train :{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
+    print('Test:')
+    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_test, y_pred_test)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
+    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_test, y_pred_test)))
+    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_test, y_pred_test))))
 
     # save model in pickles file
     with open(path + '/Pickles/xgb_model_upsampled.pkl', 'wb') as file:
         pickle.dump(xgb_reg, file)
 
     # save predictions in data file
-    xgb_preds_val = pd.DataFrame({'id': val_index, 'y_pred_xgb': y_pred, 'y_true': y_val})
+    xgb_preds_val = pd.DataFrame({'id': val_index, 'y_pred_xgb': y_pred_val, 'y_true': y_val})
     xgb_preds_train = pd.DataFrame({'id': train_index, 'y_pred_xgb': y_pred_train, 'y_true': y_train})
+    xgb_preds_test = pd.DataFrame({'id': test_index, 'y_pred_xgb': y_pred_test, 'y_true': y_train})
 
     with open(path + '/data/XGBpredtrain_upsampled.pkl', 'wb') as file:
         pickle.dump([xgb_preds_train], file)
 
     with open(path + '/data/XGBpredval_upsampled.pkl', 'wb') as file:
         pickle.dump([xgb_preds_val], file)
+
+    with open(path + '/data/XGBpredtest_upsampled.pkl', 'wb') as file:
+            pickle.dump([xgb_preds_test], file)
