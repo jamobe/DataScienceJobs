@@ -208,7 +208,7 @@ if __name__ == "__main__":
     W2V_val = padding_transform(x_val, padding_length)
     W2V_test = padding_transform(x_test, padding_length)
 
-    with open(path + '/data/W2V.pkl', 'wb') as file:
+    with open(path + '/data/W2V_upsampled.pkl', 'wb') as file:
         pickle.dump([W2V_train, W2V_val, W2V_test], file)
 
     tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
