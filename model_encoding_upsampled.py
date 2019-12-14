@@ -109,7 +109,7 @@ if __name__ == "__main__":
         PASSWORD = pickle.load(file)
     engine = create_engine('postgresql://postgres:' + PASSWORD +
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where language like'en'", engine)
+    df = pd.read_sql("select * from all_data where language like'en' AND salary_average_euros>17000 ", engine)
     print('Loaded data from SQL database...\n')
     df['full_description'] = df['job_title'] + ' ' + df['description']
     df1 = df.dropna(subset=['salary_average_euros', 'region', 'country', 'train_test_label',
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     # Upsample training set
     high_salary = x_train[x_train['salary_average_euros'] >= 100000]
-    low_salary = x_train[x_train['salary_average_euros'] < 90000]
+    low_salary = x_train[x_train['salary_average_euros'] < 100000]
     
     #high_salary2 = x_train[x_train['salary_average_euros'] >= 40000]
     #low_salary2 = x_train[x_train['salary_average_euros'] < 40000]
