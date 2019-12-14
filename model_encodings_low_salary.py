@@ -110,7 +110,7 @@ if __name__ == "__main__":
         PASSWORD = pickle.load(file)
     engine = create_engine('postgresql://postgres:' + PASSWORD +
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where language like'en' and salary_average_euros<70000", engine)
+    df = pd.read_sql("select * from all_data where language like'en' and salary_average_euros<70000 AND salary_average_euros>17000", engine)
     print('Loaded data from SQL database...\n')
     df['full_description'] = df['job_title'] + ' ' + df['description']
     df1 = df.dropna(subset=['salary_average_euros', 'region', 'country', 'train_test_label',
@@ -120,7 +120,6 @@ if __name__ == "__main__":
 
     # first split the train from the test as denoted in the database
     x_train= df1.loc[df1['train_test_label'] == 'train']
-    #pdb.set_trace()
 
     # then separate out the validation set based on the all model split
     with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:

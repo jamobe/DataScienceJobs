@@ -120,7 +120,6 @@ if __name__ == "__main__":
 
     # first split the train from the test as denoted in the database
     x_train= df1.loc[df1['train_test_label'] == 'train']
-    pdb.set_trace()
 
     # then separate out the validation set based on the all model split
     with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:
@@ -190,7 +189,7 @@ if __name__ == "__main__":
     #TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
 
-    import pdb; pdb.set_trace()
+  
     # output different encodings encoded data
     with open(path + '/data/OHE_high_salary.pkl', 'wb') as file:
         pickle.dump(OHE_train, file)
