@@ -102,6 +102,11 @@ path = os.getcwd()
 with open(path + '/Visualization/plots_density.pkl', 'rb') as file:
     fig0, all_fig, cluster_names, df_overview = pickle.load(file)
 
+with open(path + '/Visualization/bar_cluster.pkl', 'rb') as bar_file:
+    bar_fig = pickle.load(bar_file)
+
+with open(path + '/Visualization/bar_salary.pkl', 'rb') as top_tech_file:
+    top_tech_fig = pickle.load(top_tech_file)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -151,6 +156,14 @@ app.layout = html.Div([
         #                    'fontWeight': 'bold', 'color': 'white',}],
         #                     style_as_list_view=True)
     ]),
+    html.Div([
+            html.Div([
+                dcc.Graph(id='bar_cluster', figure=bar_fig[5]),
+            ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+            html.Div([
+                dcc.Graph(id='bar_salary', figure=top_tech_fig)
+            ], style={'width': '49hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        ]),
     html.Hr(),
     html.Div([
             html.Div([
@@ -251,11 +264,12 @@ def update_umap(n_clicks, description):
 
 
 @app.callback(
-    Output(component_id='salary_distribution_country', component_property='figure'),
+    [Output(component_id='salary_distribution_country', component_property='figure'),
+     Output(component_id='bar_cluster', component_property='figure')],
     [Input(component_id='select_job_type', component_property='value')]
 )
 def select_density_plot(selected_job_type):
-    return all_fig[selected_job_type]
+    return all_fig[selected_job_type], bar_fig[selected_job_type]
 
 
 @app.callback(
