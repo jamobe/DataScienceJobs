@@ -110,3 +110,5 @@ if __name__ == "__main__":
         
     except:
         print("upsampled data not generated")
+    
+    print(X_train2.shape)
