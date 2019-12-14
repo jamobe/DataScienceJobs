@@ -13,11 +13,12 @@ import plotly.graph_objs as go
 from sqlalchemy import create_engine
 from preprocessing_dash import spacy_tokenizer, text_process
 
+
 import warnings
 warnings.filterwarnings("ignore")
 
 
-def load_salary_data(country_list):
+def load_salary_data(path, country_list):
     with open(path + '/data/SQL_access.pkl', 'rb') as password_file:
         password = pickle.load(password_file)
     engine = create_engine('postgresql://postgres:' + password +
@@ -42,10 +43,10 @@ def create_trace(rf, cluster_column):
         df = rf.loc[rf[cluster_column] == cluster]
         if cluster in ['unclassified', 0]:
             data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
-                             text=df['title'].map(str)+ '<br>' + df['salary'].map(str) + '€', name='unclassified'))
+                             text=df['title'].map(str) + '<br>' + df['salary'].map(str) + '€', name='unclassified'))
         else:
             data.append(dict(type='scatter', x=df.x, y=df.y, mode='markers', marker={'color': colors},
-                             text=df['title'].map(str)+ '<br>' + df['salary'].map(str)+ '€', name=str(cluster)))
+                             text=df['title'].map(str) + '<br>' + df['salary'].map(str) + '€', name=str(cluster)))
     return data
 
 
@@ -144,8 +145,11 @@ app.layout = html.Div([
                      options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
                      style={'width': '40%'}),
         # dash_table.DataTable(id='statistics_table', columns=[{"name": i, "id": i} for i in df_overview.columns],
-        #                     data=df_overview.to_dict('records'), style_cell={'maxWidth': 0, 'overflow':'hidden',
-        #                     'textOverflow': 'ellipsis'})
+        #                     data=df_overview.to_dict('records'), style_cell={'maxWidth': 0, 'overflow': 'hidden',
+        #                     'textOverflow': 'ellipsis', 'textAlign': 'center'}, style_header={'fontWeight': 'bold'},
+        #                    style_data_conditional=[{'if': {'column_id': 'role'},'backgroundColor': '#3D9970',
+        #                    'fontWeight': 'bold', 'color': 'white',}],
+        #                     style_as_list_view=True)
     ]),
     html.Hr(),
     html.Div([
@@ -231,7 +235,7 @@ def update_umap(n_clicks, description):
     data = create_trace(rf, 'name')
     if n_clicks > 0:
         predict_job = pd.DataFrame({'description': [description]})
-        stack_predict = pd.DataFrame(np.repeat(predict_job.values, 15, axis=0))
+        stack_predict = pd.DataFrame(np.repeat(predict_job.values, 120, axis=0))
         stack_predict.columns = predict_job.columns
         tfidf_encode_stack = tfidf_encoding(stack_predict)
         umap_pred = umap_prediction(tfidf_encode_stack)

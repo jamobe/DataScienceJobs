@@ -18,10 +18,10 @@ def load_data(access_path):
         password = pickle.load(password_file)
     engine = create_engine('postgresql://postgres:' + password +
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    data = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
-    data = data.dropna(subset=['region', 'country', 'description', 'job_title'], axis=0)
-    data['full_description'] = data['job_title'] + ' ' + data['description']
-    return data
+    loaded_data = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
+    loaded_data = loaded_data.dropna(subset=['region', 'country', 'description', 'job_title'], axis=0)
+    loaded_data['full_description'] = loaded_data['job_title'] + ' ' + loaded_data['description']
+    return loaded_data
 
 
 def text_process(mess):
@@ -62,7 +62,8 @@ def encode_tfidf(df):
 
 
 def umap_jobs(array):
-    umapper = umap.UMAP(n_neighbors=15, min_dist=0.0, n_components=2, random_state=42)
+    umapper = umap.UMAP(n_neighbors=60, min_dist=0.5, n_components=15, random_state=42)
+    # n_neighbors=15, min_dist=0.0, n_components=2
     mapper = umapper.fit(array)
     umapped_array = mapper.transform(array)
     with open(path + '/Visualization/umap_encoder.pkl', 'wb') as umap_file:
@@ -104,26 +105,42 @@ def find_label(df):
     return df
 
 
+def define_label(string):
+    name = 'unclassified'
+    cleaned = ' '.join(text_process(string))
+    names = {'Data Scientist': ['data scientist', 'machine learning', ' ai '],
+             'Data Engineer': ['engineer', 'java', ' aws '],
+             'Data Analyst': ['analyst', 'business intelligence', 'insight'],
+             'Media & Marketing': ['media', 'marketing', 'digital']}
+    counts = []
+    for keys, values in names.items():
+        counts.append(occurences(cleaned, values))
+    most_common = np.array(counts).argmax()
+    if np.sort(counts)[-1]*0.75 > np.sort(counts)[-2]:
+        name = list(names)[most_common]
+    return name
+
+
 def create_density_plots(df):
-    colors_dict = {'unclassified': 'rgb(211,211,211)', 'Data Analyst': 'rgb(255, 127, 14)',
+    colors_dict = {'unclassified': 'rgb(211, 211, 211)', 'Data Analyst': 'rgb(255, 127, 14)',
                    'Data Scientist': 'rgb(44, 160, 44)', 'Media & Marketing': 'rgb(214, 39, 40)',
                    'Data Engineer': 'rgb(148, 103, 189)'}
     color_list = [color for color in colors_dict.values()]
     data_dist = []
-    cluster_overview = pd.DataFrame(columns=['role', 'mean salary','median salary', 'min salary',
-                                             'max salary', 'counts'])
-    df = df.dropna(subset=['salary', 'title'], axis=0)
+    cluster_overview = pd.DataFrame(columns=['Role', 'Mean Salary', 'Median Salary',
+                                             'Minimum Salary', 'Maximum Salary', 'Counts'])
+    df = df.dropna(subset=['salary'], axis=0)
     cluster_names = df.name.unique()
     all_figures = []
     for idx, cluster in enumerate(cluster_names):
-        df_cluster = df.loc[rf['name'] == cluster]
+        df_cluster = df.loc[df['name'] == cluster]
         data_dist.append(df_cluster.salary)
-        cluster_overview.loc[idx, 'role'] = cluster
-        cluster_overview.loc[idx, 'mean salary'] = df_cluster.salary.mean()
-        cluster_overview.loc[idx, 'median salary'] = df_cluster.salary.median()
-        cluster_overview.loc[idx, 'min salary'] = df_cluster.salary.min()
-        cluster_overview.loc[idx, 'max salary'] = df_cluster.salary.max()
-        cluster_overview.loc[idx, 'counts'] = len(df_cluster.salary)
+        cluster_overview.loc[idx, 'Role'] = cluster
+        cluster_overview.loc[idx, 'Mean Salary'] = round(df_cluster.salary.mean())
+        cluster_overview.loc[idx, 'Median Salary'] = round(df_cluster.salary.median())
+        cluster_overview.loc[idx, 'Minimum Salary'] = round(df_cluster.salary.min())
+        cluster_overview.loc[idx, 'Maximum Salary'] = round(df_cluster.salary.max())
+        cluster_overview.loc[idx, 'Counts'] = len(df_cluster.salary)
         country_list = ['UK', 'Germany', 'USA']
         data_dist_country = []
         for country in country_list:
@@ -135,12 +152,12 @@ def create_density_plots(df):
                           xaxis_title='salary [in €]', yaxis_title='density')
         all_figures.append(fig)
 
-    cluster_overview.loc[len(cluster_names+1), 'role'] = 'all'
-    cluster_overview.loc[len(cluster_names+1), 'mean salary'] = df.salary.mean()
-    cluster_overview.loc[len(cluster_names+1), 'median salary'] = df.salary.median()
-    cluster_overview.loc[len(cluster_names+1), 'min salary'] = df.salary.min()
-    cluster_overview.loc[len(cluster_names+1), 'max salary'] = df.salary.max()
-    cluster_overview.loc[len(cluster_names+1), 'counts'] = len(df.salary)
+    cluster_overview.loc[len(cluster_names)+1, 'Role'] = 'all'
+    cluster_overview.loc[len(cluster_names)+1, 'Mean Salary'] = round(df.salary.mean())
+    cluster_overview.loc[len(cluster_names)+1, 'Median Salary'] = round(df.salary.median())
+    cluster_overview.loc[len(cluster_names)+1, 'Minimum Salary'] = round(df.salary.min())
+    cluster_overview.loc[len(cluster_names)+1, 'Maximum Salary'] = round(df.salary.max())
+    cluster_overview.loc[len(cluster_names)+1, 'Counts'] = len(df.salary)
 
     country_list = ['UK', 'Germany', 'USA']
     data_dist_country = []
@@ -195,7 +212,8 @@ if __name__ == '__main__':
                        'salary': data['salary_average_euros'],
                        'full_description': data['full_description']})
 
-    rf = find_label(rf)
+    rf['name'] = rf['full_description'].apply(define_label)
+    # rf = find_label(rf)
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)
 
