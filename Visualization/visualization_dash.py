@@ -51,14 +51,14 @@ def create_trace(rf, cluster_column):
 
 
 def tfidf_encoding(df):
-    with open(path + '/Pickles/TFIDF_model.pkl', 'rb') as tfidf_file:
+    with open(path + '/Pickles/TFIDF_model_all.pkl', 'rb') as tfidf_file:
         tfidf_model = pickle.load(tfidf_file)
     tfidf_array = tfidf_model.transform(df['description']).toarray()
     return tfidf_array
 
 
 def ohe_encoding(df):
-    with open(path + '/Pickles/OHE_model.pkl', 'rb') as ohe_file:
+    with open(path + '/Pickles/OHE_model_all.pkl', 'rb') as ohe_file:
         ohe_model = pickle.load(ohe_file)
     ohe_array = ohe_model.transform(df.loc[:, ['country', 'region']]).toarray()
     return ohe_array
@@ -217,12 +217,12 @@ def set_region_value(available_options):
            State(component_id='region', component_property='value')]
 )
 def predict_salary(n_clicks, description, country, region):
-    with open(path + '/Pickles/xgb_model.pkl', 'rb') as xgb_file:
+    with open(path + '/Pickles/xgb_model_all.pkl', 'rb') as xgb_file:
         xgb_reg = pickle.load(xgb_file)
-    with open(path + '/data/OHE.pkl', 'rb') as ohe_file:
-        _, _, _, feature_names_ohe = pickle.load(ohe_file)
-    with open(path + '/data/TFIDF.pkl', 'rb') as tfidf_file:
-        _, _, _, feature_names_tfidf = pickle.load(tfidf_file)
+    with open(path + '/data/OHE_all.pkl', 'rb') as ohe_file:
+        _, _, feature_names_ohe = pickle.load(ohe_file)
+    with open(path + '/data/TFIDF_all.pkl', 'rb') as tfidf_file:
+        _, _, feature_names_tfidf = pickle.load(tfidf_file)
 
     if n_clicks > 0:
         predict = pd.DataFrame({'description': [description], 'country': [country], 'region': [region]})
