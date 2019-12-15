@@ -123,7 +123,7 @@ def define_label(string):
     return name
 
 
-def create_density_plots(df):
+def create_density_plots(df, cluster_names):
     colors_dict = {'unclassified': 'rgb(211, 211, 211)', 'Data Analyst': 'rgb(255, 127, 14)',
                    'Data Scientist': 'rgb(44, 160, 44)', 'Media & Marketing': 'rgb(214, 39, 40)',
                    'Data Engineer': 'rgb(148, 103, 189)'}
@@ -132,7 +132,6 @@ def create_density_plots(df):
     cluster_overview = pd.DataFrame(columns=['Role', 'Mean Salary', 'Median Salary',
                                              'Minimum Salary', 'Maximum Salary', 'Counts'])
     df = df.dropna(subset=['salary'], axis=0)
-    cluster_names = df.name.unique()
     all_figures = []
     for idx, cluster in enumerate(cluster_names):
         df_cluster = df.loc[df['name'] == cluster]
@@ -171,12 +170,12 @@ def create_density_plots(df):
     fig.update_layout(title="Salary distribution by country for all", title_x=0.5, xaxis_title='salary [in €]',
                       yaxis_title='density')
     all_figures.append(fig)
-    output_name = np.append(cluster_names, 'all')
+    groups = np.append(cluster_names, 'all')
 
     figure0 = ff.create_distplot(data_dist, cluster_names, colors=color_list, show_hist=False, bin_size=5000)
     figure0.update_layout(title="Salary distribution by cluster name", title_x=0.5, xaxis_title='salary [in €]',
                           yaxis_title='density')
-    return figure0, all_figures, output_name, cluster_overview
+    return figure0, all_figures, groups, cluster_overview
 
 
 def create_word_umap(input_path):
@@ -206,6 +205,71 @@ def tech_process(mess, important_terms, abbr):
     return [abbr.get(x, x) for x in important_terms if x in nopunc]
 
 
+def load_map_tech_dict(tech_path, df):
+    tech_dict = pd.read_pickle(tech_path + '/Pickles/broad_tech_dictionary.pickle')
+    categories_to_include = ['front_end-technologies', 'databases', 'software-infrastructure-devops', 'data-science',
+                             'software_architecture', 'web_design', 'tools', 'cyber_security', 'cloud_computing',
+                             'back_end-technologies', 'mobile']
+    tech_list = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
+    abbr = {' bi ': ' business intelligence ', ' ai ': ' artificial intelligence ', ' databases ': ' database ',
+            ' db ': ' database ', ' aws ': ' amazon web services ', 'nlp': 'natural language processing'}
+    df['tech_list'] = df['full_description'].apply(tech_process, args=(tech_list, abbr))
+    return df, tech_dict
+
+
+def tech_encoding(df):
+    mlb = MultiLabelBinarizer()
+    tech_array = pd.DataFrame(mlb.fit_transform(df.pop('tech_list')), columns=mlb.classes_, index=df.index)
+    return tech_array
+
+
+def create_top_technology_cluster_barplot(df, encoded_tech, clusters):
+    all_bar_fig = []
+    for cluster in clusters:
+        sub_df = df.loc[df['name'] == cluster]
+        bar_plot = pd.DataFrame(
+            encoded_tech.loc[sub_df.index].sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False),
+            columns=['counts'])
+        bar_plot = bar_plot[bar_plot.index != '  ']
+        bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name=cluster)
+        layout = dict(title='Most important technologies for a ' + cluster, yaxis=dict(autorange="reversed"),
+                      xaxis_title='occurrences in ' + str(len(sub_df)) + ' job descriptions')
+        bar_fig = go.Figure(data=bar_data, layout=layout)
+        all_bar_fig.append(bar_fig)
+
+    bar_plot = pd.DataFrame(encoded_tech.sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False),
+                            columns=['counts'])
+    bar_plot = bar_plot[bar_plot.index != '  ']
+    bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name='all')
+    layout = dict(title='Most important technologies for a all', yaxis=dict(autorange="reversed"),
+                  xaxis_title='occurrences in ' + str(len(rf)) + ' job descriptions')
+    bar_fig = go.Figure(data=bar_data, layout=layout)
+    all_bar_fig.append(bar_fig)
+    return all_bar_fig
+
+
+def create_technology_salary(df, tech_dict, encoded_tech):
+    for key in tech_dict.keys():
+        tech_dict[key] = [x.lower() for x in tech_dict[key]]
+
+    df_tech = df[['salary']].join(encoded_tech)
+    new_df = pd.DataFrame(columns=df_tech.columns[2:])
+    for column in df_tech.columns[2:]:
+        new_df.loc[1, column] = df_tech.loc[df_tech[column] == 1, 'salary'].mean()
+    top_tech = new_df.T.sort_values(by=1, ascending=False)
+    #violin_fig = go.Figure()
+    #for idx, top10 in enumerate(top_tech.index[0:9]):
+    #    violin_fig.add_trace(go.Violin(x=top_tech.index[idx], y=rf_tech.loc[rf_tech[top10] == 1, 'salary'],
+    #                                   name=str(top10), box_visible=True,
+    #                                   meanline_visible=True))
+
+    top_tech_bar = go.Bar(x=top_tech[1][0:9], y=top_tech.index[0:9], orientation='h')
+    layout = dict(title='Advertised salary average (€) of job ads by technologies referenced',
+                  yaxis=dict(autorange="reversed"), xaxis_title='mean salary')
+    top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
+    return top_tech_fig
+
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     path = os.getcwd()
@@ -227,56 +291,23 @@ if __name__ == '__main__':
     # rf = find_label(rf)
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)
+
     cluster_name = rf.name.unique()
-    #fig0, all_fig, cluster_name, df_overview = create_density_plots(rf)
-
+    #fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
     #with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-    #    pickle.dump([fig0, all_fig, cluster_name, df_overview], file)
+    #    pickle.dump([fig0, all_fig, outputname, df_overview], file)
 
-    #with open(path + '/Pickles/broad_tech_dictionary.pickle') as tech_file:
-    #    tech_dict = pickle.load(tech_file)
-    tech_dict = pd.read_pickle('Pickles/broad_tech_dictionary.pickle')
-    categories_to_include = ['front_end-technologies', 'databases', 'software-infrastructure-devops', 'data-science',
-                             'software_architecture', 'web_design', 'tools', 'cyber_security', 'cloud_computing',
-                             'back_end-technologies', 'mobile']
+    rf, technical_dict = load_map_tech_dict(path, rf)
+    encoded_tech_array = tech_encoding(rf)
 
-    tech_list = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
-    abbr = {' bi ': ' business bntelligence ', ' ai ': ' artifical intelligence ', ' databases ': ' database ',
-            ' db ': ' database ', ' aws ': ' amazon web services ', 'nlp': 'natural language processing'}
-    rf['tech_list'] = rf['full_description'].apply(tech_process, args=(tech_list, abbr))
-
-    mlb = MultiLabelBinarizer()
-    tech = pd.DataFrame(mlb.fit_transform(rf.pop('tech_list')), columns=mlb.classes_, index=rf.index)
-    all_bar_fig = []
-    for cluster in cluster_name:
-        sub_rf = rf.loc[rf['name'] == cluster]
-        bar_plot = pd.DataFrame(tech.loc[sub_rf.index].sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False), columns=['counts'])
-        bar_plot = bar_plot[bar_plot.index != '  ']
-        bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name=cluster)
-        layout = dict(title='Most important technologies for a ' + cluster, yaxis=dict(autorange="reversed"))
-        bar_fig = go.Figure(data=bar_data, layout=layout)
-        all_bar_fig.append(bar_fig)
-
-    bar_plot = pd.DataFrame(tech.sum(axis=0, skipna=True, numeric_only=True).sort_values(ascending=False), columns=['counts'])
-    bar_plot = bar_plot[bar_plot.index != '  ']
-    bar_data = go.Bar(x=bar_plot['counts'][0:9], y=bar_plot.index[0:9], orientation='h', name='all')
-    layout = dict(title='Most important technologies for a all', yaxis=dict(autorange="reversed"))
-    bar_fig = go.Figure(data=bar_data, layout=layout)
-    all_bar_fig.append(bar_fig)
-
-    rf_tech = rf[['salary']].join(tech)
-    new_rf = pd.DataFrame(columns=rf_tech.columns[2:])
-    for column in rf_tech.columns[2:]:
-        new_rf.loc[1, column] = rf_tech.loc[rf_tech[column] == 1, 'salary'].mean()
-    top_tech = new_rf.T.sort_values(by=1, ascending=False)
-    top_tech_bar = go.Bar(x=top_tech[1][0:9], y=top_tech.index[0:9], orientation='h')
-    layout = dict(title='Advertised salary average (€) of job ads by technologies referenced', yaxis=dict(autorange="reversed"))
-    top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
-    with open(path + '/Visualization/bar_salary.pkl', 'wb') as file:
-        pickle.dump(top_tech_fig, file)
-
+    all_bar_figure = create_top_technology_cluster_barplot(rf, encoded_tech_array, cluster_name)
     with open(path + '/Visualization/bar_cluster.pkl', 'wb') as file:
-        pickle.dump(all_bar_fig, file)
+        pickle.dump(all_bar_figure, file)
+
+    top_tech_salary = create_technology_salary(rf, technical_dict, encoded_tech_array)
+
+    with open(path + '/Visualization/bar_salary.pkl', 'wb') as file:
+        pickle.dump(top_tech_salary, file)
 
     w2v, word_mapper = create_word_umap(path)
 
