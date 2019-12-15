@@ -22,19 +22,11 @@ def text_process(mess):
     3. Remove all stopwords
     4. Returns a list of the cleaned text
     """
-
-    punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-    mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character
-    mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
-
-    # punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-
-
     mess = mess.lower()
     mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character [^A-Za-z0-9]
     mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
-    #nopunc = [char for char in mess if char not in punctuations]
-    #nopunc = ''.join(nopunc)
+
+    # Now just remove any stopwords
     return [word for word in mess.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
 
 def spacy_tokenizer(doc):

@@ -22,18 +22,11 @@ def text_process(mess):
     3. Remove all stopwords
     4. Returns a list of the cleaned text
     """
-
-    punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-    mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character
-    mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
-
-    # punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-
     mess = mess.lower()
     mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character [^A-Za-z0-9]
     mess = re.sub(r'https?:/\/\S+', ' ', mess)  # remove links
-    # nopunc = [char for char in mess if char not in punctuations]
-    # nopunc = ''.join(nopunc)
+
+    # Now just remove any stopwords
     return [word for word in mess.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
 
 
@@ -123,32 +116,12 @@ if __name__ == "__main__":
     y_train = x_train['salary_average_euros']
     y_test = x_test['salary_average_euros']
 
-    # Upsample training set
-    high_salary = x_train[x_train['salary_average_euros'] >= 100000]
-    low_salary = x_train[x_train['salary_average_euros'] < 100000]
-
-    # high_salary2 = x_train[x_train['salary_average_euros'] >= 40000]
-    # low_salary2 = x_train[x_train['salary_average_euros'] < 40000]
-
-    # add upper upsample
-    upsample = high_salary.sample(n=1000, replace=True)
-    upsample_y = y_train[upsample.index]
-    x_train = x_train.append(upsample)
-    y_train = y_train.append(upsample_y)
-
-    # then split the train data into train and validation
-    #x_train, x_val, y_train, y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
-    #print('Splitted Train, Validation and Test data...\n')
 
     train_index = x_train['id']
-    #val_index = x_val['id']
     test_index = x_test['id']
-    # train_high_salary = x_train.loc[x_train['salary_average_euros']>70000,'id']
-    # train_low_salary = x_train.loc[x_train['salary_average_euros'] > 70000, 'id']
 
     columns_to_ohe_encode = ['country', 'region']
     train_enc = x_train[columns_to_ohe_encode]
-    #val_enc = x_val[columns_to_ohe_encode]
     test_enc = x_test[columns_to_ohe_encode]
 
     # only train encoding on train data
@@ -160,19 +133,17 @@ if __name__ == "__main__":
 
     # create encoding
     OHE_train = enc.transform(train_enc).toarray()
-    #OHE_val = enc.transform(val_enc).toarray()
     OHE_test = enc.transform(test_enc).toarray()
     print('Performed One-Hot-Encoding for columns: Country, Region...\n')
 
     BOG_model = encode_BOG(x_train, min_df=3)
     BOG_train = BOG_model.transform(x_train['full_description']).toarray()
-    #BOG_val = BOG_model.transform(x_val['full_description']).toarray()
     BOG_test = BOG_model.transform(x_test['full_description']).toarray()
     feature_names_BOG = list(BOG_model.get_feature_names())
 
+
     TFIDF_model = encode_TFIDF(x_train, min_df=3)
     TFIDF_train = TFIDF_model.transform(x_train['full_description']).toarray()
-    #TFIDF_val = TFIDF_model.transform(x_val['full_description']).toarray()
     TFIDF_test = TFIDF_model.transform(x_test['full_description']).toarray()
     feature_names_TFIDF = list(TFIDF_model.get_feature_names())
 
@@ -180,7 +151,6 @@ if __name__ == "__main__":
         w2v_model = pickle.load(file)
 
     x_train = w2v_clean_encode(x_train, w2v_model)
-    #x_val = w2v_clean_encode(x_val, w2v_model)
     x_test = w2v_clean_encode(x_test, w2v_model)
 
     x_train.loc[:, 'lengths'] = x_train.loc[:, 'description_list'].apply(len)
@@ -189,7 +159,6 @@ if __name__ == "__main__":
     padding_length = int(round(x_train['lengths'].mean()))
 
     W2V_train = padding_transform(x_train, padding_length)
-    #W2V_val = padding_transform(x_val, padding_length)
     W2V_test = padding_transform(x_test, padding_length)
 
     with open(path + '/data/W2V_all.pkl', 'wb') as file:
@@ -203,7 +172,6 @@ if __name__ == "__main__":
     important_terms = list(set([item.lower() for key in categories_to_include for item in tech_dict[key]]))
 
     tech_terms_train = (x_train['full_description']).apply(tech_process, args=(important_terms,))
-    #tech_terms_val = (x_val['description']).apply(tech_process, args=(important_terms,))
     tech_terms_test = (x_test['job_title'] + ' ' + x_test['description']).apply(tech_process, args=(important_terms,))
 
     feature_names_TECH = important_terms
@@ -211,7 +179,6 @@ if __name__ == "__main__":
     mlb = MultiLabelBinarizer(classes=important_terms)
     mlb.fit(tech_terms_train)
     TECH_train = mlb.transform(tech_terms_train)
-    #TECH_val = mlb.transform(tech_terms_val)
     TECH_test = mlb.transform(tech_terms_test)
     print('Performed encoding of technical terms...\n')
 
@@ -248,3 +215,4 @@ if __name__ == "__main__":
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
     print(OHE_train.shape)
     print(TFIDF_train.shape)
+    print(len(feature_names_TFIDF))

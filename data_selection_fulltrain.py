@@ -2,7 +2,6 @@ import os.path
 import numpy as np
 import pickle
 import pandas as pd
-from sklearn import preprocessing
 
 if __name__ == "__main__":
     path = os.getcwd()
@@ -28,3 +27,7 @@ if __name__ == "__main__":
 
     with open(path + '/data/x_data_for_models_all.pkl', 'wb') as file:
         pickle.dump([X_train,X_test], file)
+
+    print(X_train.shape)
+    print(TFIDF_train.shape)
+    print(len(feature_names))
