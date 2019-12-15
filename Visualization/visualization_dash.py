@@ -248,7 +248,7 @@ def update_umap(n_clicks, description):
     data = create_trace(rf, 'name')
     if n_clicks > 0:
         predict_job = pd.DataFrame({'description': [description]})
-        stack_predict = pd.DataFrame(np.repeat(predict_job.values, 120, axis=0))
+        stack_predict = pd.DataFrame(np.repeat(predict_job.values, 60, axis=0))
         stack_predict.columns = predict_job.columns
         tfidf_encode_stack = tfidf_encoding(stack_predict)
         umap_pred = umap_prediction(tfidf_encode_stack)
