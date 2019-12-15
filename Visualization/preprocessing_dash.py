@@ -253,21 +253,29 @@ def create_technology_salary(df, tech_dict, encoded_tech):
         tech_dict[key] = [x.lower() for x in tech_dict[key]]
 
     df_tech = df[['salary']].join(encoded_tech)
-    new_df = pd.DataFrame(columns=df_tech.columns[2:])
+    df_tech_list = pd.DataFrame(columns=df_tech.columns[2:])
     for column in df_tech.columns[2:]:
-        new_df.loc[1, column] = df_tech.loc[df_tech[column] == 1, 'salary'].mean()
-    top_tech = new_df.T.sort_values(by=1, ascending=False)
-    #violin_fig = go.Figure()
-    #for idx, top10 in enumerate(top_tech.index[0:9]):
-    #    violin_fig.add_trace(go.Violin(x=top_tech.index[idx], y=rf_tech.loc[rf_tech[top10] == 1, 'salary'],
-    #                                   name=str(top10), box_visible=True,
-    #                                   meanline_visible=True))
+        df_tech_list.loc[1, column] = df_tech.loc[df_tech[column] == 1, 'salary'].mean()
+        df_tech_list.loc[2, column] = df_tech.loc[df_tech[column] == 1, 'salary'].count()
+    threshold = 10
+    df_tech_trans = df_tech_list.T
+    df_tech_trans = df_tech_trans[df_tech_trans[2] > threshold]
+    top_tech = df_tech_trans.sort_values(by=1, ascending=False)
+
+    violin_fig = go.Figure()
+    for idx, top10 in enumerate(top_tech.index[0:9]):
+        tech_data = df_tech.loc[df_tech[top10] == 1, ['salary',top10]]
+        tech_data.loc[:,top10] = top10
+        violin_fig.add_trace(go.Violin(x=tech_data[top10], y=tech_data.salary,
+                                    box_visible=True, meanline_visible=True))
+    violin_fig.update_layout(dict(title='Advertised salary average (€) of job ads by technologies referenced',
+                                  showlegend=False))
 
     top_tech_bar = go.Bar(x=top_tech[1][0:9], y=top_tech.index[0:9], orientation='h')
     layout = dict(title='Advertised salary average (€) of job ads by technologies referenced',
                   yaxis=dict(autorange="reversed"), xaxis_title='mean salary')
     top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
-    return top_tech_fig
+    return violin_fig
 
 
 if __name__ == '__main__':
@@ -276,10 +284,10 @@ if __name__ == '__main__':
     data = load_data(path)
     encoded_array = encode_tfidf(data)
     umap_array = umap_jobs(encoded_array)
-    cluster_labels = clustering(umap_array)
+    #cluster_labels = clustering(umap_array)
     rf = pd.DataFrame({'x': [x for x in umap_array[:, 0]],
                        'y': [y for y in umap_array[:, 1]],
-                       'label': [x for x in cluster_labels],
+                       #'label': [x for x in cluster_labels],
                        'company': data['company'],
                        'region': data['region'],
                        'country': data['country'],
@@ -293,9 +301,9 @@ if __name__ == '__main__':
         pickle.dump(rf, file)
 
     cluster_name = rf.name.unique()
-    #fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
-    #with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-    #    pickle.dump([fig0, all_fig, outputname, df_overview], file)
+    fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
+    with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
+        pickle.dump([fig0, all_fig, outputname, df_overview], file)
 
     rf, technical_dict = load_map_tech_dict(path, rf)
     encoded_tech_array = tech_encoding(rf)
