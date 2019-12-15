@@ -242,7 +242,7 @@ if __name__ == "__main__":
         pickle.dump([train_index, test_index], file)
 
         # output full data frame
-    with open(path + '/data/x_data.pkl', 'wb') as file:
+    with open(path + '/data/x_data_all.pkl', 'wb') as file:
         pickle.dump([x_train, x_test], file)
 
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')
