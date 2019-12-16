@@ -5,7 +5,6 @@ import umap
 import re
 import os.path
 from sqlalchemy import create_engine
-import hdbscan
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 import spacy
@@ -71,14 +70,6 @@ def umap_jobs(array):
     with open(path + '/Visualization/umap_encoder.pkl', 'wb') as umap_file:
         pickle.dump(mapper, umap_file)
     return umapped_array
-
-
-def clustering(umap_array):
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=120, min_samples=2)
-    clustered = clusterer.fit_predict(umap_array[:, 0:2])
-    with open(path + '/Visualization/cluster_labeler.pkl', 'wb') as cluster_file:
-        pickle.dump(clusterer, cluster_file)
-    return clustered
 
 
 def occurences(string, word_list):
@@ -284,7 +275,7 @@ if __name__ == '__main__':
     data = load_data(path)
     encoded_array = encode_tfidf(data)
     umap_array = umap_jobs(encoded_array)
-    #cluster_labels = clustering(umap_array)
+
     rf = pd.DataFrame({'x': [x for x in umap_array[:, 0]],
                        'y': [y for y in umap_array[:, 1]],
                        #'label': [x for x in cluster_labels],
@@ -296,7 +287,7 @@ if __name__ == '__main__':
                        'full_description': data['full_description']})
 
     rf['name'] = rf['full_description'].apply(define_label)
-    # rf = find_label(rf)
+
     with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
         pickle.dump(rf, file)
 
