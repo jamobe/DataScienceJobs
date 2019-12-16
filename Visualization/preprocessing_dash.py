@@ -275,7 +275,7 @@ def create_technology_salary(df, tech_dict, encoded_tech):
     layout = dict(title='Advertised salary average (€) of job ads by technologies referenced',
                   yaxis=dict(autorange="reversed"), xaxis_title='mean salary')
     top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
-    return violin_fig
+    return top_tech_fig
 
 
 if __name__ == '__main__':
