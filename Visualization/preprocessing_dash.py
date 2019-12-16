@@ -193,7 +193,7 @@ def create_word_umap(input_path):
     word_mapped = word_umapper.fit(vectors)
     word_map = word_mapped.transform(vectors)
     word2vector = pd.DataFrame({'x': [x for x in word_map[:, 0]], 'y': [y for y in word_map[:, 1]], 'word': vocab})
-    return word2vector, word_mapped
+    return word2vector
 
 
 def tech_process(mess, important_terms, abbr):
@@ -317,7 +317,7 @@ if __name__ == '__main__':
     with open(path + '/Visualization/bar_salary.pkl', 'wb') as file:
         pickle.dump(top_tech_salary, file)
 
-    w2v, word_mapper = create_word_umap(path)
+    w2v = create_word_umap(path)
 
     with open(path + '/Visualization/umap_words.pkl', 'wb') as file:
-        pickle.dump([w2v, word_mapper], file)
+        pickle.dump(w2v, file)
