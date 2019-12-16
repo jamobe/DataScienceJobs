@@ -10,7 +10,6 @@ import numpy as np
 import pickle
 import os.path
 import plotly.graph_objs as go
-from sqlalchemy import create_engine
 from preprocessing_dash import spacy_tokenizer, text_process
 
 import warnings
@@ -92,15 +91,21 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
     html.Div([
-        html.H1(children='From job descriptions to salary predictions'),
-        html.H3(children='by Rachel Lund and Janina Mothes'),
-    ], style={'textAlign': 'center'}),
+        html.Img(id='logo', src='https://s3.amazonaws.com/media-p.slid.es/uploads/1154669/images/6891807/pasted-from-clipboard.png',
+                 style={'width': '15%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+        html.Div([
+            html.H1(children='From job description to salary prediction'),
+            html.H3(children='by Rachel Lund and Janina Mothes'),
+        ], style={'width': '75%', 'display': 'inline-block', 'vertical-align': 'middle', 'textAlign': 'center'})
+    ]),
+    # , style={'textAlign': 'center'}
+
     html.Div([
         html.Div([
             dcc.Graph(id='UMAP_jobs'),
         ], style={'width': '59hh', 'display': 'inline-block', 'vertical-align': 'middle'}),
         html.Div([
-            html.H4(children='Predict salary for a job descriptions:'),
+            html.H4(children='Predict salary for a job description:'),
             html.Div(children='Enter your jobs description here (in English only):'),
             dcc.Textarea(id='description', value='We need a Python genius', cols=60, rows=20, required=True),
             html.Div([
