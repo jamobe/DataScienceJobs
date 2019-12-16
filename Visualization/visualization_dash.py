@@ -13,7 +13,6 @@ import plotly.graph_objs as go
 from sqlalchemy import create_engine
 from preprocessing_dash import spacy_tokenizer, text_process
 
-
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -268,7 +267,7 @@ def predict_umap_word(n_clicks, input_word, closest):
     with open(path + '/Pickles/word2vec_4.pkl', 'rb') as w2v_file:
         w2v_model = pickle.load(w2v_file)
     with open(path + '/Visualization/umap_words.pkl', 'rb') as umap_w2v_file:
-        w2v, word_mapper = pickle.load(umap_w2v_file)
+        w2v = pickle.load(umap_w2v_file)
     data_word = [dict(type='scatter', x=w2v.x, y=w2v.y, mode='markers', marker=dict(color='lightgrey'),
                       text=w2v['word'], name='whole vocabulary')]
     if n_clicks > 0:
