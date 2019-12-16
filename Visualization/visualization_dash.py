@@ -55,13 +55,6 @@ def umap_prediction(tfidf_array):
     return umap_array
 
 
-def cluster_prediction(umap_array):
-    with open(path + '/Visualization/cluster_labeler.pkl', 'rb') as cluster_file:
-        clusterer = pickle.load(cluster_file)
-    cluster_labels = clusterer.fit_predict(umap_array[:, 0:2])
-    return cluster_labels
-
-
 def find_close_words(df, word, neighbors, model):
     close_words = model.wv.most_similar([word], topn=neighbors)
     word_list = []
