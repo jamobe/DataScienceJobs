@@ -17,21 +17,6 @@ from preprocessing_dash import spacy_tokenizer, text_process
 import warnings
 warnings.filterwarnings("ignore")
 
-
-def load_salary_data(path, country_list):
-    with open(path + '/data/SQL_access.pkl', 'rb') as password_file:
-        password = pickle.load(password_file)
-    engine = create_engine('postgresql://postgres:' + password +
-                           '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
-    df = df.dropna(subset=['salary_average_euros', 'region', 'country', 'description', 'job_title'], axis=0)
-    data_dist = []
-    for country in country_list:
-        rf = df.loc[df['country'] == country]
-        data_dist.append(rf.salary_average_euros)
-    return data_dist
-
-
 def create_trace(rf, cluster_column):
     data = []
     clusters = rf[cluster_column].unique()
