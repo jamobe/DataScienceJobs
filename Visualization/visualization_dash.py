@@ -13,24 +13,8 @@ import plotly.graph_objs as go
 from sqlalchemy import create_engine
 from preprocessing_dash import spacy_tokenizer, text_process
 
-
 import warnings
 warnings.filterwarnings("ignore")
-
-
-def load_salary_data(path, country_list):
-    with open(path + '/data/SQL_access.pkl', 'rb') as password_file:
-        password = pickle.load(password_file)
-    engine = create_engine('postgresql://postgres:' + password +
-                           '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
-    df = pd.read_sql("select * from all_data where language like 'en' and salary_type like 'yearly'", engine)
-    df = df.dropna(subset=['salary_average_euros', 'region', 'country', 'description', 'job_title'], axis=0)
-    data_dist = []
-    for country in country_list:
-        rf = df.loc[df['country'] == country]
-        data_dist.append(rf.salary_average_euros)
-    return data_dist
-
 
 def create_trace(rf, cluster_column):
     data = []
@@ -283,7 +267,7 @@ def predict_umap_word(n_clicks, input_word, closest):
     with open(path + '/Pickles/word2vec_4.pkl', 'rb') as w2v_file:
         w2v_model = pickle.load(w2v_file)
     with open(path + '/Visualization/umap_words.pkl', 'rb') as umap_w2v_file:
-        w2v, word_mapper = pickle.load(umap_w2v_file)
+        w2v = pickle.load(umap_w2v_file)
     data_word = [dict(type='scatter', x=w2v.x, y=w2v.y, mode='markers', marker=dict(color='lightgrey'),
                       text=w2v['word'], name='whole vocabulary')]
     if n_clicks > 0:
