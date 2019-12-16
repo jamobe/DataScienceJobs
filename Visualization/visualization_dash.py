@@ -92,7 +92,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div([
     html.Div([
         html.Img(id='logo', src='https://s3.amazonaws.com/media-p.slid.es/uploads/1154669/images/6891807/pasted-from-clipboard.png',
-                 style={'width': '15%', 'display': 'inline-block', 'vertical-align': 'middle'}),
+                 style={'width': '10%', 'display': 'inline-block', 'vertical-align': 'middle'}),
         html.Div([
             html.H1(children='From job description to salary prediction'),
             html.H3(children='by Rachel Lund and Janina Mothes'),
@@ -239,7 +239,7 @@ def update_umap(n_clicks, description):
         data.append(dict(type='scatter', x=x_mean, y=y_mean, mode='markers', name='your job',
                          marker={'size': 10, "color": 'black', "cmid": 0}))
 
-    umap_figure = go.Figure(data=data, layout=dict(title='UMAP visualization for: job descriptions',
+    umap_figure = go.Figure(data=data, layout=dict(title='UMAP of job descriptions <br><sub>Each point represents a job description. The closer two points are together the more similar their descriptions.</sub>',
                                                    legend=dict(orientation="h"), hovermode='closest',
                                                    xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700))
     return umap_figure
