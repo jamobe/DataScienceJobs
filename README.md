@@ -22,7 +22,7 @@ econometrics, statistics, data analyst).
 * __salary_type:__ whether yearly, monthly, daily, hourly
 * __language:__ language of job description (en, de, ...)
 
-The data is in a postgres database on AWS. Please contact: Rachel to get access.
+<font color="red">The data is in a postgres database on AWS. Please send us a message if you want to have access.</font>
 
 #### 2. Load data to Postgres Database
 
