@@ -22,8 +22,6 @@ econometrics, statistics, data analyst).
 * __salary_type:__ whether yearly, monthly, daily, hourly
 * __language:__ language of job description (en, de, ...)
 
-<font color="red">The data is in a postgres database on AWS. Please send us a message if you want to have access.</font>
-
 #### 2. Load data to Postgres Database
 
 Once the initial clean has taken place the data are pushed to a PostgresSQL database in AWS.
@@ -38,6 +36,7 @@ If all tests are passed, then the push to database script is run, which pushes a
 
 ```SQL/db_push_to_main.py ```
 
+Please send us a message if you want to have access to the data.
 
 #### 3. Encoding data and selecting columns to model with
 
