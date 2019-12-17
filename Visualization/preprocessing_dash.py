@@ -282,12 +282,11 @@ if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     path = os.getcwd()
     data = load_data(path)
-    #encoded_array = encode_tfidf(data)
-    #umap_array = umap_jobs(encoded_array)
+    encoded_array = encode_tfidf(data)
+    umap_array = umap_jobs(encoded_array)
 
-    rf = pd.DataFrame({#'x': [x for x in umap_array[:, 0]],
-                       #'y': [y for y in umap_array[:, 1]],
-                       #'label': [x for x in cluster_labels],
+    rf = pd.DataFrame({'x': [x for x in umap_array[:, 0]],
+                       'y': [y for y in umap_array[:, 1]],
                        'company': data['company'],
                        'region': data['region'],
                        'country': data['country'],
@@ -297,13 +296,13 @@ if __name__ == '__main__':
 
     rf['name'] = rf['full_description'].apply(define_label)
 
-    #with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
-    #    pickle.dump(rf, file)
+    with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
+        pickle.dump(rf, file)
 
     cluster_name = rf.name.unique()
-    #fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
-    #with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-    #    pickle.dump([fig0, all_fig, outputname, df_overview], file)
+    fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
+    with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
+        pickle.dump([fig0, all_fig, outputname, df_overview], file)
 
     rf, technical_dict = load_map_tech_dict(path, rf)
     encoded_tech_array = tech_encoding(rf)
