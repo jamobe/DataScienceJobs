@@ -246,7 +246,7 @@ def create_technology_salary(df, tech_dict, encoded_tech):
     df_tech = df[['salary']].join(encoded_tech)
     df_tech_list = pd.DataFrame(columns=df_tech.columns[2:])
     for column in df_tech.columns[2:]:
-        df_tech_list.loc[1, column] = df_tech.loc[df_tech[column] == 1, 'salary'].mean()
+        df_tech_list.loc[1, column] = df_tech.loc[df_tech[column] == 1, 'salary'].median()
         df_tech_list.loc[2, column] = df_tech.loc[df_tech[column] == 1, 'salary'].count()
     threshold = 10
     df_tech_trans = df_tech_list.T
@@ -254,30 +254,39 @@ def create_technology_salary(df, tech_dict, encoded_tech):
     top_tech = df_tech_trans.sort_values(by=1, ascending=False)
 
     violin_fig = go.Figure()
+    box_fig = go.Figure()
     for idx, top10 in enumerate(top_tech.index[0:9]):
         tech_data = df_tech.loc[df_tech[top10] == 1, ['salary',top10]]
         tech_data.loc[:,top10] = top10
         violin_fig.add_trace(go.Violin(x=tech_data[top10], y=tech_data.salary,
                                     box_visible=True, meanline_visible=True))
+        box_fig.add_trace(go.Box(y=tech_data.salary, name=top10))
     violin_fig.update_layout(dict(title='Advertised salary average (€) of job ads by technologies referenced',
                                   showlegend=False))
+    box_fig.update_layout(dict(title='Top 10 technologies ranked by highest median salary',
+                                  showlegend=False, yaxis_title='salary [in €]'))
+    labels = []
+    for idx, name in enumerate(top_tech.index[0:9]):
+        tmp = [key for key, value in tech_dict.items() if name in value]
+        tmp = ', '.join(tmp)
+        labels.append(top_tech.index[idx] + '<sub>(' + tmp + ')</sub>')
 
-    top_tech_bar = go.Bar(x=top_tech[1][0:9], y=top_tech.index[0:9], orientation='h')
+    top_tech_bar = go.Bar(x=top_tech[1][0:9], y=labels, orientation='h') #top_tech.index[0:9]
     layout = dict(title='Advertised salary average (€) of job ads by technologies referenced',
                   yaxis=dict(autorange="reversed"), xaxis_title='mean salary')
     top_tech_fig = go.Figure(data=top_tech_bar, layout=layout)
-    return top_tech_fig
+    return box_fig
 
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     path = os.getcwd()
     data = load_data(path)
-    encoded_array = encode_tfidf(data)
-    umap_array = umap_jobs(encoded_array)
+    #encoded_array = encode_tfidf(data)
+    #umap_array = umap_jobs(encoded_array)
 
-    rf = pd.DataFrame({'x': [x for x in umap_array[:, 0]],
-                       'y': [y for y in umap_array[:, 1]],
+    rf = pd.DataFrame({#'x': [x for x in umap_array[:, 0]],
+                       #'y': [y for y in umap_array[:, 1]],
                        #'label': [x for x in cluster_labels],
                        'company': data['company'],
                        'region': data['region'],
@@ -288,13 +297,13 @@ if __name__ == '__main__':
 
     rf['name'] = rf['full_description'].apply(define_label)
 
-    with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
-        pickle.dump(rf, file)
+    #with open(path + '/Visualization/umap_jobs.pkl', 'wb') as file:
+    #    pickle.dump(rf, file)
 
     cluster_name = rf.name.unique()
-    fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
-    with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
-        pickle.dump([fig0, all_fig, outputname, df_overview], file)
+    #fig0, all_fig, outputname, df_overview = create_density_plots(rf, cluster_name)
+    #with open(path + '/Visualization/plots_density.pkl', 'wb') as file:
+    #    pickle.dump([fig0, all_fig, outputname, df_overview], file)
 
     rf, technical_dict = load_map_tech_dict(path, rf)
     encoded_tech_array = tech_encoding(rf)
