@@ -7,55 +7,24 @@ We also plan to segement the market for data professionals to establish whether 
 
 ## Workflow
 
-#### 1. Web Scraping
+#### 1. Web Scraping and Cleaning
 We scraped job descriptions from the several websites (harnham (.co.uk, .de, .com), indeed (.co.uk, .de, .com), monster 
 (.co.uk)). The python files to run the scrapings are in the folder 'Web_Scraping'. We scraped the job descriptions for 
 different search terms (e.g. data scientist, machine learning, data, business intelligence, data engineer, data manager,
 econometrics, statistics, data analyst).
 
-#### The following columns were scraped:
-* __job title:__ title of the job (e.g. Data Scientist, Machine Learning Expert, ...)
-* __company:__ name of the company
-* __job description:__ text describing the position
-* __location:__ city, region or country, where job is located 
-* __salary:__ salary range 
-* __education:__ required education (e.g. Masters, Bachler, PhD, ...)
-* __industry:__ industry where job is associated to 
-* __career:__ career type of job (e.g. Experienced, Entry level, ....)
-* __url:__ url of the job posting
-* __extraction date:__ date when job was scraped
-* __duration:__ for how long has the job been published
-* __jobtype:__ type of job (e.g. permanent, temporary, ...)
-* __ref_code:__ unique code for job description (given by website)
-
-#### 2. Cleaning
-
-Data were then cleaned to create a consistent dataset. Further columns were added to allow for identification of country, 
-limits and averages of salary ranges and conversion into common currencies. Python files for cleaning can be found in the folder 'Cleaning'
-
-* __job_title:__
-* __ref_code:__
-* __company:__
-* __description:__
-* __salary:__
-* __salary_low:__ (numeric) bottom of stated salary range
-* __salary_high:__ (numeric) top of stated salary range
-* __currency:__ currency (symbol) of stated salary
-* __salary_average:__ mid point of salary range
-* __salary_low_euros:__ (numeric) bottom of stated salary range in euros using October 2019 exchange rate averages (1.14 EUR/GBP, 0.9 EUR/USD)
-* __salary_high_euros:__(numeric) top of stated salary range in euros
-* __salary_average_euros:__ (numeric) mid point of stated salary range in euros
-* __salary_type:__ whether yearly, monthly, daily, hourly
-* __location:__ 
-* __jobtype:__
-* __posted_date:__ calculated date when job was posted (where available)
-* __extraction_date:__
+#### The following columns were scraped or created:
+* __job_title:__ title of the job (e.g. Data Scientist, Machine Learning Expert, ...)
+* __description:__ text describing the position
 * __country:__ Country location of job 
 * __region:__ UK region, US State or German state where job is located
-* __url:__
+* __salary_average_euros:__ (numeric) mid point of stated salary range in euros
+* __salary_type:__ whether yearly, monthly, daily, hourly
+* __language:__ language of job description (en, de, ...)
 
+The data is in a postgres database on AWS. Please contact: Rachel to get access.
 
-#### 3. Postgres Database
+#### 2. Load data to Postgres Database
 
 Once the initial clean has taken place the data are pushed to a PostgresSQL database in AWS.
 
@@ -70,24 +39,53 @@ If all tests are passed, then the push to database script is run, which pushes a
 ```SQL/db_push_to_main.py ```
 
 
-#### 4. Encoding data and selecting columns to model with
+#### 3. Encoding data and selecting columns to model with
 
 Data are taken from the database, split into train, test, validation and Job descriptions are encoded (One Hot encoding, TFIDF, Bag of Words, Word2Vec), by running:
-``` model_encodings_rl.py```
+``` model_encodings_fulltrain.py```
 
 files are outputted locally to the data folder.
 
 To choose the variables used in modelling, run:
 
-``` data selection```
+``` data selection_fulltrain.py```
 
-#### model training
+#### 4. Model training
 
-Run ```XGBoost.py``` for the XGboost predictions on the train and validations sets.
+Run ```XGBoost.py``` for the XGBoost predictions on the train and validations sets.
+
+There were additional models run (Linear Regression, Random Forest, Neural Net, SVM), which were not used for the final prediction. If you want to have a closer look on the results of the other models open:
+```ModelComparison.ipynb```
+
+This Notebook also contains the Shap-Diagram of the XGBoost.
+
+
+#### 5. App
+
+The visualizations for the app are pre-calulcated and created in the ````preprocessing_dash.py```` in the Visualization folder (you need access to the postgres database).
+To run the app, you need to run:
+
+````visualization_dash.py````
+
+The following Pickle-Files are required: 
+
+* xgb_model_all.pkl (created by xgboost.py)
+* TFIDF_model_all.pkl (created by model_encodings_fulltrain.py)
+* OHE_model_all.pkl (created by model_encodings_fulltrain.py)
+* OHE_all.pkl (created by data_selection_fulltrain.py)
+* TFIDF_all.pkl (created by data_selection_fulltrain.py)
+* word2vec_4.pkl (created by Word2Vec_create.py)
+* umap_words.pkl (created by preprocessing.py)
+* umap_encoder.pkl (created by preprocessing_dash.py)
+* umap_jobs.pkl (created by preprocessing_dash.py)
+* plots_density.pkl (created by preprocessing_dash.py)
+* bar_cluster.pkl (created by preprocessing_dash.py)
+* bar_salary.pkl (created by preprocessing_dash.py)
+
 
 
 #### A1. Project Plan (Diagram)
 
 
 
-![alt text](Assets/DSJDiagram.png "Project Plan Diagram")
+![alt text](Assets/ProjectDiagram2.png "Project Plan Diagram")
