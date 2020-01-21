@@ -3,39 +3,40 @@ import pandas as pd
 import pickle
 import os.path
 
-def db_upload(PASSWORD, df):
-    '''
+
+def db_upload(password, dataframe):
+    """
     This function uploads the data to the landing table in the database.
     There is a prompt to ensure you want to update data if there is data in the landing table already,
     because it will overwrite whatever is there already.
     params:
-    PASSWORD: your db password
-    df: dataframe you wish to upload
-    '''
-
-    engine = create_engine('postgresql://postgres:'+PASSWORD+'@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
+    password: your db password
+    dataframe: dataframe you wish to upload
+    """
+    engine = create_engine('postgresql://postgres:' + password
+                           + '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     exists = pd.read_sql('''SELECT EXISTS (
        SELECT 1
        FROM   information_schema.tables 
        WHERE  table_schema = 'public'
        AND    table_name = 'landing'
        );
-    ''', engine).iloc[0,0]
+    ''', engine).iloc[0, 0]
     # has_rows = pd.read_sql('''SELECT count(*) landing''',engine).iloc[0,0]
 
-    if exists is True and has_rows > 1:
+    if exists is True:
         print('The landing table already exists, are you sure you wish to continue?[yes/no]')
         myinput = input()
         if myinput == 'yes':
             print('Uploading data to landing page...')
-            df.to_sql(name='landing', con=engine, if_exists='replace',  index=False)
+            dataframe.to_sql(name='landing', con=engine, if_exists='replace',  index=False)
             print('Done!')
         else:
             print('Data not uploaded!')
     else:
         print('Landing page is currently empty.\n')
         print('Uploading data to landing page...')
-        df.to_sql(name='landing', con=engine, if_exists='replace',  index=False)
+        dataframe.to_sql(name='landing', con=engine, if_exists='replace',  index=False)
         print('Done!')
 
 
