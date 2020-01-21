@@ -15,6 +15,37 @@ from preprocessing_dash import spacy_tokenizer, text_process
 import warnings
 warnings.filterwarnings("ignore")
 
+path = os.getcwd()
+
+df_uk = pd.read_csv(path + '/data/uk_location_lookup.csv')
+df_us = pd.read_csv(path + '/data/us-states.csv')
+df_ger = pd.read_csv(path + '/data/locations_germany.csv')
+
+with open(path + '/Pickles/TFIDF_model_all.pkl', 'rb') as tfidf_file:
+    tfidf_model = pickle.load(tfidf_file)
+with open(path + '/Pickles/OHE_model_all.pkl', 'rb') as ohe_file:
+    ohe_model = pickle.load(ohe_file)
+with open(path + '/Visualization/umap_encoder.pkl', 'rb') as umap_file:
+    mapper = pickle.load(umap_file)
+with open(path + '/Visualization/plots_density.pkl', 'rb') as file:
+    fig0, all_fig, cluster_names, df_overview = pickle.load(file)
+with open(path + '/Visualization/bar_cluster.pkl', 'rb') as bar_file:
+    bar_fig = pickle.load(bar_file)
+with open(path + '/Visualization/bar_salary.pkl', 'rb') as top_tech_file:
+    top_tech_fig = pickle.load(top_tech_file)
+with open(path + '/Pickles/xgb_model_all.pkl', 'rb') as xgb_file:
+    xgb_reg = pickle.load(xgb_file)
+with open(path + '/data/OHE_all.pkl', 'rb') as ohe_file:
+    _, _, feature_names_ohe = pickle.load(ohe_file)
+with open(path + '/data/TFIDF_all.pkl', 'rb') as tfidf_file:
+    _, _, feature_names_tfidf = pickle.load(tfidf_file)
+with open(path + '/Visualization/umap_jobs.pkl', 'rb') as umap_file:
+    rf = pickle.load(umap_file)
+with open(path + '/Pickles/word2vec_4.pkl', 'rb') as w2v_file:
+    w2v_model = pickle.load(w2v_file)
+with open(path + '/Visualization/umap_words.pkl', 'rb') as umap_w2v_file:
+    w2v = pickle.load(umap_w2v_file)
+
 def create_trace(rf, cluster_column):
     data = []
     clusters = rf[cluster_column].unique()
@@ -34,22 +65,16 @@ def create_trace(rf, cluster_column):
 
 
 def tfidf_encoding(df):
-    with open(path + '/Pickles/TFIDF_model_all.pkl', 'rb') as tfidf_file:
-        tfidf_model = pickle.load(tfidf_file)
     tfidf_array = tfidf_model.transform(df['description']).toarray()
     return tfidf_array
 
 
 def ohe_encoding(df):
-    with open(path + '/Pickles/OHE_model_all.pkl', 'rb') as ohe_file:
-        ohe_model = pickle.load(ohe_file)
     ohe_array = ohe_model.transform(df.loc[:, ['country', 'region']]).toarray()
     return ohe_array
 
 
 def umap_prediction(tfidf_array):
-    with open(path + '/Visualization/umap_encoder.pkl', 'rb') as umap_file:
-        mapper = pickle.load(umap_file)
     umap_array = mapper.transform(tfidf_array)
     return umap_array
 
@@ -62,27 +87,11 @@ def find_close_words(df, word, neighbors, model):
     subdf = df[df['word'].isin(word_list)]
     return subdf
 
-
-df_uk = pd.read_csv('https://raw.githubusercontent.com/jamobe/DataScienceJobs/master/data/uk_location_lookup.csv')
-df_us = pd.read_csv('https://raw.githubusercontent.com/jamobe/DataScienceJobs/master/data/us-states.csv')
-df_ger = pd.read_csv('https://raw.githubusercontent.com/jamobe/DataScienceJobs/master/data/locations_germany.csv')
-
 all_options = {
     'UK': df_uk['region'].sort_values().unique().tolist(),
     'Germany': df_ger['region'].sort_values().unique().tolist(),
     'USA':  df_us['region'].sort_values().unique().tolist()
 }
-
-path = os.getcwd()
-
-with open(path + '/Visualization/plots_density.pkl', 'rb') as file:
-    fig0, all_fig, cluster_names, df_overview = pickle.load(file)
-
-with open(path + '/Visualization/bar_cluster.pkl', 'rb') as bar_file:
-    bar_fig = pickle.load(bar_file)
-
-with open(path + '/Visualization/bar_salary.pkl', 'rb') as top_tech_file:
-    top_tech_fig = pickle.load(top_tech_file)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -131,12 +140,6 @@ app.layout = html.Div([
         dcc.Dropdown(id='select_job_type', value=5,
                      options=[{'label': name, 'value': idx} for idx, name in enumerate(cluster_names)],
                      style={'width': '40%'}),
-        # dash_table.DataTable(id='statistics_table', columns=[{"name": i, "id": i} for i in df_overview.columns],
-        #                     data=df_overview.to_dict('records'), style_cell={'maxWidth': 0, 'overflow': 'hidden',
-        #                     'textOverflow': 'ellipsis', 'textAlign': 'center'}, style_header={'fontWeight': 'bold'},
-        #                    style_data_conditional=[{'if': {'column_id': 'role'},'backgroundColor': '#3D9970',
-        #                    'fontWeight': 'bold', 'color': 'white',}],
-        #                     style_as_list_view=True)
     ]),
     html.Div([
             html.Div([
@@ -199,13 +202,6 @@ def set_region_value(available_options):
            State(component_id='region', component_property='value')]
 )
 def predict_salary(n_clicks, description, country, region):
-    with open(path + '/Pickles/xgb_model_all.pkl', 'rb') as xgb_file:
-        xgb_reg = pickle.load(xgb_file)
-    with open(path + '/data/OHE_all.pkl', 'rb') as ohe_file:
-        _, _, feature_names_ohe = pickle.load(ohe_file)
-    with open(path + '/data/TFIDF_all.pkl', 'rb') as tfidf_file:
-        _, _, feature_names_tfidf = pickle.load(tfidf_file)
-
     if n_clicks > 0:
         predict = pd.DataFrame({'description': [description], 'country': [country], 'region': [region]})
         tfidf_encode = tfidf_encoding(predict)
@@ -224,9 +220,6 @@ def predict_salary(n_clicks, description, country, region):
     state=[State(component_id='description', component_property='value')]
 )
 def update_umap(n_clicks, description):
-    with open(path + '/Visualization/umap_jobs.pkl', 'rb') as umap_file:
-        rf = pickle.load(umap_file)
-
     data = create_trace(rf, 'name')
     if n_clicks > 0:
         predict_job = pd.DataFrame({'description': [description]})
@@ -262,10 +255,6 @@ def select_density_plot(selected_job_type):
            State(component_id='number_similar', component_property='value')]
 )
 def predict_umap_word(n_clicks, input_word, closest):
-    with open(path + '/Pickles/word2vec_4.pkl', 'rb') as w2v_file:
-        w2v_model = pickle.load(w2v_file)
-    with open(path + '/Visualization/umap_words.pkl', 'rb') as umap_w2v_file:
-        w2v = pickle.load(umap_w2v_file)
     data_word = [dict(type='scatter', x=w2v.x, y=w2v.y, mode='markers', marker=dict(color='lightgrey'),
                       text=w2v['word'], name='whole vocabulary')]
     if n_clicks > 0:
@@ -287,6 +276,13 @@ def predict_umap_word(n_clicks, input_word, closest):
                                                    xaxis=dict(title=''), yaxis=dict(title=''), width=820, height=700))
     return figure, output
 
+@app.callback(
+    Output(component_id='number_similar_input', component_property='value'),
+    [Input(component_id='word_submit', component_property='n_clicks')],
+    state=[State(component_id='number_similar', component_property='value')]
+)
+def update_dropdown(n_clicks, value):
+    return value
 
 @app.callback(
     Output(component_id='number_similar', component_property='value'),
@@ -297,4 +293,4 @@ def map_input_slider(value):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8050, host='0.0.0.0')
+    app.run_server(debug=True)

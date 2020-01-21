@@ -2,9 +2,11 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as soup
 import re
 import pickle
+import os.path
 
 
 if __name__ == "__main__":
+    path = os.getcwd()
     # setup connection to website
     url = "https://glossarytech.com/"
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -24,14 +26,14 @@ if __name__ == "__main__":
         for j in ["", "/page2", "/page3", "/page4", "/page5", "/page6", "/page7", "/page8"]:
             try:
                 url = "https://glossarytech.com/terms/"+i+j
-                req=Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
                 webpage = urlopen(req).read()
                 page_soup = soup(webpage, "html.parser")
 
                 tags = page_soup.find_all('a', href="/terms/go_to_term/")
                 b = [x.text for x in tags]
                 tech_dict[i]+str(b)
-                cells = page_soup.find_all('tr', {'data-term' : True})
+                cells = page_soup.find_all('tr', {'data-term': True})
                 for element in cells:
                     a = [x.text for x in element.find_all('a', {'href': re.compile('^/terms/')})]
                     tech_dict[i] += str(a)
@@ -81,4 +83,4 @@ if __name__ == "__main__":
             pass
 
     # pickle out tech dictionary
-    pickle.dump(tech_dict, open('Pickles/broad_tech_dictionary.pkl', 'wb'))
+    pickle.dump(tech_dict, open(path + '/Pickles/broad_tech_dictionary.pkl', 'wb'))

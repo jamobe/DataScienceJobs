@@ -63,11 +63,13 @@ def encode_tfidf(df):
 
 
 def umap_jobs(array):
+    print(array.shape)
     umapper = umap.UMAP(n_neighbors=60, min_dist=0.5, n_components=15, random_state=42)
     # n_neighbors=15, min_dist=0.0, n_components=2
     mapper = umapper.fit(array)
     umapped_array = mapper.transform(array)
-    with open(path + '/Visualization/umap_encoder.pkl', 'wb') as umap_file:
+    print(umapped_array.shape)
+    with open(path + '/Visualization/umap_encoder_2.pkl', 'wb') as umap_file:
         pickle.dump(mapper, umap_file)
     return umapped_array
 
