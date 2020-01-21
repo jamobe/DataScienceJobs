@@ -88,7 +88,7 @@ if __name__ == "__main__":
     params_1['max_depth'] = int(round(params_1['max_depth']))
     params.update(params_1)
     
-    with open(path + '/data/XGBparams.pkl', 'wb') as file:
+    with open(path + '/Pickles/XGBparams.pkl', 'wb') as file:
         pickle.dump(params, file)
 
     xgb_reg = xgb.XGBRegressor(**params)
