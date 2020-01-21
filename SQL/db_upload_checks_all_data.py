@@ -29,7 +29,7 @@ if __name__ == "__main__":
     country_regions = pd.read_sql(''' SELECT country, region FROM all_data ''', engine).reset_index()
 
     loc_UK = pd.read_csv(path + '/data/uk_location_lookup.csv')['region'].unique()
-    loc_GER = pd.read_csv(path + '/data/locations.csv')['region'].unique()
+    loc_GER = pd.read_csv(path + '/data/locations_cities.csv')['region'].unique()
     loc_USA = pd.read_csv(path + '/data/us-states.csv')['region'].unique()
 
     country_region_dict = {'UK': list(loc_UK), 'Germany': list(loc_GER), 'USA': list(loc_USA), None: None,
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     AND salary_high_euros/salary_low_euros > 3 ''', engine).iloc[0, 0]
 
     if salary_ratio_check == 0:
-        print(" salary highs no more than 3 times salarly lows: check passed")
+        print(" salary highs no more than 3 times salary lows: check passed")
     else:
         print("salaries violating 1/3 ratio check:")
         print("salary_ratio_check")

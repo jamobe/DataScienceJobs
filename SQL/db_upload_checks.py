@@ -29,7 +29,7 @@ if __name__ == "__main__":
     country_regions = pd.read_sql(''' SELECT country, region FROM landing ''', engine)
 
     loc_UK = pd.read_csv(path + '/data/uk_location_lookup.csv')['region'].unique()
-    loc_GER = pd.read_csv(path + '/data/locations.csv')['region'].unique()
+    loc_GER = pd.read_csv(path + '/data/locations_cities.csv')['region'].unique()
     loc_USA = pd.read_csv(path + '/data/us-states.csv')['region'].unique()
 
     country_region_dict = {'UK': list(loc_UK), 'Germany': list(loc_GER), 'USA': list(loc_USA)}

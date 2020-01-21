@@ -90,8 +90,8 @@ def check_locations(location_string, path):
     :param location_string:
     :return: location
     """
-    loc = pd.read_csv(path + '/data/locations_UK.csv')
-    loc2 = pd.read_csv(path + '/data/locations.csv')
+    loc = pd.read_csv(path + '/data/uk_location_lookup.csv')
+    loc2 = pd.read_csv(path + '/data/locations_cities.csv')
     UK_cities = loc.set_index('location').T.to_dict('list')
     Cities = loc2.set_index('location').T.to_dict('list')
     location = [key for key, val in UK_cities.items() if key in location_string]
@@ -160,8 +160,8 @@ def text_process(mess):
 
 
 if __name__ == "__main__":
-    website = 'indeed_de_all'
-    # website = 'monster_all'
+    # website = 'indeed_de_all'
+    website = 'monster_all'
     # website = 'indeed_us_all'
 
     path = os.getcwd()
@@ -314,8 +314,8 @@ if __name__ == "__main__":
         df.loc[df.location.str.contains('München') == True, 'location'] = 'München'
         df.loc[df.location.str.contains('Main') == True, 'location'] = 'Frankfurt'
         df.loc[df.location.str.contains('Birmingham') == True, 'location'] = 'Birmingham'
-        location_UK = pd.read_csv(path + '/data/locations_UK.csv')
-        location_EU = pd.read_csv(path + '/data/locations.csv')
+        location_UK = pd.read_csv(path + '/data/uk_location_lookup.csv')
+        location_EU = pd.read_csv(path + '/data/locations_cities.csv')
         location = location_UK.append(location_EU, ignore_index=True)
         df2 = pd.merge(df, location, on='location', how='left')
         df2.loc[df2.location.str.contains('Sweden') == True, 'country'] = 'Sweden'
