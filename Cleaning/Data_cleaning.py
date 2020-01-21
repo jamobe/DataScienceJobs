@@ -6,41 +6,41 @@ import os.path
 from collections import defaultdict
 
 
-def extract_salary(string):
+def extract_salary(salary_string):
     """
     Extracts from a string the salary starting with £, $, € and followed by integers
-    :param string: text containing salaries
+    :param salary_string: text containing salaries
     :return: (integer) salary
     """
     try:
-        result = re.findall(r'(?:[\£\$\€].{1}[,\d]+.?\d*)', string)
+        result = re.findall(r'(?:[\£\$\€].{1}[,\d]+.?\d*)', salary_string)
         result = ' - '.join(result)
     except:
         result = 'NaN'
     return result
 
 
-def extract_salary_after(string):
+def extract_salary_after(salary_string):
     """
     Extracts from a string the salary starting with integers and followed by £, $, €
-    :param string: text containing salaries
+    :param salary_string: text containing salaries
     :return: (integer) salary
     """
     try:
-        result = re.findall(r'([.|,\d]+,?\d*.[\£\$\€])', string)
+        result = re.findall(r'([.|,\d]+,?\d*.[\£\$\€])', salary_string)
         result = ' - '.join(result)
     except:
         result = 'NaN'
     return result
 
 
-def find_salary(string):
+def find_salary(salary_string):
     """
     Extracting salary from the job descriptions
-    :param string: job descriptions
+    :param salary_string: job descriptions
     :return: salary
     """
-    string = str(string)
+    string = str(salary_string)
     currencies = ['£', '€', 'EUR', '$']
     found = [i for i in string if i in currencies]
     if found:
@@ -52,14 +52,14 @@ def find_salary(string):
     return salary
 
 
-def check_currency(string):
+def check_currency(currency_string):
     """
     Extract currency ('£', '€', 'EUR', '$') from salary
     :param string:
     :return: currency
     """
     currencies = ['£', '€', 'EUR', '$']
-    found = [i for i in string if i in currencies]
+    found = [i for i in currency_string if i in currencies]
     if not found:
         found = np.NaN
     else:
@@ -67,37 +67,36 @@ def check_currency(string):
     return found
 
 
-def clean_salary(df, column_names):
+def clean_salary(dataframe, column_names):
     """
     cleaning salary and transforming to floats
-    :param df:
+    :param dataframe:
     :param column_names:
     :return: salaries in float format
     """
     for column in column_names:
-        if df[column] is not None:
-            df[column] = df[column].str.strip()
+        if dataframe[column] is not None:
+            dataframe[column] = dataframe[column].str.strip()
             # df[column] = df[column].str.split(' ', n=1, expand=True)[0]
-            df[column] = df[column].str.split('.', n=1, expand=True)[0]
-            df[column].replace(regex=True, inplace=True, to_replace=r'\D', value=r'')
-            df[column] = pd.to_numeric(df[column])
-    return df
+            dataframe[column] = dataframe[column].str.split('.', n=1, expand=True)[0]
+            dataframe[column].replace(regex=True, inplace=True, to_replace=r'\D', value=r'')
+            dataframe[column] = pd.to_numeric(dataframe[column])
+    return dataframe
 
 
-def check_locations(string):
+def check_locations(location_string, path):
     """
     Extract locations from job description
-    :param string:
+    :param location_string:
     :return: location
     """
-    path = os.getcwd()
     loc = pd.read_csv(path + '/data/locations_UK.csv')
     loc2 = pd.read_csv(path + '/data/locations.csv')
     UK_cities = loc.set_index('location').T.to_dict('list')
     Cities = loc2.set_index('location').T.to_dict('list')
-    location = [key for key, val in UK_cities.items() if key in string]
+    location = [key for key, val in UK_cities.items() if key in location_string]
     if not location:
-        location = [key for key, val in Cities.items() if key in string]
+        location = [key for key, val in Cities.items() if key in location_string]
     return ','.join(location)
 
 
@@ -119,19 +118,19 @@ def convert_euro(value, currency):
     return euro
 
 
-def clean_jobtype(string):
+def clean_jobtype(jobtype_string):
     """
     Extract jobtype from description
-    :param string:
+    :param jobtype_string:
     :return: currency
     """
     permanent = ['Permanent', 'unbefristet']
     temporary = ['Temporary', 'Placement', 'Seasonal']
-    position = [string.find(substring) for substring in permanent]
+    position = [jobtype_string.find(substring) for substring in permanent]
     if max(position) > -1:
         label = 'permanent'
     else:
-        temp_position = [string.find(substring) for substring in temporary]
+        temp_position = [jobtype_string.find(substring) for substring in temporary]
         if max(temp_position) > -1:
             label = 'others'
         else:
@@ -161,9 +160,9 @@ def text_process(mess):
 
 
 if __name__ == "__main__":
-    # website = 'indeed_de_all'
+    website = 'indeed_de_all'
     # website = 'monster_all'
-    website = 'indeed_us_all'
+    # website = 'indeed_us_all'
 
     path = os.getcwd()
     parent_folder, current_folder = os.path.split(path)
@@ -206,9 +205,9 @@ if __name__ == "__main__":
     # conversion german . to , only for indeed_de
     if 'indeed_de' in website:
         df['salary_extract'] = df['salary'].apply(extract_salary_after)
-        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str\
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str \
             .replace('.000,00', ',000')
-        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str.\
+        df.loc[df.currency == '€', 'salary_extract'] = df.loc[df.currency == '€', 'salary_extract'].str. \
             replace('.000', ',000')
     else:
         df['salary_extract'] = df['salary'].apply(extract_salary)
@@ -217,7 +216,6 @@ if __name__ == "__main__":
     df['salary_high'] = df['salary_extract'].str.split('-', n=1, expand=True)[1]
     df = clean_salary(df, ['salary_high', 'salary_low'])
     df = df.drop(columns='salary_extract', axis=1)
-
 
     # fill low or high salary with high or low salary
     no_high_salary = df['salary_high'].isnull() & df['salary_low'].notnull()
@@ -253,9 +251,9 @@ if __name__ == "__main__":
     df.loc[df.jobtype.notnull(), 'jobtype'] = df.loc[df.jobtype.notnull(), 'jobtype'].apply(clean_jobtype)
 
     # get location from description if not available
-    df.location.replace(to_replace = 'Nothing_found', value = np.NaN, inplace=True)
+    df.location.replace(to_replace='Nothing_found', value=np.NaN, inplace=True)
     mask4 = df.location.isnull()
-    df.loc[mask4, 'location'] = df[mask4]['description'].apply(check_locations)
+    df.loc[mask4, 'location'] = df[mask4]['description'].apply(check_locations, args=(path,))
     print('Extracted locations from job description (if not available)...\n')
 
     # transforming scraped locations
