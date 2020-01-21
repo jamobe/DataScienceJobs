@@ -1,68 +1,70 @@
-import requests, bs4, time
+import requests
+import bs4
+import time
 import pandas as pd
 import os.path
 from datetime import date
 from collections import defaultdict
 
 
-def monster_links(soup):
+def monster_links(bsoup):
     """
     Retrieves Links from Monster.uk website
-    :param soup:
+    :param bsoup:
     :return: link
     """
-    links = []
-    for div in soup.find_all(name='a', attrs={'data-bypass': 'true'}):
-        links.append(div['href'])
-    return links
+    find_links = []
+    for div in bsoup.find_all(name='a', attrs={'data-bypass': 'true'}):
+        find_links.append(div['href'])
+    return find_links
 
 
-def monster_jobtitle(soup):
+def monster_jobtitle(bsoup):
     """
     Extracting titles from job descriptions from Monster.uk
-    :param soup:
+    :param bsoup:
     :return: title
     """
     title = 'no_title'
-    for div in soup.find_all(name='h1', attrs={'class': 'title'}):
+    for div in bsoup.find_all(name='h1', attrs={'class': 'title'}):
         title = div.text
     return title
 
 
-def monster_descr(soup):
+def monster_descr(bsoup):
     """
     Extracting detailed job description from Monster.uk
-    :param soup:
+    :param bsoup:
     :return: description
     """
     jobdesc = []
-    for div in soup.find_all(name='span', attrs={'id': 'TrackingJobBody'}):
+    for div in bsoup.find_all(name='span', attrs={'id': 'TrackingJobBody'}):
         jobdesc = div.text
     return jobdesc
 
 
-def monster_salary(soup):
+def monster_salary(bsoup):
     """
     Extracting salary from Monster.uk
-    :param soup:
+    :param bsoup:
     :return: salary
     """
     salary = []
-    for div in soup.find_all('div', {'class': 'col-xs-12 cell'}):
+    for div in bsoup.find_all('div', {'class': 'col-xs-12 cell'}):
         salary = div.text
         salary = salary.replace('Salary', '').strip()
     return salary
 
 
-def monster_summary(soup):
+def monster_summary(bsoup):
     """
     Extracting meta-data from Monster.uk
-    :param soup:
+    :param bsoup:
     :return: location, job type, posted, industries, education level, career level, reference code
     """
     output = ['nan', 'nan', 'nan', 'nan', 'nan', 'nan', 'nan']
     separation = ['Location', 'Job type', 'Posted', 'Industries', 'Education level', 'Career level', 'Reference code']
-    for div in soup.find_all('dl', {'class': 'header'}):
+    for div in bsoup.find_all('dl', {'class': 'header'}):
         summary = div.text
         summary = summary.replace('\n', '')
         for idx, item in enumerate(separation):
@@ -80,7 +82,7 @@ if __name__ == "__main__":
 
     print('Scraping job descriptions for the search term: ' + searchTerm)
 
-    url = 'https://www.monster.co.uk/jobs/search/?q='+ searchTerm +'&saltyp=1&cy=uk&stpage=1&page=10'
+    url = 'https://www.monster.co.uk/jobs/search/?q=' + searchTerm + '&saltyp=1&cy=uk&stpage=1&page=10'
     res = requests.get(url)
     soup = bs4.BeautifulSoup(res.content, features='html.parser')
     all_links = monster_links(soup)

@@ -2,14 +2,110 @@ import requests, bs4, time
 import pandas as pd
 import numpy as np
 import os.path
-from datetime import datetime
 from datetime import date
-from scraping_indeed_us import indeed_job_title, indeed_salary, indeed_location, indeed_description, indeed_date, indeed_company, indeed_full_desc
 
 
-def indeed_links(soup):
+def indeed_job_title(bsoup):
+    """
+    Extracting job title from Indeed.com
+    :param bsoup:
+    :return: job title
+    """
+    jobs = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        for a in div.find_all(name="a", attrs={"data-tn-element": "jobTitle"}):
+            jobs.append(a["title"])
+    return jobs
+
+
+def indeed_salary(bsoup):
+    """
+    Extracting the salary from Indeed.com
+    :param bsoup:
+    :return: salary
+    """
+    salaries = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        try:
+            salaries.append(div.find(name="span", attrs={"class": "salaryText"}).text)
+        except:
+            salaries.append("Nothing_found")
+    return salaries
+
+
+def indeed_location(bsoup):
+    """
+    Extracting the location from Indeed.com
+    :param bsoup:
+    :return: location
+    """
+    locations = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        try:
+            locations.append(div.find("span", attrs={"class": "location accessible-contrast-color-location"}).text)
+        except:
+            locations.append("Nothing_found")
+    return locations
+
+
+def indeed_description(bsoup):
+    """
+    Extracting the basic description from Indeed.com
+    :param bsoup:
+    :return: basic description
+    """
+    description = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        try:
+            description.append(div.find("div", attrs={"class": "summary"}).text)
+        except:
+            description.append("Nothing_found")
+    return description
+
+
+def indeed_date(bsoup):
+    """
+    Extracting the publication date of the job advertisement on Indeed.com
+    :param bsoup:
+    :return: date
+    """
+    find_date = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        try:
+            find_date.append(div.find("span", attrs={"class": "date"}).text)
+        except:
+            find_date.append("Nothing_found")
+    return find_date
+
+
+def indeed_company(bsoup):
+    """
+    Extracting the company of the job advertisement on Indeed.com
+    :param bsoup:
+    :return: company
+    """
+    company = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
+        try:
+            company.append(div.find("span", attrs={"class": "company"}).text)
+        except:
+            company.append("Nothing_found")
+    return company
+
+
+def indeed_full_desc(bsoup):
+    """
+    Extracting the full description from Indeed.com
+    :param bsoup:
+    :return: full description
+    """
+    description = [x.text for x in bsoup.find_all(name="div", attrs={"id": "jobDescriptionText"})]
+    return description
+
+
+def indeed_links(bsoup):
     links = []
-    for div in soup.find_all(name='a', attrs={'class': 'jobtitle turnstileLink'}):
+    for div in bsoup.find_all(name='a', attrs={'class': 'jobtitle turnstileLink'}):
         links.append('https://de.indeed.com' + str(div['href']))
     return links
 

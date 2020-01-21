@@ -1,31 +1,33 @@
-import requests, bs4, time
+import requests
+import bs4
+import time
 import pandas as pd
 import numpy as np
 import os.path
 from datetime import date
 
 
-def indeed_job_title(soup):
+def indeed_job_title(bsoup):
     """
     Extracting job title from Indeed.com
-    :param soup:
+    :param bsoup:
     :return: job title
     """
     jobs = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         for a in div.find_all(name="a", attrs={"data-tn-element": "jobTitle"}):
             jobs.append(a["title"])
     return jobs
 
 
-def indeed_salary(soup):
+def indeed_salary(bsoup):
     """
     Extracting the salary from Indeed.com
-    :param soup:
+    :param bsoup:
     :return: salary
     """
     salaries = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         try:
             salaries.append(div.find(name="span", attrs={"class": "salaryText"}).text)
         except:
@@ -33,14 +35,14 @@ def indeed_salary(soup):
     return salaries
 
 
-def indeed_location(soup):
+def indeed_location(bsoup):
     """
     Extracting the location from Indeed.com
-    :param soup:
+    :param bsoup:
     :return: location
     """
     locations = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         try:
             locations.append(div.find("span", attrs={"class": "location accessible-contrast-color-location"}).text)
         except:
@@ -48,14 +50,14 @@ def indeed_location(soup):
     return locations
 
 
-def indeed_description(soup):
+def indeed_description(bsoup):
     """
     Extracting the basic description from Indeed.com
-    :param soup:
+    :param bsoup:
     :return: basic description
     """
     description = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         try:
             description.append(div.find("div", attrs={"class": "summary"}).text)
         except:
@@ -63,29 +65,29 @@ def indeed_description(soup):
     return description
 
 
-def indeed_date(soup):
+def indeed_date(bsoup):
     """
     Extracting the publication date of the job advertisement on Indeed.com
-    :param soup:
+    :param bsoup:
     :return: date
     """
-    date = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    find_date = []
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         try:
-            date.append(div.find("span", attrs={"class": "date"}).text)
+            find_date.append(div.find("span", attrs={"class": "date"}).text)
         except:
-            date.append("Nothing_found")
-    return date
+            find_date.append("Nothing_found")
+    return find_date
 
 
-def indeed_company(soup):
+def indeed_company(bsoup):
     """
     Extracting the company of the job advertisement on Indeed.com
-    :param soup:
+    :param bsoup:
     :return: company
     """
     company = []
-    for div in soup.find_all(name="div", attrs={"class": "row"}):
+    for div in bsoup.find_all(name="div", attrs={"class": "row"}):
         try:
             company.append(div.find("span", attrs={"class": "company"}).text)
         except:
@@ -93,25 +95,25 @@ def indeed_company(soup):
     return company
 
 
-def indeed_us_links(soup):
+def indeed_us_links(bsoup):
     """
         Extracting the link of the job advertisement on Indeed.com
-        :param soup:
+        :param bsoup:
         :return: link
         """
     links = []
-    for div in soup.find_all(name='a', attrs={'class': 'jobtitle turnstileLink'}):
+    for div in bsoup.find_all(name='a', attrs={'class': 'jobtitle turnstileLink'}):
         links.append('https://www.indeed.com' + str(div['href']))
     return links
 
 
-def indeed_full_desc(soup):
+def indeed_full_desc(bsoup):
     """
     Extracting the full description from Indeed.com
-    :param soup:
+    :param bsoup:
     :return: full description
     """
-    text = [x.text for x in soup.find_all(name="div", attrs={"id": "jobDescriptionText"})]
+    text = [x.text for x in bsoup.find_all(name="div", attrs={"id": "jobDescriptionText"})]
     return text
 
 
