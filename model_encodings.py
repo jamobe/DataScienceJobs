@@ -36,21 +36,22 @@ def filtering(dataframe):
 
 
 def splitting(dataframe):
-    X_test = dataframe.loc[dataframe['train_test_label'] == 'test']
-    Y_test = X_test['salary_average_euros']
+    x_test_set = dataframe.loc[dataframe['train_test_label'] == 'test']
+    y_test_set = x_test_set['salary_average_euros']
 
     df_train = dataframe.loc[dataframe['train_test_label'] == 'train']
     df_train_y = df_train['salary_average_euros']
 
-    X_train, X_val, Y_train, Y_val = train_test_split(df_train, df_train_y, test_size=0.2, random_state=42)
+    x_train_set, x_val_set, y_train_set, y_val_set = train_test_split(df_train, df_train_y, test_size=0.2,
+                                                                      random_state=42)
     print('Splitted Train, Validation and Test data...\n')
 
-    train_index = X_train['id']
-    val_index = X_val['id']
-    test_index = X_test['id']
-    print('Train Set (' + str(len(train_index)) + '), Validation Set (' + str(len(val_index))
-          + ') and Test Set (' + str(len(test_index)) + ')\n')
-    return train_index, X_train, Y_train, val_index, X_val, Y_val, test_index, X_test, Y_test
+    train_idx = x_train_set['id']
+    val_idx = x_val_set['id']
+    test_idx = x_test_set['id']
+    print('Train Set (' + str(len(train_idx)) + '), Validation Set (' + str(len(val_idx))
+          + ') and Test Set (' + str(len(test_idx)) + ')\n')
+    return train_idx, x_train_set, y_train_set, val_idx, x_val_set, y_val_set, test_idx, x_test_set, y_test_set
 
 
 def encode_ohe(columns, dataframe):
@@ -192,11 +193,12 @@ if __name__ == "__main__":
     X_Val.to_csv(path + '/Pickles/X_Val.csv')
     X_Test.to_csv(path + '/Pickles/X_Test.csv')
 
-    type(y_train)
-    with open(path + '/Pickles/xTrainValTest.pkl', 'wb') as file:
-        pickle.dump([x_train, x_val, x_test], file)
-    with open(path + '/Pickles/yTrainValTest.pkl', 'wb') as file:
-        pickle.dump([y_train, y_val, y_test], file)
-    with open(path + '/Pickles/IndexTrainValTest.pkl', 'wb') as file:
-        pickle.dump([train_index, val_index, test_index], file)
+    y_train.to_csv(path + '/Pickles/Y_Train.csv', header=True, index=False)
+    y_val.to_csv(path + '/Pickles/Y_Val.csv', header=True, index=False)
+    y_test.to_csv(path + '/Pickles/Y_Test.csv', header=True, index=False)
+
+    train_index.to_csv(path + '/Pickles/Train_index.csv', header=True, index=False)
+    val_index.to_csv(path + '/Pickles/Val_index.csv', header=True, index=False)
+    test_index.to_csv(path + '/Pickles/Test_index.csv', header=True, index=False)
+
     print('Saved Train, Validation and Test Set in corresponding Pickle Files...\n')

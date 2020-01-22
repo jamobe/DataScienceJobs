@@ -3,18 +3,21 @@ import numpy as np
 import pickle
 import xgboost as xgb
 from bayes_opt import BayesianOptimization
-from sklearn import metrics
 import pandas as pd
 
 
 def mean_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-
-def mean_range_percentage_error(y_true, y_pred): 
-    error = np.abs(y_true - y_pred)-10000
-    error[error < 0] = 0
-    return np.mean(error/y_true)*100
+def xgb_evaluate(max_depth, reg_lambda, colsample_bytree, subsample, min_child_weight):
+    params1 = {'colsample_bytree': colsample_bytree, 'max_depth': int(round(max_depth)), 'reg_lambda': reg_lambda,
+               'subsample': subsample, 'min_child_weight': min_child_weight}
+    cv_result = xgb.cv(dtrain=df_DM,
+                       params=params1,
+                       early_stopping_rounds=3,
+                       num_boost_round=1000,
+                       metrics='rmse')
+    return -cv_result['test-rmse-mean'].iloc[-1]
 
 
 if __name__ == "__main__":
@@ -24,25 +27,25 @@ if __name__ == "__main__":
     X_val = pd.read_csv(path + '/Pickles/X_Val.csv')
     X_test = pd.read_csv(path + '/Pickles/X_Test.csv')
 
-    with open(path + '/Pickles/yTrainValTest.pkl', 'rb') as file:
-        y_train, y_val, y_test = pickle.load(file)
-    with open(path + '/Pickles/IndexTrainValTest.pkl', 'rb') as file:
-        train_index, val_index, test_index = pickle.load(file)
+    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv')
+    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv')
+    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv')
+
+    train_index = pd.read_csv(path + '/Pickles/Train_index.csv', index_col=False).to_numpy()
+    val_index = pd.read_csv(path + '/Pickles/Val_index.csv', index_col=False).to_numpy()
+    test_index = pd.read_csv(path + '/Pickles/Test_index.csv', index_col=False).to_numpy()
     
     y_train = np.log(y_train)
     y_val = np.log(y_val)
     y_test = np.log(y_test)
         
     params = {
-        # Learning Task Parameters
         'objective': 'reg:squarederror',
-        'eval_metric': 'rmse',  # Evaluation metrics for validation data
-        # Parameters for Tree Booster
-        'learning_rate': 0.05,  # Learning Rate: step size shrinkage used to prevent overfitting.
-        # Paramters for XGB ScikitLearn API
-        'n_jobs': -1,  # Number of parallel threads used to run xgboost
-        'n_estimators': 1000,  # number of trees you want to build
-        'verbosity': 1,  # degree of verbosity: 0 (silent) - 3 (debug)
+        'eval_metric': 'rmse',
+        'learning_rate': 0.05,
+        'n_jobs': -1,
+        'n_estimators': 1000,
+        'verbosity': 1,
         'max_depth': 4,
         'reg_lambda': 1,
         'colsample_bytree': 0.5,
@@ -54,28 +57,7 @@ if __name__ == "__main__":
         'eval_set': [(X_val, y_val)],
     }
     xgb_reg = xgb.XGBRegressor(**params)
-
-    xgb_reg.fit(X_train, y_train, **fit_params)
-
     df_DM = xgb.DMatrix(data=X_train, label=y_train)
-
-    def xgb_evaluate(max_depth, reg_lambda, colsample_bytree, subsample, min_child_weight):
-        params1 = {
-            'colsample_bytree': colsample_bytree,
-            'max_depth': int(round(max_depth)),  # Maximum depth of a tree: high value
-            # -> prone to overfitting
-            'reg_lambda': reg_lambda,  # L2 regularization term on weights
-            'subsample': subsample,
-            'min_child_weight': min_child_weight
-        }
-        cv_result = xgb.cv(dtrain=df_DM,
-                           params=params1,
-                           early_stopping_rounds=3,
-                           num_boost_round=1000,
-                           metrics='rmse')
-        return -cv_result['test-rmse-mean'].iloc[-1]
-
-
     optimizer = BayesianOptimization(xgb_evaluate, {'max_depth': (3, 10),
                                                     'reg_lambda': (0, 5),
                                                     'colsample_bytree': (0.3, 1),
@@ -87,12 +69,10 @@ if __name__ == "__main__":
     params_1 = optimizer.max['params']
     params_1['max_depth'] = int(round(params_1['max_depth']))
     params.update(params_1)
-    
+    xgb_reg.fit(X_train, y_train, **fit_params)
+
     with open(path + '/Pickles/XGBparams.pkl', 'wb') as file:
         pickle.dump(params, file)
-
-    xgb_reg = xgb.XGBRegressor(**params)
-    xgb_reg.fit(X_train, y_train, **fit_params)
 
     y_pred_val = np.exp(xgb_reg.predict(X_val))
     y_pred_train = np.exp(xgb_reg.predict(X_train))
@@ -103,31 +83,25 @@ if __name__ == "__main__":
     y_test = np.exp(y_test)
 
     print('Train:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_train, y_pred_train)))
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_train)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_train, y_pred_train)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
-    
+
     print('Validation:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_val, y_pred_val)))
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_val, y_pred_val)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_val, y_pred_val)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred_val))))
-    
+
     print('Test:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_test, y_pred_test)))
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_test, y_pred_test)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_test, y_pred_test))))
 
     # save model in pickles file
     with open(path + '/Pickles/xgb_model.pkl', 'wb') as file:
         pickle.dump(xgb_reg, file)
 
     # save predictions in data file
-    xgb_preds_val = pd.DataFrame({'id': val_index, 'y_pred_xgb': y_pred_val, 'y_true': y_val})
-    xgb_preds_train = pd.DataFrame({'id': train_index, 'y_pred_xgb': y_pred_train, 'y_true': y_train})
-    xgb_preds_test = pd.DataFrame({'id': test_index, 'y_pred_xgb': y_pred_test, 'y_true': y_test})
+    xgb_preds_val = pd.DataFrame(data={'y_pred_xgb': y_pred_val.reshape(-1,), 'y_true': y_val.reshape(-1,)},
+                                 index=val_index.reshape(-1,))
+    xgb_preds_train = pd.DataFrame(data={'y_pred_xgb': y_pred_train.reshape(-1,), 'y_true': y_train.reshape(-1,)},
+                                   index=train_index.reshape(-1,))
+    xgb_preds_test = pd.DataFrame(data={'y_pred_xgb': y_pred_test.reshape(-1,), 'y_true': y_test.reshape(-1,)},
+                                  index=test_index.reshape(-1,))
 
     xgb_preds_train.to_csv(path + '/Pickles/XGBpredtrain.csv')
     xgb_preds_val.to_csv(path + '/Pickles/XGBpredval.csv')
