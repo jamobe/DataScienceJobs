@@ -17,13 +17,13 @@ if __name__ == "__main__":
     X_val = pd.read_csv(path + '/Pickles/X_Val.csv')
     X_test = pd.read_csv(path + '/Pickles/X_Test.csv')
 
-    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv', index_col=False).to_numpy()
-    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv', index_col=False).to_numpy()
-    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv', index_col=False).to_numpy()
+    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv', index_col=False).to_numpy().ravel()
+    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv', index_col=False).to_numpy().ravel()
+    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv', index_col=False).to_numpy().ravel()
 
-    train_index = pd.read_csv(path + '/Pickles/Train_index.csv', index_col=False).to_numpy()
-    val_index = pd.read_csv(path + '/Pickles/Val_index.csv', index_col=False).to_numpy()
-    test_index = pd.read_csv(path + '/Pickles/Test_index.csv', index_col=False).to_numpy()
+    train_index = pd.read_csv(path + '/Pickles/Train_index.csv', index_col=False).to_numpy().ravel()
+    val_index = pd.read_csv(path + '/Pickles/Val_index.csv', index_col=False).to_numpy().ravel()
+    test_index = pd.read_csv(path + '/Pickles/Test_index.csv', index_col=False).to_numpy().ravel()
         
     scaler = preprocessing.StandardScaler()
     scaler.fit(X_train)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     svr = svm.SVR(verbose=1, max_iter=10000, gamma='scale')
     gsvr = GridSearchCV(svr, parameters, n_jobs=-1)
-    gsvr.fit(X_train, y_train)
+    gsvr.fit(scaled_X_train, y_train)
 
     with open(path + '/Pickles/svr_model.pkl', 'wb') as file:
         pickle.dump(gsvr, file)
