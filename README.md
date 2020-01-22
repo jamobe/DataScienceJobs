@@ -14,6 +14,11 @@ www.motheslund.de
 Explanatory Slides can be found [here](https://slides.com/janinamo/from-job-description-to-salary-prediction#/).
 
 ## Workflow
+#### Project Plan (Diagram)
+
+
+
+![alt text](Assets/ProjectDiagram2.png "Project Plan Diagram")
 
 #### 1. Web Scraping and Cleaning
 We scraped job descriptions from the several websites (harnham (.co.uk, .de, .com), indeed (.co.uk, .de, .com), monster 
