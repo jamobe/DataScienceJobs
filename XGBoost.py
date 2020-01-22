@@ -9,6 +9,7 @@ import pandas as pd
 def mean_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
+
 def xgb_evaluate(max_depth, reg_lambda, colsample_bytree, subsample, min_child_weight):
     params1 = {'colsample_bytree': colsample_bytree, 'max_depth': int(round(max_depth)), 'reg_lambda': reg_lambda,
                'subsample': subsample, 'min_child_weight': min_child_weight}
@@ -27,9 +28,9 @@ if __name__ == "__main__":
     X_val = pd.read_csv(path + '/Pickles/X_Val.csv')
     X_test = pd.read_csv(path + '/Pickles/X_Test.csv')
 
-    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv')
-    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv')
-    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv')
+    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv', index_col=False).to_numpy()
+    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv', index_col=False).to_numpy()
+    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv', index_col=False).to_numpy()
 
     train_index = pd.read_csv(path + '/Pickles/Train_index.csv', index_col=False).to_numpy()
     val_index = pd.read_csv(path + '/Pickles/Val_index.csv', index_col=False).to_numpy()
