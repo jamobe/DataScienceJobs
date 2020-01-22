@@ -14,9 +14,9 @@ www.motheslund.de
 Explanatory Slides can be found [here](https://slides.com/janinamo/from-job-description-to-salary-prediction#/).
 
 ## Workflow
+
 #### Project Plan (Diagram)
-
-
+The diagram depicts the workflow:
 
 ![alt text](Assets/ProjectDiagram2.png "Project Plan Diagram")
 
@@ -93,11 +93,3 @@ The following Pickle-Files are required:
 * plots_density.pkl (created by preprocessing_dash.py)
 * bar_cluster.pkl (created by preprocessing_dash.py)
 * bar_salary.pkl (created by preprocessing_dash.py)
-
-
-
-#### A1. Project Plan (Diagram)
-
-
-
-![alt text](Assets/ProjectDiagram2.png "Project Plan Diagram")
