@@ -20,19 +20,12 @@ def text_process(mess):
     3. Remove all stopwords
     4. Returns a list of the cleaned text
     """
-    punctuations = '!"$%&\'()*,-./:;<=>?@[\\]^_`{|}~'
-
-    # transforms all to lower case words
     mess = mess.lower()
-
-    # Check characters to see if they are in punctuation
-    nopunc = [char for char in mess if char not in punctuations]
-
-    # Join the characters again to form the string.
-    nopunc = ''.join(nopunc)
+    mess = re.sub(r'[^A-Za-z]+', ' ', mess)  # remove non alphanumeric character [^A-Za-z0-9]
+    mess = re.sub(r'https?://\S+', ' ', mess)  # remove links
 
     # Now just remove any stopwords
-    return [word for word in nopunc.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
+    return [word for word in mess.split() if word not in spacy.lang.en.stop_words.STOP_WORDS]
 
 
 def transform_vocab(wordlist, model):
@@ -40,9 +33,9 @@ def transform_vocab(wordlist, model):
     return model.wv[filtered_wl]
 
 
-def padding(wordlist, padding_length):
-    paddings = padding_length - len(wordlist)
-    padded_wordlist = paddings *[len(wordlist[0])*[0]] + wordlist[0:padding_length].tolist()
+def padding(wordlist, paddinglength):
+    paddings = paddinglength - len(wordlist)
+    padded_wordlist = paddings * [len(wordlist[0])*[0]] + wordlist[0:paddinglength].tolist()
     return np.array(padded_wordlist)
 
 
@@ -52,8 +45,8 @@ if __name__ == "__main__":
         w2v_model = pickle.load(file)
 
     with open(path + '/data/SQL_access.pkl', 'rb') as file:
-        PASSWORD = pickle.load(file)
-    engine = create_engine('postgresql://postgres:' + PASSWORD +
+        password = pickle.load(file)
+    engine = create_engine('postgresql://postgres:' + password +
                            '@dsj-1.c9mo6xd9bf9d.us-west-2.rds.amazonaws.com:5432/')
     df = pd.read_sql("select * from all_data where language like'en'", engine)
     print('Loaded data from SQL database...\n')
