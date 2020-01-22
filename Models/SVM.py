@@ -31,9 +31,6 @@ if __name__ == "__main__":
     scaled_X_val = scaler.transform(X_val)
     scaled_X_test = scaler.transform(X_test)
 
-#     X_trainval = np.concatenate([scaled_X_train, scaled_X_val])
-#     y_trainval = np.concatenate([y_train, y_val])
-
     parameters = {'kernel': ('linear', 'rbf'), 'C': [1, 10]}
 
     svr = svm.SVR(verbose=1, max_iter=10000, gamma='scale')
