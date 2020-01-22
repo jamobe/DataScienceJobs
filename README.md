@@ -11,6 +11,8 @@ The results of this project can be found here:
 
 www.motheslund.de
 
+Explanatory Slides can be found [here](https://slides.com/janinamo/from-job-description-to-salary-prediction#/).
+
 ## Workflow
 
 #### 1. Web Scraping and Cleaning
