@@ -48,7 +48,7 @@ if __name__ == "__main__":
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_train)))
 
     print('Val:')
-    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_val)))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_val, y_pred_val)))
 
     print('Test:')
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
