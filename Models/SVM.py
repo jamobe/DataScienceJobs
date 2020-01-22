@@ -17,9 +17,9 @@ if __name__ == "__main__":
     X_val = pd.read_csv(path + '/Pickles/X_Val.csv')
     X_test = pd.read_csv(path + '/Pickles/X_Test.csv')
 
-    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv')
-    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv')
-    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv')
+    y_train = pd.read_csv(path + '/Pickles/Y_Train.csv', index_col=False).to_numpy()
+    y_val = pd.read_csv(path + '/Pickles/Y_Val.csv', index_col=False).to_numpy()
+    y_test = pd.read_csv(path + '/Pickles/Y_Test.csv', index_col=False).to_numpy()
 
     train_index = pd.read_csv(path + '/Pickles/Train_index.csv', index_col=False).to_numpy()
     val_index = pd.read_csv(path + '/Pickles/Val_index.csv', index_col=False).to_numpy()
@@ -56,12 +56,12 @@ if __name__ == "__main__":
     print('Test:')
     print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
 
-    svr_preds_val = pd.DataFrame(data={'y_pred_svr': y_pred_val.reshape(-1, ), 'y_true': y_val.reshape(-1, )},
-                                 index=val_index.reshape(-1, ))
-    svr_preds_train = pd.DataFrame(data={'y_pred_svr': y_pred_train.reshape(-1, ), 'y_true': y_train.reshape(-1, )},
-                                   index=train_index.reshape(-1, ))
-    svr_preds_test = pd.DataFrame(data={'y_pred_svr': y_pred_test.reshape(-1, ), 'y_true': y_test.reshape(-1, )},
-                                  index=test_index.reshape(-1, ))
+    svr_preds_val = pd.DataFrame(data={'y_pred_svr': y_pred_val.reshape(-1,), 'y_true': y_val.reshape(-1,)},
+                                 index=val_index.reshape(-1,))
+    svr_preds_train = pd.DataFrame(data={'y_pred_svr': y_pred_train.reshape(-1,), 'y_true': y_train.reshape(-1,)},
+                                   index=train_index.reshape(-1,))
+    svr_preds_test = pd.DataFrame(data={'y_pred_svr': y_pred_test.reshape(-1,), 'y_true': y_test.reshape(-1,)},
+                                  index=test_index.reshape(-1,))
 
     svr_preds_train.to_csv(path + '/Pickles/SVRpredtrain.csv')
     svr_preds_val.to_csv(path + '/Pickles/SVRpredval.csv')
