@@ -5,6 +5,12 @@ The project's objective is to build an application that will predict the salary 
 
 We also plan to segement the market for data professionals to establish whether job titles for data professionals actually describe roles with similar skill sets.
 
+## Results
+
+The results of this project can be found here:
+
+www.motheslund.de
+
 ## Workflow
 
 #### 1. Web Scraping and Cleaning
