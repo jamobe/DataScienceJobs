@@ -35,23 +35,29 @@ def filtering(dataframe):
     return dataframe
 
 
-def splitting(dataframe):
+def splitting_test(dataframe):
     x_test_set = dataframe.loc[dataframe['train_test_label'] == 'test']
     y_test_set = x_test_set['salary_average_euros']
 
-    df_train = dataframe.loc[dataframe['train_test_label'] == 'train']
-    df_train_y = df_train['salary_average_euros']
+    x_train_set = dataframe.loc[dataframe['train_test_label'] == 'train']
+    y_train_set = x_train_set['salary_average_euros']
 
+    print('Splitted Train and Test data...\n')
+
+    train_val_idx = x_train_set['id']
+    test_idx = x_test_set['id']
+    print('Train Set (' + str(len(train_val_idx)) + ') and Test Set (' + str(len(test_idx)) + ')\n')
+    return train_val_idx, x_train_set, y_train_set, test_idx, x_test_set, y_test_set
+
+
+def splitting_train_val(df_train, df_train_y):
     x_train_set, x_val_set, y_train_set, y_val_set = train_test_split(df_train, df_train_y, test_size=0.2,
                                                                       random_state=42)
-    print('Splitted Train, Validation and Test data...\n')
-
+    print('Splitted Train and Validation data...\n')
     train_idx = x_train_set['id']
     val_idx = x_val_set['id']
-    test_idx = x_test_set['id']
-    print('Train Set (' + str(len(train_idx)) + '), Validation Set (' + str(len(val_idx))
-          + ') and Test Set (' + str(len(test_idx)) + ')\n')
-    return train_idx, x_train_set, y_train_set, val_idx, x_val_set, y_val_set, test_idx, x_test_set, y_test_set
+    print('Train Set (' + str(len(train_idx)) + ') and Validation Set (' + str(len(val_idx)) + ')\n')
+    return train_idx, val_idx, x_train_set, x_val_set, y_train_set, y_val_set
 
 
 def encode_ohe(columns, dataframe):
@@ -150,8 +156,8 @@ if __name__ == "__main__":
     path = os.getcwd()
     df = load_data(path)
     df_filtered = filtering(df)
-    train_index, x_train, y_train, val_index, x_val, y_val, test_index, x_test, y_test = splitting(df_filtered)
-
+    train_val_index, x_train_val, y_train_val, test_index, x_test, y_test = splitting_test(df_filtered)
+    train_index, val_index, x_train, x_val, y_train, y_val = splitting_train_val(x_train_val, y_train_val)
     columns_to_ohe_encode = ['country', 'region']
     enc, feature_names_OHE, OHE_train = encode_ohe(columns_to_ohe_encode, x_train)
     OHE_val = enc.transform(x_val[columns_to_ohe_encode]).toarray()
