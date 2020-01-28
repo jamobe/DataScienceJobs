@@ -2,72 +2,67 @@ import os.path
 import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestRegressor
-from sklearn import metrics
+from sklearn.model_selection import RandomizedSearchCV
 import pandas as pd
-
-# define functions
 
 
 def mean_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-def mean_range_percentage_error(y_true, y_pred):
-    error = np.abs(y_true- y_pred)-10000
-    error[error < 0] = 0
-    return np.mean(error/y_true)*100
-
 
 if __name__ == "__main__":
     path = os.getcwd()
-    with open(path + '/data/x_data_for_models.pkl', 'rb') as file:
-            X_train,X_val,X_test = pickle.load(file)
-    with open(path + '/data/yTrainValTest.pkl', 'rb') as file:
-            y_train,y_val,y_test= pickle.load(file) 
-    with open(path + '/data/IndexTrainValTest.pkl', 'rb') as file:
-        train_index,val_index,test_index= pickle.load(file)
-        
-    params = {'n_estimators':100,'max_depth': 20, 'n_jobs':-1}
-    
-    # Create the model with 100 trees
-    model = RandomForestRegressor(**params)
-    model.fit(X_train, y_train)
-    
-    with open(path + '/Pickles/RF_model.pkl', 'wb') as file:
-            pickle.dump([model], file)
-            
-    y_pred_val = model.predict(X_val)
-    y_pred_train = model.predict(X_train)
-    y_pred_test= model.predict(X_test)
+    X_train = pd.read_csv(path + '/Pickles/X_Train_all.csv')
+    X_test = pd.read_csv(path + '/Pickles/X_Test_all.csv')
 
+    y_train = pd.read_csv(path + '/Pickles/Y_Train_all.csv', index_col=False).to_numpy()
+    y_test = pd.read_csv(path + '/Pickles/Y_Test_all.csv', index_col=False).to_numpy()
+
+    train_index = pd.read_csv(path + '/Pickles/Train_index_all.csv', index_col=False).to_numpy()
+    test_index = pd.read_csv(path + '/Pickles/Test_index_all.csv', index_col=False).to_numpy()
+
+    # Number of trees in random forest
+    n_estimators = [int(x) for x in np.linspace(start=100, stop=1200, num=12)]
+    # Number of features to consider at every split
+    max_features = ['auto', 'sqrt']
+    # Maximum number of levels in tree
+    max_depth = [int(x) for x in np.linspace(5, 30, num=6)]
+    # max_depth.append(None)
+    # Minimum number of samples required to split a node
+    min_samples_split = [2, 5, 10, 15, 100]
+    # Minimum number of samples required at each leaf node
+    min_samples_leaf = [1, 2, 5, 10]
+    # Method of selecting samples for training each tree
+    # bootstrap = [True, False]
+    # Create the random grid
+    random_grid = {'n_estimators': n_estimators,
+                   'max_features': max_features,
+                   'max_depth': max_depth,
+                   'min_samples_split': min_samples_split,
+                   'min_samples_leaf': min_samples_leaf}
+
+    params = {'n_estimators': 100, 'max_depth': 20, 'n_jobs': -1}
+
+    model = RandomForestRegressor(**params)
+    RF_random = RandomizedSearchCV(estimator=model, param_distributions=random_grid, n_iter=50,
+                                   cv=5, verbose=2, random_state=42, n_jobs=-1)
+    RF_random.fit(X_train, y_train.ravel())
+
+    with open(path + '/Pickles/RF_model.pkl', 'wb') as file:
+        pickle.dump(RF_random, file)
+
+    y_pred_train = RF_random.predict(X_train)
+    y_pred_test = RF_random.predict(X_test)
 
     print('Train:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_train, y_pred_train)))
-    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train, y_pred_train)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_train, y_pred_train)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_train, y_pred_train))))
-
-    print('Validation:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_val, y_pred_val)))
-    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_val, y_pred_val)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_val, y_pred_val)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_val, y_pred_val))))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_train.ravel(), y_pred_train)))
 
     print('Test:')
-    print('Mean Absolute Error: {0:.0f}'.format(metrics.mean_absolute_error(y_test, y_pred_test)))
-    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test, y_pred_test)))
-    print('Mean Range Percentage Error: {0:.1f}'.format(mean_range_percentage_error(y_test, y_pred_test)))
-    print('R2 Score:{0:.2f}'.format(np.sqrt(metrics.r2_score(y_test, y_pred_test))))
+    print('Mean Percentage Error: {0:.1f}'.format(mean_percentage_error(y_test.ravel(), y_pred_test)))
 
-    
-    rf_preds_val = pd.DataFrame({'id':val_index, 'y_pred_rf': y_pred_val, 'y_true': y_val})
-    rf_preds_train = pd.DataFrame({'id':train_index, 'y_pred_rf': y_pred_train, 'y_true':y_train})
-    rf_preds_test = pd.DataFrame({'id':test_index, 'y_pred_rf': y_pred_test, 'y_true':y_test})
+    rf_preds_train = pd.DataFrame({'id': train_index.ravel(), 'y_pred_rf': y_pred_train.ravel(),
+                                   'y_true': y_train.ravel()})
+    rf_preds_test = pd.DataFrame({'id': test_index.ravel(), 'y_pred_rf': y_pred_test.ravel(), 'y_true': y_test.ravel()})
 
-    with open(path + '/data/RFpredtrain.pkl', 'wb') as file:
-            pickle.dump([rf_preds_train], file)
-
-    with open(path + '/data/RFpredval.pkl', 'wb') as file:
-            pickle.dump([rf_preds_val], file)
-
-    with open(path + '/data/RFpredtest.pkl', 'wb') as file:
-        pickle.dump([rf_preds_test], file)
+    rf_preds_train.to_csv(path + '/Pickles/RFpredtrain.csv')
+    rf_preds_test.to_csv(path + '/Pickles/RFpredtes.csv')
